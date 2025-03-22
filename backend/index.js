@@ -1,1 +1,1 @@
-"login""registrazione"
+"registrazione"
