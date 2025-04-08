@@ -1,0 +1,186 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto', 'premier-sans';
+}
+
+body {
+  margin: 0;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center; 
+}
+
+.login-container {
+  display: flex;
+  width: 150vh;
+  height: 80vh;
+  background-image: url(img/sfondo_login.jpeg);
+}
+
+.left, .right {
+  height: 100%; 
+}
+
+.left {
+  width: 100%;
+  background-size: cover;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.left h1 {
+  font-size: 2.5rem;
+  margin: 0;
+  color: white;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7), -1px -1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.left p {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7), -1px -1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.left .credits {
+  margin-top: auto;
+  font-size: 0.9rem;
+}
+
+.left .credits b {
+  display: block;
+  font-size: 1.1rem;
+  margin-top: 0.2rem;
+}
+
+.right {
+  width: 100%;
+  background: #f8f9fa;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.right h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #0077b5;
+  border-radius: 30px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background: white;
+  cursor: pointer;
+}
+
+.btn img {
+  height: 20px;
+  margin-right: 10px;
+}
+
+.btn:hover{
+  background-color: lightgray;
+}
+
+.btn:active{
+  background-color: gray;
+}
+
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  color: gray;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  display: inline-block;
+  width: 40%;
+  height: 1px;
+  background: lightgray;
+  vertical-align: middle;
+  margin: 0 10px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.password-options {
+  text-align: right;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #0077b5;
+}
+
+.password-options:hover{
+  text-decoration: underline;
+}
+
+.signin-btn {
+  background-color: #025c6a;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 30px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.signin-btn:hover{
+  background-color: lightblue;
+}
+
+.signin-btn:active{
+  background-color: lightskyblue;
+}
+
+.signup {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.signup a {
+  font-weight: bold;
+  text-decoration: none;
+  color: #025c6a;
+}
+
+.signup:hover{
+  text-decoration: underline;
+}
+
+.credits b{
+  color: lightgrey;
+}
+
+.hide{
+  color: #025c6a;
+  align-self:last baseline;
+}
+
+button.clicked{
+  text-decoration: line-through;
+  text-decoration-color: black;
+  text-decoration-thickness: 5px;
+}
