@@ -8,7 +8,7 @@ export default function HomeAgente() {
       <div className="w-20 bg-white shadow-md z-10">
         <TendinaLateraleAgente />
       </div>
-
+                
       <div className="flex-1 p-8">
         <LogoConScritta />
 
