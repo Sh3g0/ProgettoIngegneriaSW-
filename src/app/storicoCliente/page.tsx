@@ -1,8 +1,8 @@
-import { ImmobiliVisualizzatiCliente } from "@/app/components/immobiliVisualizzatiCliente";
-import LogoConScrittaRiepilogoCliente from "@/app/components/logoConScrittaRiepilogoCliente";
-import { OfferteFatteCliente } from "@/app/components/offerteFatteCliente";
-import TendinaStoricoCliente from "@/app/components/tendinaStoricoCliente";
-import { VisitePrenotateCliente } from "@/app/components/visitePrenotateCliente";
+import { ImmobiliVisualizzatiCliente } from "@/components/immobiliVisualizzatiCliente";
+import LogoConScrittaRiepilogoCliente from "@/components/logoConScrittaRiepilogoCliente";
+import { OfferteFatteCliente } from "@/components/offerteFatteCliente";
+import TendinaStoricoCliente from "@/components/tendinaStoricoCliente";
+import { VisitePrenotateCliente } from "@/components/visitePrenotateCliente";
 
 export default function TrackingOfferte() {
   return (

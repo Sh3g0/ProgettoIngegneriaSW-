@@ -1,8 +1,8 @@
 'use client';
 import { useRouter } from 'next/navigation';  
-import LogoConScrittaPrenotazioniCliente from '@/app/components/logoConScrittaPrenotazioniCliente';
-import TabellaPrenotazioniCliente from '@/app/components/tabellaPrenotazioniCliente';
-import TendinaOfferteCliente from '@/app/components/tendinaOfferteCliente';
+import LogoConScrittaPrenotazioniCliente from '@/components/logoConScrittaPrenotazioniCliente';
+import TabellaPrenotazioniCliente from '@/components/tabellaPrenotazioniCliente';
+import TendinaOfferteCliente from '@/components/tendinaOfferteCliente';
 export default function PrenotazioniCliente() {
   const router = useRouter();
 

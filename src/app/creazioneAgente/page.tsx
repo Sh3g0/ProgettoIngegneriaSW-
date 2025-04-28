@@ -1,7 +1,7 @@
 'use client';
 
-import CreaAgente from "@/app/components/creaAgente";
-import TendinaGestioneAgenti from "@/app/components/tendinaGestioneAgenti";
+import CreaAgente from "@/components/creaAgente";
+import TendinaGestioneAgenti from "@/components/tendinaGestioneAgenti";
 
 export default function CreazioneAgente() {
   return (

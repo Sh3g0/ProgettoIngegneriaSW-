@@ -1,5 +1,5 @@
-import { TabellaTotPrenCliente } from "@/app/components/tabellaTotPrenCliente";
-import TendinaStoricoCliente from "@/app/components/tendinaStoricoCliente";
+import { TabellaTotPrenCliente } from "@/components/tabellaTotPrenCliente";
+import TendinaStoricoCliente from "@/components/tendinaStoricoCliente";
 export default function PrenotazioniTotCliente() {
   return (
     <div className="flex min-h-screen">

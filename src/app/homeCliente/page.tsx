@@ -1,6 +1,6 @@
-import BarraDiRicercaCliente from "../components/barraDiRicercaCliente";
-import LogoConScritta from "../components/logoConScritta";
-import TendinaHomeCliente from "../components/tendinaHomeCliente";
+import BarraDiRicercaCliente from "../../components/barraDiRicercaCliente";
+import LogoConScritta from "../../components/logoConScritta";
+import TendinaHomeCliente from "../../components/tendinaHomeCliente";
 
 
 export default function HomeCliente() {

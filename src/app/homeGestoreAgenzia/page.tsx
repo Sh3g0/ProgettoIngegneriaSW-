@@ -1,8 +1,8 @@
 'use client';
 
-import AnalisiGeneralePerGestore from "@/app/components/analisiGeneralePerGestore";
-import AttivitaRecentiAgenti from "@/app/components/attivitàRecentiAgenti";
-import TendinaHomeGestoreAgenzia from "@/app/components/tendinaHomeGestoreAgenzia";
+import AnalisiGeneralePerGestore from "@/components/analisiGeneralePerGestore";
+import AttivitaRecentiAgenti from "@/components/attivitàRecentiAgenti";
+import TendinaHomeGestoreAgenzia from "@/components/tendinaHomeGestoreAgenzia";
 
 export default function HomeGestoreAgenzia() {
   return (

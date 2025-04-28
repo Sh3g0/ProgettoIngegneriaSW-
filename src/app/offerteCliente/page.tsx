@@ -1,9 +1,9 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation'; 
-import LogoConScrittaOfferteCliente from '@/app/components/logoConScrittaOfferteCliente';
-import TabellaOfferteCliente from '@/app/components/tabellaOfferteCliente'; 
-import TendinaOfferteCliente from '@/app/components/tendinaOfferteCliente';
+import LogoConScrittaOfferteCliente from '@/components/logoConScrittaOfferteCliente';
+import TabellaOfferteCliente from '@/components/tabellaOfferteCliente'; 
+import TendinaOfferteCliente from '@/components/tendinaOfferteCliente';
 export default function OfferteCliente() {
   const router = useRouter();
 

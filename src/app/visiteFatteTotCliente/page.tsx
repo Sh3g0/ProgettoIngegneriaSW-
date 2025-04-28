@@ -1,5 +1,5 @@
-import { OfferteFatteTot } from "@/app/components/OfferteFatteTot";
-import TendinaStoricoCliente from "@/app/components/tendinaStoricoCliente";
+import { OfferteFatteTot } from "@/components/OfferteFatteTot";
+import TendinaStoricoCliente from "@/components/tendinaStoricoCliente";
 
 export default function PrenotazioniTotCliente() {
   return (

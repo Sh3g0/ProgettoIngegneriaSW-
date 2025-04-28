@@ -1,7 +1,7 @@
 'use client';
 
-import TendinaHomeGestoreAgenzia from "@/app/components/tendinaHomeGestoreAgenzia";
-import AttivitaRecentiAgentiCompleta from "@/app/components/attivitaRecentiAgentiCompleta";
+import TendinaHomeGestoreAgenzia from "@/components/tendinaHomeGestoreAgenzia";
+import AttivitaRecentiAgentiCompleta from "@/components/attivitaRecentiAgentiCompleta";
 
 export default function AttivitaRecentiCompleta() {
   return (

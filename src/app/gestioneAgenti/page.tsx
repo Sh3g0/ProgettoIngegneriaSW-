@@ -1,7 +1,7 @@
 'use client';
 
-import SchedaAgente from "@/app/components/schedaAgente";
-import TendinaGestioneAgenti from "@/app/components/tendinaGestioneAgenti";
+import SchedaAgente from "@/components/schedaAgente";
+import TendinaGestioneAgenti from "@/components/tendinaGestioneAgenti";
 
 export default function GestioneAgenti() {
   return (
