@@ -173,7 +173,7 @@
     color: #025c6a;
   }
   
-  .signup:hover{
+  .signup > a:hover{
     text-decoration: underline;
   }
   
@@ -184,6 +184,12 @@
   .hide{
     color: #025c6a;
     align-self:last baseline;
+  }
+
+  .hide::before{
+    content: "Password";
+    margin-right: 270px;
+    color: black;
   }
   
   button.clicked{

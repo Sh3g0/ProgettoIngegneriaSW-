@@ -10,6 +10,6 @@ router.get('/', (req, res) => {
 router.post('/login', getUserRole);  // POST per login
 
 //Route di registrazione
-router.post('/registrazione', createClient);  // POST per registrazione
+router.post('/signup', createClient);  // POST per registrazione
 
 module.exports = router;

@@ -46,7 +46,6 @@ export default function Reg() {
 
   return (
     <div className="login-container">
-      <Script src="/scripts/login.js"></Script>
       <div className="left">
         <img src="/img/logo.png" alt="Logo"/> 
         <h1>DietiEstates25</h1>
@@ -56,25 +55,17 @@ export default function Reg() {
         </div>
       </div>
       <div className="right">
-        <h2>Sign in</h2>
-        <button className="btn">
-          <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" />
-          Continue with Google
-        </button>
-        <button className="btn">
-          <img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook" />
-          Continue with Facebook
-        </button>
-        <div className="divder">OR</div>
-        <input id="username" type="text" placeholder="User name or email address" />
+        <h2>Sign up</h2>
+        <input id="username" type="text" placeholder="Your username" />
+        <input id="email" type="text" placeholder="E-mail address" />
         <button className='hide'>👁️‍🗨️</button>
         <input id="password" type="password" placeholder="Your password"/>
+        <input id="confirmPassword" type="password" placeholder="Confirm password"/>
         <div className="password-options">
-          <a href="#">Forgot your password?</a>
-        </div>
-        <button id="login" className="signin-btn">Sign in</button>
+          <a href="#">Sei un'agenzia?</a>
+        </div><button id="signup" type='submit' className="signin-btn">Sign up</button>
         <div className="signup">
-          Don’t have an account? <Link href="/registrazione">Sign up</Link>
+          Already have an account? <a href="/">Sign in</a>
         </div>
       </div>
     </div>

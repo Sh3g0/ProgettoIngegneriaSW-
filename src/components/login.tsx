@@ -1,18 +1,18 @@
 'use client';
 import React, { useState } from 'react';
 import '../styles/style.css'; 
-import Script from 'next/script';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleSignIn = async () => {
+    const username = (document.getElementById('username') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
     try {
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -23,7 +23,6 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      console.log('Ruolo:', data.role);
 
       // In base al ruolo, vai alla pagina corretta
       if (data.role === 'cliente') {
@@ -44,7 +43,6 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
-      <Script src="/scripts/login.js"></Script>
       <div className="left">
         <img src="/img/logo.png" alt="Logo"/> 
         <h1>DietiEstates25</h1>
@@ -63,16 +61,30 @@ export default function LoginPage() {
           <img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook" />
           Continue with Facebook
         </button>
-        <div className="divder">OR</div>
-        <input id="username" type="text" placeholder="User name or email address" />
-        <button className='hide'>👁️‍🗨️</button>
-        <input id="password" type="password" placeholder="Your password"/>
+        <div className="divider">OR</div>
+        Username
+        <input id="username" 
+          type="text" 
+          placeholder="User name or email address"
+        />
+        <button
+          type="button"
+          className="hide"
+          onClick={() => setShowPassword((prev) => !prev)}
+        >
+          {showPassword ? "🙈" : "👁️‍🗨️"}
+        </button>
+        <input
+          id="password"
+          type={showPassword ? "text" : "password"}
+          placeholder="Your password"
+        />
         <div className="password-options">
           <a href="#">Forgot your password?</a>
         </div>
-        <button id="login" className="signin-btn">Sign in</button>
+        <button id="login" className="signin-btn" onClick={handleSignIn}>Sign in</button>
         <div className="signup">
-          Don’t have an account? <Link href="/registrazione">Sign up</Link>
+          Don’t have an account? <a href="/registrazione">Sign up</a>
         </div>
       </div>
     </div>
