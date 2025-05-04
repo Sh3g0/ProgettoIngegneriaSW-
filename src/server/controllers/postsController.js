@@ -49,8 +49,6 @@ async function showImmobiliController(req, res) {
     // Chiamata al servizio per ottenere gli immobili
     const immobili = await getImmobili(id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio);
 
-    console.log('Immobili trovati:', immobili);
-
     // Restituisce gli immobili trovati
     return res.json(immobili);
   } catch (error) {

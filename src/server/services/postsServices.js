@@ -38,7 +38,7 @@ async function addClient(email, username, passwordHash, ruolo = "cliente", idAge
 
 //Se l'id è -1, effettua una ricerca con i parametri
 //Se l'id è -2, effettua una ricerca solo con latitudine e longitudine
-async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='q', portineria=false, tipo_annuncio='vendita') {
+async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='q', portineria=false, tipo_annuncio='vendita', climatizzazione=false) {
   try {
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
@@ -64,13 +64,27 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
         lngNum - 0.1,
         lngNum + 0.1,
       ];
+      console.log('Query eseguita con questi parametri con id -1:', values);
 
 
     }else if(id === -2) {
 
-      query = 'SELECT * FROM immobile WHERE latitudine BETWEEN $1 AND $2 AND longitudine BETWEEN $3 AND $4 AND prezzo BETWEEN $5 AND $6 AND dimensione_mq >= $7 AND piano >= $8 AND stanze >= $9 AND ascensore = $10 AND classe_energetica = ANY ($11) AND portineria = $12 AND tipo_annuncio = $13'; 
-
-      classe_energetica = classe_energetica === 'q' ? ['A', 'B', 'C', 'D', 'E'] : [req.body.classe_energetica];
+      query = `
+      SELECT * FROM immobile
+      WHERE latitudine BETWEEN $1 AND $2
+        AND longitudine BETWEEN $3 AND $4
+        AND prezzo BETWEEN $5 AND $6
+        AND dimensione_mq >= $7
+        AND piano >= $8
+        AND stanze >= $9
+        AND ascensore = $10
+        AND classe_energetica = ANY($11::text[])
+        AND portineria = $12
+        AND tipo_annuncio = $13
+        AND climatizzazione = $14
+      `;
+      
+      classe_energetica = classe_energetica === 'q' ? ['A', 'B', 'C', 'D', 'E'] : [classe_energetica];
 
       values = [
         latNum - 0.1, //$1
@@ -85,8 +99,11 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
         ascensore, //$10
         classe_energetica, //$11
         portineria, //$12
-        tipo_annuncio //$13
+        tipo_annuncio, //$13
+        climatizzazione //$14
       ];
+
+      console.log('Query eseguita con questi parametri con id -2:', values);
 
     }else{
       query = 'SELECT * FROM immobile WHERE id = $1';
@@ -94,10 +111,10 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
       values = [id];
     }
 
-    console.log('id:', id);
-    console.log('Query eseguita con questi parametri:', values);
-
     const result = await queryDB(query, values);
+
+    console.log('Risultato della query:', result);
+
     return result;
 
   } catch (error) {
