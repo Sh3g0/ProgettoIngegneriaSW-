@@ -44,9 +44,8 @@ export default function LoginPage() {
   return (
     <div className="login-container">
       <div className="left">
-        <img src="/img/logo.png" alt="Logo"/> 
-        <h1>DietiEstates25</h1>
-        <p>Dove l’arte incontra l’immobiliare</p>
+        <img src="/img/logo_prova.png" alt="Logo" className='w-128'/> 
+        <h1>Dove l’arte incontra l’immobiliare</h1>
         <div className="credits">
           Designed by<br /><b>STICY Tech.</b>
         </div>

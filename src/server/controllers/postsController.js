@@ -1,9 +1,9 @@
 //File per la gestione dei controller relativi alle query
 
-const { getRoleByUsernameAndPassword, addClient } = require('../services/postsServices');
+const { getRoleByUsernameAndPassword, addClient, getImmobili } = require('../services/postsServices');
 
 //Controller per ottenere il ruolo di un utente dato username e password
-async function getUserRole(req, res) {
+async function getUserRoleController(req, res) {
   try {
     console.log('Corpo della richiesta:', req.body);
     const { username, password } = req.body;
@@ -16,7 +16,7 @@ async function getUserRole(req, res) {
 }
 
 //Controller per inserire un nuovo cliente
-async function createClient(req, res) {
+async function addClientController(req, res) {
   try {
     const { email, username, password, ruolo, idAgenzia } = req.body;
 
@@ -40,7 +40,27 @@ async function createClient(req, res) {
   }
 }
 
+async function showImmobiliController(req, res) {
+  try {
+
+    const params = req.body
+    const { id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio } = params;
+
+    // Chiamata al servizio per ottenere gli immobili
+    const immobili = await getImmobili(id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio);
+
+    console.log('Immobili trovati:', immobili);
+
+    // Restituisce gli immobili trovati
+    return res.json(immobili);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
 module.exports = {
-  getUserRole,
-  createClient
+  getUserRoleController,
+  addClientController,
+  showImmobiliController
 };

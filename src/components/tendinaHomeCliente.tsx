@@ -5,15 +5,15 @@ import Link from 'next/link';
 
 export default function TendinaHomeCliente() {
   const icone = [
-    { icon: <User />, href: '/homeCliente', attiva: true },
-    { icon: <Home />, href: '/offerteCliente' },
-    { icon: <History />, href: '/storicoCliente' },
+    { icon: <User size={32}/>, href: '/homeCliente', attiva: true },
+    { icon: <Home size={32}/>, href: '/offerteCliente' },
+    { icon: <History size={32}/>, href: '/storicoCliente' },
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-full w-16 bg-white shadow-lg flex flex-col justify-between items-center py-4">
+    <div className="fixed left-0 top-0 h-full w-24 bg-white shadow-lg flex flex-col justify-between items-center py-4">
       <div className="flex flex-col items-center space-y-4">
-        {icone.map((item, i) => (
+      {icone.map((item, i) => (
           <Link key={i} href={item.href}>
             <div
               className={`p-2 rounded ${

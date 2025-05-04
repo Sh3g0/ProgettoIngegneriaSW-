@@ -6,7 +6,7 @@ const postsRoute = require('./Router/postsRoute.js');
 
 //Middleware
 app.use(cors({
-  origin: 'http://localhost:3000' // <--- PERMETTE SOLO RICHIESTE DA Next.js
+  origin: '*'
 }));
 app.use(express.json());
 
@@ -15,5 +15,5 @@ app.use('/api', postsRoute);
 
 //Avvia il server sulla porta 3001
 app.listen(3001, () => {
-  console.log('Server in ascolto sulla porta 3001');
+  console.log('Database in ascolto sulla porta 3001');
 });
