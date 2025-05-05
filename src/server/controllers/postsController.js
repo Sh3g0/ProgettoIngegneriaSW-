@@ -102,3 +102,10 @@ export async function showImmobiliController(req, res) {
     return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
   }
 }
+
+export {
+  getRoleByUsernameAndPassword,
+  addClient,
+  getImmobili,
+  creaAgenzia
+};

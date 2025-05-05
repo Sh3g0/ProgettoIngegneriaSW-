@@ -1,7 +1,7 @@
 import { queryDB } from '../db/database.js';
 
 // Funzione per ottenere il ruolo di un utente
-export async function getRoleByUsernameAndPassword(username, password) {
+ async function getRoleByUsernameAndPassword(username, password) {
   const query = `
     SELECT ruolo 
     FROM utente 
@@ -20,7 +20,7 @@ export async function getRoleByUsernameAndPassword(username, password) {
 }
 
 // Funzione per inserire un nuovo cliente
-export async function addClient(email, username, passwordHash, ruolo = "cliente", idAgenzia = null) {
+ async function addClient(email, username, passwordHash, ruolo = "cliente", idAgenzia = null) {
   const query = `
     INSERT INTO utente (email, username, password_hash, ruolo, id_agenzia) 
     VALUES ($1, $2, $3, $4, $5)
@@ -37,7 +37,7 @@ export async function addClient(email, username, passwordHash, ruolo = "cliente"
 }
 
 // Funzione per ottenere immobili
-async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='q', portineria=false, tipo_annuncio='vendita', climatizzazione=false) {
+ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='q', portineria=false, tipo_annuncio='vendita', climatizzazione=false) {
   try {
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
@@ -119,7 +119,7 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
 }
 
 // Funzione per creare un'agenzia
-export async function creaAgenzia(nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmin) {
+ async function creaAgenzia(nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmin) {
   const query = `
     INSERT INTO agenzia (nome, sede, email, id_admin)
     VALUES ($1, $2, $3, $4)
@@ -131,9 +131,10 @@ export async function creaAgenzia(nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmi
   return result[0].id;
 }
 
-module.exports = {
+export {
   getRoleByUsernameAndPassword,
   addClient,
   getImmobili,
   creaAgenzia
 };
+
