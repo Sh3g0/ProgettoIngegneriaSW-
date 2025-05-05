@@ -10,7 +10,7 @@ export default function Reg() {
   const [password, setPassword] = useState('');
   const [idAgenzia, setIdAgenzia] = useState('');
   const [sedeAgenzia, setSedeAgenzia] = useState('');
-  const [nomeAgenzia, setNomeAgenzia] = useState(''); // Cambia nomeAgenzia
+  const [nomeAgenzia, setNomeAgenzia] = useState('');
   const [emailAgenzia, setEmailAgenzia] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,7 +21,7 @@ export default function Reg() {
     setError(''); // Resetta l'errore
 
     if (password !== confirmPassword) {
-      console.error('Le password non corrispondono');
+      setError('Le password non corrispondono');
       return;
     }
 
@@ -29,7 +29,7 @@ export default function Reg() {
       const agenziaData = {
         nomeAgenzia,
         sedeAgenzia,
-        emailAgenzia
+        emailAgenzia,
       };
 
       try {
@@ -41,31 +41,38 @@ export default function Reg() {
 
         if (agenziaResponse.ok) {
           const agenzia = await agenziaResponse.json();
-          const idAgenziaCreata = agenzia.agenziaId; // Assicurati che il backend ritorni questo ID
+          if (agenzia && agenzia.agenziaId) {
+            const idAgenziaCreata = agenzia.agenziaId;
 
-          // Ora registriamo l'utente con l'ID dell'agenzia
-          const response = await fetch('http://localhost:3001/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email,
-              username,
-              password,
-              ruolo,
-              idAgenzia: idAgenziaCreata,
-            }),
-          });
+            // Ora registriamo l'utente con l'ID dell'agenzia
+            const response = await fetch('http://localhost:3001/api/signup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email,
+                username,
+                password,
+                ruolo,
+                idAgenzia: idAgenziaCreata,
+              }),
+            });
 
-          if (response.ok) {
-            const data = await response.json();
-            localStorage.setItem('token', data.token); // Salva il token nel localStorage
-            router.push("/start");
+            if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem('token', data.token); // Salva il token nel localStorage
+              router.push('/start');
+            } else {
+              setError('Registrazione agenzia fallita');
+            }
           } else {
-            setError('Registrazione agenzia fallita');
+            setError('ID agenzia non trovato');
           }
+        } else {
+          setError('Creazione agenzia fallita');
         }
       } catch (error) {
         console.error(error);
+        setError('Errore durante la creazione dell\'agenzia');
       }
     } else {
       // Registrazione cliente
@@ -77,26 +84,29 @@ export default function Reg() {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token); // Salva il token nel localStorage
-        router.push("/start");
+        router.push('/start');
       } else {
         setError('Registrazione fallita');
       }
     }
   };
 
+  // Funzione per aprire/chiudere il pop-up
+  const handlePopup = () => {
+    setShowPopup(!showPopup);
+  };
 
+  // Funzione per creare l'agenzia
   const handleCreazioneAzienda = async () => {
-
     const data = {
-      nome: nomeAgenzia, // Oppure un altro nome che usi per l'agenzia
+      nome: nomeAgenzia,
       sede: sedeAgenzia,
       email: emailAgenzia,
-      id: 1 // solo per test
-
+      id: 1, // solo per test
     };
 
     if (!nomeAgenzia || !sedeAgenzia || !emailAgenzia) {
-      alert("Tutti i campi sono obbligatori per la creazione dell'agenzia");
+      alert('Tutti i campi sono obbligatori per la creazione dell\'agenzia');
       return;
     }
 
@@ -110,24 +120,20 @@ export default function Reg() {
       });
 
       const result = await response.json();
-      console.log('Agenzia creata con successo:', result);
-
-      // Dopo la creazione, chiudi il popup
-      setShowPopup(false);
+      if (result && result.agenziaId) {
+        console.log('Agenzia creata con successo:', result);
+        setRuolo('agente');
+        setShowPopup(false);
+      } else {
+        console.error('Creazione agenzia fallita', result);
+      }
     } catch (error) {
-      console.error('Creazione agenzia fallita', error);
+      console.error('Errore durante la creazione dell\'agenzia', error);
     }
   };
 
-
-
-  // Funzione per aprire/chiudere il pop-up
-  const handlePopup = () => {
-    setShowPopup(!showPopup);
-  };
-
   return (
-    <div className="flex h-screen bg-cover bg-center" style={{ backgroundImage: "url('/img/sfondo.jpg')" }}>
+    <div className="flex h-screen bg-cover bg-center" style={{ backgroundImage: 'url("/img/sfondo.jpg")' }}>
       {/* Sezione sinistra */}
       <div className="flex-1 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center">
         <img src="/img/logo.png" alt="Logo" className="w-32 h-auto mb-4" />
@@ -141,6 +147,8 @@ export default function Reg() {
       {/* Sezione destra */}
       <div className="flex-1 bg-white flex flex-col justify-center items-center p-6">
         <h2 className="text-3xl font-semibold mb-4">Sign up</h2>
+
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
         <input
           id="username"
@@ -206,7 +214,7 @@ export default function Reg() {
               type="text"
               placeholder="Nome agenzia"
               value={nomeAgenzia}
-              onChange={(e) => setNomeAgenzia(e.target.value)} // Aggiorna il valore
+              onChange={(e) => setNomeAgenzia(e.target.value)}
               className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
@@ -228,14 +236,7 @@ export default function Reg() {
             />
             <button
               className="w-full bg-blue-600 text-white p-4 rounded-lg font-semibold hover:bg-blue-700 mb-2"
-              onClick={() => {
-                if (!nomeAgenzia || !sedeAgenzia || !emailAgenzia) {
-                  console.error('Tutti i campi sono obbligatori per la creazione dell\'agenzia');
-                  return; // Blocca l'invio se qualche campo è vuoto
-                }
-                setRuolo('agente');
-                handleCreazioneAzienda();
-              }}
+              onClick={handleCreazioneAzienda}
             >
               Crea Agenzia
             </button>
