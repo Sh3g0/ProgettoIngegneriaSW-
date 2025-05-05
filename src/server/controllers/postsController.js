@@ -1,22 +1,48 @@
-//File per la gestione dei controller relativi alle query
+import { queryDB } from '../db/database.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { getRoleByUsernameAndPassword, addClient, creaAgenzia, getImmobili } from '../services/postsServices.js';
 
-const { getRoleByUsernameAndPassword, addClient, getImmobili } = require('../services/postsServices');
+const SECRET_KEY = 'dieti_secret_key25'; // In produzione, usa process.env
 
-//Controller per ottenere il ruolo di un utente dato username e password
-async function getUserRoleController(req, res) {
+// Login
+export async function getUserRole(req, res) {
   try {
-    console.log('Corpo della richiesta:', req.body);
     const { username, password } = req.body;
-    const role = await getRoleByUsernameAndPassword(username, password);
-    res.json({ role });
+    const query = `SELECT * FROM utente WHERE username = $1;`;
+    const users = await queryDB(query, [username]);
+
+    if (users.length === 0) return res.status(400).json({ message: "Utente non trovato" });
+
+    const user = users[0];
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+    if (!validPassword) return res.status(401).json({ message: "Password errata" });
+
+    const token = jwt.sign({ user: user.id }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token, ruolo: user.ruolo });
   } catch (error) {
-    console.error('Errore nel controller login');
-    res.status(400).json({ message: error.message });
+    console.error("Errore login:", error);
+    res.status(500).json({ message: "Errore login" });
   }
 }
 
-//Controller per inserire un nuovo cliente
-async function addClientController(req, res) {
+// Recupero info utente loggato
+export async function getUserInfo(req, res) {
+  try {
+    const userId = req.user.user;
+    const result = await queryDB('SELECT * FROM utente WHERE id = $1', [userId]);
+
+    if (result.length === 0) return res.status(404).json({ error: 'Utente non trovato' });
+
+    res.json(result[0]);
+  } catch (err) {
+    console.error("Errore nel recupero delle informazioni dell'utente:", err);
+    res.sendStatus(500);
+  }
+}
+
+// Signup client
+export async function createClient(req, res) {
   try {
     const { email, username, password, ruolo, idAgenzia } = req.body;
 
@@ -24,41 +50,55 @@ async function addClientController(req, res) {
       return res.status(400).json({ error: 'Tutti i campi sono obbligatori.' });
     }
 
-    //Verifica se l'email o username esistono già
-    const userExists = await pool.query('SELECT * FROM utente WHERE email = $1 OR username = $2', [email, username]);
-    if (userExists.rows.length > 0) {
+    const existing = await queryDB(
+      'SELECT * FROM utente WHERE email = $1 OR username = $2',
+      [email, username]
+    );
+
+    if (existing.length > 0) {
       return res.status(400).json({ error: 'Email o username già in uso.' });
     }
 
-    // Hash della password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const clientId = await addClient(email, username, hashedPassword, ruolo, idAgenzia);
-    res.status(201).json({ clientId });
+    const result = await addClient(email, username, hashedPassword, ruolo, idAgenzia);
+    res.status(201).json({ clientId: result });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 }
 
-async function showImmobiliController(req, res) {
-  try {
+// Creazione agenzia
+export async function creazioneAgenzia(req, res) {
+  const { nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmin } = req.body;
 
-    const params = req.body
+  if (!nomeAgenzia || !sedeAgenzia || !emailAgenzia || !idAdmin) {
+    return res.status(400).json({ error: 'Tutti i campi sono obbligatori.' });
+  }
+
+  try {
+    const result = await queryDB(
+      'INSERT INTO agenzia (nome, sede, email, id_admin) VALUES ($1, $2, $3, $4) RETURNING id',
+      [nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmin]
+    );
+
+    const agenziaId = result.rows[0].id;
+    res.status(201).json({ message: 'Agenzia creata con successo', agenziaId });
+  } catch (error) {
+    console.error("Errore nella creazione dell'agenzia:", error);
+    res.status(500).json({ message: "Errore nella creazione dell'agenzia", error: error.message });
+  }
+}
+
+// Mostra immobili filtrati
+export async function showImmobiliController(req, res) {
+  try {
+    const params = req.body;
     const { id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio } = params;
 
-    // Chiamata al servizio per ottenere gli immobili
     const immobili = await getImmobili(id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio);
-
-    // Restituisce gli immobili trovati
     return res.json(immobili);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
   }
 }
-
-module.exports = {
-  getUserRoleController,
-  addClientController,
-  showImmobiliController
-};
