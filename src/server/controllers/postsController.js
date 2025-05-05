@@ -1,37 +1,32 @@
-import { getRoleByUsernameAndPassword, addClient, creaAgenzia } from '../services/postsServices.js';
 import { queryDB } from '../db/database.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { getRoleByUsernameAndPassword, addClient, creaAgenzia, getImmobili } from '../services/postsServices.js';
 
+const SECRET_KEY = 'dieti_secret_key25'; // In produzione, usa process.env
 
 // Login
-import jwt from 'jsonwebtoken';
-
-const SECRET_KEY = 'dieti_secret_key25'; // Salvala in .env nel progetto vero
-
 export async function getUserRole(req, res) {
   try {
     const { username, password } = req.body;
-    const query = `
-      SELECT * FROM utente WHERE username = $1;
-    `;
+    const query = `SELECT * FROM utente WHERE username = $1;`;
     const users = await queryDB(query, [username]);
 
     if (users.length === 0) return res.status(400).json({ message: "Utente non trovato" });
 
     const user = users[0];
     const validPassword = await bcrypt.compare(password, user.password_hash);
-
     if (!validPassword) return res.status(401).json({ message: "Password errata" });
 
     const token = jwt.sign({ user: user.id }, SECRET_KEY, { expiresIn: '1h' });
-
-    res.json({ token, ruolo: user.ruolo }); // puoi aggiungere anche username, id ecc. se ti servono
+    res.json({ token, ruolo: user.ruolo });
   } catch (error) {
     console.error("Errore login:", error);
     res.status(500).json({ message: "Errore login" });
   }
 }
 
+// Recupero info utente loggato
 export async function getUserInfo(req, res) {
   try {
     const userId = req.user.user;
@@ -46,8 +41,7 @@ export async function getUserInfo(req, res) {
   }
 }
 
-
-// Registrazione
+// Signup client
 export async function createClient(req, res) {
   try {
     const { email, username, password, ruolo, idAgenzia } = req.body;
@@ -73,7 +67,7 @@ export async function createClient(req, res) {
   }
 }
 
-// Creazione azienda
+// Creazione agenzia
 export async function creazioneAgenzia(req, res) {
   const { nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmin } = req.body;
 
@@ -82,7 +76,7 @@ export async function creazioneAgenzia(req, res) {
   }
 
   try {
-    const result = await pool.query(
+    const result = await queryDB(
       'INSERT INTO agenzia (nome, sede, email, id_admin) VALUES ($1, $2, $3, $4) RETURNING id',
       [nomeAgenzia, sedeAgenzia, emailAgenzia, idAdmin]
     );
@@ -95,3 +89,16 @@ export async function creazioneAgenzia(req, res) {
   }
 }
 
+// Mostra immobili filtrati
+export async function showImmobiliController(req, res) {
+  try {
+    const params = req.body;
+    const { id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio } = params;
+
+    const immobili = await getImmobili(id, lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio);
+    return res.json(immobili);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}

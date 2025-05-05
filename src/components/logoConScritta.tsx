@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function LogoConScritta() {
   return (
-    <div className="flex items-center gap-4 p-4 ">
+    <div className="flex items-center gap-4 ">
       <img
         src="/img/logo.png" 
         alt="Logo DietiEstates"

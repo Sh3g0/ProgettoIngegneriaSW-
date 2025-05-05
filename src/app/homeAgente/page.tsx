@@ -1,6 +1,6 @@
-import TendinaLateraleAgente from "../components/tendinaLateraleAgente";
-import LogoConScritta from "../components/logoConScritta";
-import BarraDiRicercaHomeAgente from "../components/barraDiRicercaHomeAgente";
+import TendinaLateraleAgente from "../../components/tendinaLateraleAgente";
+import LogoConScritta from "../../components/logoConScritta";
+import BarraDiRicercaHomeAgente from "../../components/barraDiRicercaHomeAgente";
 
 export default function HomeAgente() {
   return (
@@ -10,10 +10,7 @@ export default function HomeAgente() {
       </div>
                 
       <div className="flex-1 p-8">
-        <LogoConScritta />
-
-        <BarraDiRicercaHomeAgente/>
-        
+        <LogoConScritta />        
 
       </div>
   

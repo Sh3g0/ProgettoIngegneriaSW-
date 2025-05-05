@@ -3,3 +3,54 @@
 @tailwind utilities;
 
 @import "./style.css";
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('fonts/Bemirs.ttf') format('ttf');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    width: 100%;
+  }
+  
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    background-color: #3b82f6; /* Tailwind blue-500 */
+    border-radius: 9999px;
+    cursor: pointer;
+    margin-top: -9px;
+    pointer-events: auto;
+    position: relative;
+    z-index: 30;
+  }
+  
+  input[type='range']::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    background-color: #3b82f6;
+    border-radius: 9999px;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 30;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.4);
+    border-radius: 4px;
+  }
+
+  
+
+  
+  

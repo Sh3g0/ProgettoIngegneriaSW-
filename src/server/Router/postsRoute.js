@@ -1,35 +1,40 @@
 import express from 'express';
 import passport from 'passport';
 
-import { getUserRole, createClient, creazioneAgenzia } from '../controllers/postsController.js';
+import {
+  getUserRole,
+  createClient,
+  creazioneAgenzia,
+  getUserInfo,
+  showImmobiliController
+} from '../controllers/postsController.js';
+
+import { authenticateToken } from '../middlewares/authenticateToken.js';
 
 const router = express.Router();
-import { authenticateToken } from '../middlewares/authenticateToken.js';
-import { getUserInfo } from '../controllers/postsController.js';
 
+// Rotta protetta per recuperare info utente loggato
 router.get('/user', authenticateToken, getUserInfo);
 
-
-// Resto delle rotte
+// Autenticazione standard
 router.post('/login', getUserRole);
 router.post('/signup', createClient);
 router.post('/creazioneAzienda', creazioneAgenzia);
+router.post('/showImmobili', showImmobiliController);
 
-// Avvio login con Google
+// Login con Google
 router.get('/google', passport.authenticate('google', {
   scope: ['profile', 'email'],
 }));
 
-// Callback che Google chiama dopo il login
 router.get('/google/callback', passport.authenticate('google', {
   successRedirect: 'http://localhost:3000/homeCliente',
   failureRedirect: '/login',
 }));
 
-// Avvio login con Facebook
+// Login con Facebook
 router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 
-// Callback che Facebook chiama dopo il login
 router.get('/facebook/callback', passport.authenticate('facebook', {
   successRedirect: 'http://localhost:3000/homeCliente',
   failureRedirect: '/login',

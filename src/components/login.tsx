@@ -7,7 +7,6 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Login classico
   const handleSignIn = async () => {
     const username = (document.getElementById('username') as HTMLInputElement).value;
     const password = (document.getElementById('password') as HTMLInputElement).value;
@@ -21,16 +20,11 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error('Login fallito');
       const data = await response.json();
-      console.log(data); // Aggiungi questa riga per verificare i dati ricevuti
-      
+      console.log(data);
 
-      // Salva credenziali nel localStorage
       localStorage.setItem('token', data.token);
-      console.log('Token salvato:', localStorage.getItem('token'));
-
       localStorage.setItem('utente', JSON.stringify({ username, ruolo: data.ruolo }));
 
-      // Reindirizza in base al ruolo
       if (data.ruolo === 'cliente') {
         router.push('/homeCliente');
       } else if (data.ruolo === 'agente') {
