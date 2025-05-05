@@ -1,19 +1,25 @@
-const express = require('express');
-const cors = require('cors');  // <--- AGGIUNGI QUESTO
+import express from 'express';
+import cors from 'cors';
+import session from 'express-session';
+import passport from 'passport';
+
+import './config/passport.js'; // Inizializza le strategie di Passport
+import postRoutes from './Router/postsRoute.js'; // Rotte per post, login, signup, OAuth
+
 const app = express();
 
-const postsRoute = require('./Router/postsRoute.js');
-
-//Middleware
+// Middleware
 app.use(cors({
-  origin: 'http://localhost:3000' // <--- PERMETTE SOLO RICHIESTE DA Next.js
+  origin: 'http://localhost:3000',
+  credentials: true
 }));
 app.use(express.json());
+app.use(session({ secret: 'secretbro', resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-//Configura le rotte
-app.use('/api', postsRoute);
+app.use('/api', postRoutes); // Rotte generali
+app.use('/auth', postRoutes); // Rotte OAuth
 
-//Avvia il server sulla porta 3001
-app.listen(3001, () => {
-  console.log('Server in ascolto sulla porta 3001');
-});
+// Avvio del server
+app.listen(3001, () => console.log('Server attivo sulla porta 3001'));

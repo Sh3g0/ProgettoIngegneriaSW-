@@ -1,40 +1,46 @@
 'use client';
 import React, { useState } from 'react';
-import '../styles/style.css'; 
+import '../styles/style.css';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-
+  // Login classico
   const handleSignIn = async () => {
     const username = (document.getElementById('username') as HTMLInputElement).value;
     const password = (document.getElementById('password') as HTMLInputElement).value;
+
     try {
       const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Login fallito');
-      }
-
+      if (!response.ok) throw new Error('Login fallito');
       const data = await response.json();
+      console.log(data); // Aggiungi questa riga per verificare i dati ricevuti
+      
 
-      // In base al ruolo, vai alla pagina corretta
-      if (data.role === 'cliente') {
+      // Salva credenziali nel localStorage
+      localStorage.setItem('token', data.token);
+      console.log('Token salvato:', localStorage.getItem('token'));
+
+      localStorage.setItem('utente', JSON.stringify({ username, ruolo: data.ruolo }));
+
+      // Reindirizza in base al ruolo
+      if (data.ruolo === 'cliente') {
         router.push('/homeCliente');
-      } else if (data.role === 'agente') {
+      } else if (data.ruolo === 'agente') {
         router.push('/homeAgente');
-      } else if (data.role === 'gestore') {
+      } else if (data.ruolo === 'gestore') {
         router.push('/homeGestoreAgenzia');
       } else {
-        //Se il ruolo non è riconosciuto
-        alert('Utente non trovato. Per favore, registrati.');
+        alert('Ruolo non riconosciuto.');
       }
+
     } catch (error) {
       console.error('Errore di login:', error);
       alert('Username o password errati.');
@@ -44,45 +50,73 @@ export default function LoginPage() {
   return (
     <div className="login-container">
       <div className="left">
-        <img src="/img/logo.png" alt="Logo"/> 
+        <img src="/img/logo.png" alt="Logo" />
         <h1>DietiEstates25</h1>
         <p>Dove l’arte incontra l’immobiliare</p>
         <div className="credits">
           Designed by<br /><b>STICY Tech.</b>
         </div>
       </div>
+
       <div className="right">
         <h2>Sign in</h2>
-        <button className="btn">
+
+        {/* Login Google */}
+        <button className="btn" onClick={() => window.location.href = 'http://localhost:3001/auth/google'}>
           <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" />
           Continue with Google
         </button>
-        <button className="btn">
+
+        {/* Login Facebook */}
+        <button className="btn" onClick={() => window.location.href = 'http://localhost:3001/auth/facebook'}>
           <img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook" />
           Continue with Facebook
         </button>
+
         <div className="divider">OR</div>
-        Username
-        <input id="username" 
-          type="text" 
-          placeholder="User name or email address"
-        />
-        <button
-          type="button"
-          className="hide"
-          onClick={() => setShowPassword((prev) => !prev)}
-        >
-          {showPassword ? "🙈" : "👁️‍🗨️"}
-        </button>
-        <input
-          id="password"
-          type={showPassword ? "text" : "password"}
-          placeholder="Your password"
-        />
+
+        <div className="input-group">
+          <label htmlFor="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            placeholder="Inserisci il tuo username"
+            className="login-input"
+          />
+        </div>
+
+        <div className="input-group" style={{ position: 'relative' }}>
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Inserisci la tua password"
+            className="login-input"
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword(prev => !prev)}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '36px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.2rem'
+            }}
+          >
+            {showPassword ? "🙈" : "👁️‍🗨️"}
+          </button>
+        </div>
+
         <div className="password-options">
           <a href="#">Forgot your password?</a>
         </div>
-        <button id="login" className="signin-btn" onClick={handleSignIn}>Sign in</button>
+
+        <button className="signin-btn" onClick={handleSignIn}>Sign in</button>
+
         <div className="signup">
           Don’t have an account? <a href="/registrazione">Sign up</a>
         </div>
