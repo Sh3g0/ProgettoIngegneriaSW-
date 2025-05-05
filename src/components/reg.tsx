@@ -8,247 +8,240 @@ export default function Reg() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [idAgenzia, setIdAgenzia] = useState('');
-  const [sedeAgenzia, setSedeAgenzia] = useState('');
-  const [nomeAgenzia, setNomeAgenzia] = useState(''); // Cambia nomeAgenzia
-  const [emailAgenzia, setEmailAgenzia] = useState('');
-  const [showPopup, setShowPopup] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Funzione per gestire la registrazione
+  // Dati per agenzia (solo se ruolo = agente)
+  const [nomeAgenzia, setNomeAgenzia] = useState('');
+  const [sedeAgenzia, setSedeAgenzia] = useState('');
+  const [emailAgenzia, setEmailAgenzia] = useState('');
+
   const handleSignup = async () => {
-    setError(''); // Resetta l'errore
+    setError('');
 
     if (password !== confirmPassword) {
-      console.error('Le password non corrispondono');
+      setError('Le password non coincidono');
       return;
     }
 
     if (ruolo === 'agente') {
-      const agenziaData = {
-        nomeAgenzia,
-        sedeAgenzia,
-        emailAgenzia
-      };
-
       try {
-        const agenziaResponse = await fetch('http://localhost:3001/api/creazioneAzienda', {
+        const agenziaRes = await fetch('http://localhost:3001/api/creazioneAzienda', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(agenziaData),
+          body: JSON.stringify({
+            nomeAgenzia,
+            sedeAgenzia,
+            emailAgenzia
+          }),
         });
 
-        if (agenziaResponse.ok) {
-          const agenzia = await agenziaResponse.json();
-          const idAgenziaCreata = agenzia.agenziaId; // Assicurati che il backend ritorni questo ID
+        if (!agenziaRes.ok) throw new Error('Creazione agenzia fallita');
+        const { agenziaId } = await agenziaRes.json();
 
-          // Ora registriamo l'utente con l'ID dell'agenzia
-          const response = await fetch('http://localhost:3001/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email,
-              username,
-              password,
-              ruolo,
-              idAgenzia: idAgenziaCreata,
-            }),
-          });
+        const userRes = await fetch('http://localhost:3001/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, username, password, ruolo, idAgenzia: agenziaId }),
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            localStorage.setItem('token', data.token); // Salva il token nel localStorage
-            router.push("/start");
-          } else {
-            setError('Registrazione agenzia fallita');
-          }
-        }
-      } catch (error) {
-        console.error(error);
+        if (!userRes.ok) throw new Error('Registrazione utente fallita');
+
+        const data = await userRes.json();
+        localStorage.setItem('token', data.token);
+        router.push('/start');
+      } catch (err) {
+        console.error(err);
+        setError('Errore durante la registrazione come agente');
       }
+
     } else {
-      // Registrazione cliente
-      const response = await fetch('http://localhost:3001/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, username, password, ruolo }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('token', data.token); // Salva il token nel localStorage
-        router.push("/start");
-      } else {
-        setError('Registrazione fallita');
+      try {
+        const res = await fetch('http://localhost:3001/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, username, password, ruolo }),
+        });
+
+        if (!res.ok) throw new Error('Registrazione cliente fallita');
+
+        const data = await res.json();
+        localStorage.setItem('token', data.token);
+        router.push('/start');
+      } catch (err) {
+        console.error(err);
+        setError('Errore durante la registrazione');
       }
     }
   };
 
-
-  const handleCreazioneAzienda = async () => {
-
-    const data = {
-      nome: nomeAgenzia, // Oppure un altro nome che usi per l'agenzia
-      sede: sedeAgenzia,
-      email: emailAgenzia,
-      id: 1 // solo per test
-
-    };
-
-    if (!nomeAgenzia || !sedeAgenzia || !emailAgenzia) {
-      alert("Tutti i campi sono obbligatori per la creazione dell'agenzia");
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:3001/api/creazioneAzienda', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      console.log('Agenzia creata con successo:', result);
-
-      // Dopo la creazione, chiudi il popup
-      setShowPopup(false);
-    } catch (error) {
-      console.error('Creazione agenzia fallita', error);
-    }
-  };
-
-
-
-  // Funzione per aprire/chiudere il pop-up
-  const handlePopup = () => {
-    setShowPopup(!showPopup);
-  };
-
-  return (
-    <div className="flex h-screen bg-cover bg-center" style={{ backgroundImage: "url('/img/sfondo.jpg')" }}>
-      {/* Sezione sinistra */}
-      <div className="flex-1 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center">
-        <img src="/img/logo.png" alt="Logo" className="w-32 h-auto mb-4" />
-        <h1 className="text-4xl font-bold text-white mb-4">DietiEstates25</h1>
-        <p className="text-lg text-white mb-4">Dove l’arte incontra l’immobiliare</p>
-        <div className="text-gray-300">
-          Designed by<br /><b>STICY Tech.</b>
-        </div>
+  return (<div className="flex h-screen">
+    {/* SEZIONE SINISTRA */}
+    <div
+        className="left w-full md:w-1/2 flex flex-col justify-center items-center bg-gray-100 p-8"
+        style={{ backgroundImage: 'url(/img/sfondo6.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        <img src="/img/logo.png" alt="Logo" className="mb-4" />
+      <h1 className="text-4xl font-bold text-center mb-4">DietiEstates25</h1>
+      <p className="text-lg text-center text-white-700 mb-6">Dove l’arte incontra l’immobiliare</p>
+      <div className="credits text-center text-sm text-gray-500">
+        Designed by<br /><b>STICY Tech.</b>
       </div>
-
-      {/* Sezione destra */}
-      <div className="flex-1 bg-white flex flex-col justify-center items-center p-6">
-        <h2 className="text-3xl font-semibold mb-4">Sign up</h2>
-
-        <input
-          id="username"
-          type="text"
-          placeholder="Your username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <input
-          id="email"
-          type="text"
-          placeholder="E-mail address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <button className="absolute right-10 top-24 bg-transparent border-none text-2xl">👁️‍🗨️</button>
-
-        <input
-          id="password"
-          type="password"
-          placeholder="Your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <div className="mb-4">
-          <a href="#" onClick={handlePopup} className="text-blue-500 hover:underline">Sei un'agenzia?</a>
+    </div>
+  
+    {/* SEZIONE DESTRA - FORM DI REGISTRAZIONE */}
+    <div className="right w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-white shadow-lg">
+      <h2 className="text-3xl font-bold mb-6">Sign up</h2>
+  
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+  
+      <div className="w-full max-w-md space-y-4">
+        {/* Username */}
+        <div>
+          <label htmlFor="username" className="block text-base font-semibold mb-1">
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            placeholder="Inserisci il tuo username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-
+  
+        {/* Email */}
+        <div>
+          <label htmlFor="email" className="block text-base font-semibold mb-1">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Inserisci la tua email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+  
+        {/* Password */}
+        <div className="relative">
+          <label htmlFor="password" className="block text-base font-semibold mb-1">
+            Password
+          </label>
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Inserisci la password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-9 text-lg"
+            onClick={() => setShowPassword(prev => !prev)}
+          >
+            {showPassword ? '🙈' : '👁️‍🗨️'}
+          </button>
+        </div>
+  
+        {/* Conferma Password */}
+        <div>
+          <label htmlFor="confirmPassword" className="block text-base font-semibold mb-1">
+            Conferma Password
+          </label>
+          <input
+            id="confirmPassword"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Conferma la password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+  
+        {/* Ruolo */}
+        <div>
+          <label className="block text-base font-semibold mb-1">Ruolo</label>
+          <select
+            value={ruolo}
+            onChange={(e) => setRuolo(e.target.value as 'cliente' | 'agente')}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="cliente">Cliente</option>
+            <option value="agente">Agente</option>
+          </select>
+        </div>
+  
+        {/* Se ruolo è agente, mostra campi extra */}
+        {ruolo === 'agente' && (
+          <>
+            <div>
+              <label htmlFor="nomeAgenzia" className="block text-base font-semibold mb-1">
+                Nome Agenzia
+              </label>
+              <input
+                id="nomeAgenzia"
+                type="text"
+                placeholder="Inserisci il nome dell'agenzia"
+                value={nomeAgenzia}
+                onChange={(e) => setNomeAgenzia(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+  
+            <div>
+              <label htmlFor="sedeAgenzia" className="block text-base font-semibold mb-1">
+                Sede
+              </label>
+              <input
+                id="sedeAgenzia"
+                type="text"
+                placeholder="Inserisci la sede"
+                value={sedeAgenzia}
+                onChange={(e) => setSedeAgenzia(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+  
+            <div>
+              <label htmlFor="emailAgenzia" className="block text-base font-semibold mb-1">
+                Email Agenzia
+              </label>
+              <input
+                id="emailAgenzia"
+                type="email"
+                placeholder="Email dell'agenzia"
+                value={emailAgenzia}
+                onChange={(e) => setEmailAgenzia(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </>
+        )}
+  
+        {/* Bottone Registrazione */}
         <button
-          id="signup"
-          type="submit"
-          className="w-full bg-blue-600 text-white p-4 rounded-lg font-semibold hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
           onClick={handleSignup}
         >
-          Sign up
+          Registrati
         </button>
-
-        <div className="mt-4 text-sm">
-          Already have an account? <a href="/" className="text-blue-500 hover:underline">Sign in</a>
-        </div>
+  
+        {/* Link per Sign in */}
+        <p className="text-center mt-4 text-sm">
+          Hai già un account?{" "}
+          <a href="/" className="text-blue-600 hover:underline">
+            Sign in
+          </a>
+        </p>
       </div>
-
-      {/* Pop-up per la creazione dell'agente */}
-      {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h3 className="text-xl font-semibold mb-4">Registrazione Agente</h3>
-            <label className="block text-lg font-medium mb-2">Nome Agenzia</label>
-            <input
-              type="text"
-              placeholder="Nome agenzia"
-              value={nomeAgenzia}
-              onChange={(e) => setNomeAgenzia(e.target.value)} // Aggiorna il valore
-              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <label className="block text-lg font-medium mb-2">Sede Agenzia</label>
-            <input
-              type="text"
-              placeholder="Sede agenzia"
-              value={sedeAgenzia}
-              onChange={(e) => setSedeAgenzia(e.target.value)}
-              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <label className="block text-lg font-medium mb-2">Email Agenzia</label>
-            <input
-              type="email"
-              placeholder="Email agenzia"
-              value={emailAgenzia}
-              onChange={(e) => setEmailAgenzia(e.target.value)}
-              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              className="w-full bg-blue-600 text-white p-4 rounded-lg font-semibold hover:bg-blue-700 mb-2"
-              onClick={() => {
-                if (!nomeAgenzia || !sedeAgenzia || !emailAgenzia) {
-                  console.error('Tutti i campi sono obbligatori per la creazione dell\'agenzia');
-                  return; // Blocca l'invio se qualche campo è vuoto
-                }
-                setRuolo('agente');
-                handleCreazioneAzienda();
-              }}
-            >
-              Crea Agenzia
-            </button>
-
-            <button
-              className="w-full bg-red-600 text-white p-4 rounded-lg font-semibold hover:bg-red-700"
-              onClick={handlePopup}
-            >
-              Chiudi
-            </button>
-          </div>
-        </div>
-      )}
     </div>
+  </div>
+  
   );
 }
