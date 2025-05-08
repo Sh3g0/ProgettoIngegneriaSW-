@@ -70,7 +70,6 @@ export default function Home() {
                 })}
               </div>
             </div>
-
             <SearchBar />
           </div>      
         </div>

@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');  // <--- AGGIUNGI QUESTO
+const cors = require('cors'); 
 const app = express();
 
 const postsRoute = require('./Router/postsRoute.js');
@@ -9,6 +9,9 @@ app.use(cors({
   origin: '*'
 }));
 app.use(express.json());
+
+//Per le immagini
+app.use('/uploads', express.static('public/uploads'));
 
 //Configura le rotte
 app.use('/api', postsRoute);

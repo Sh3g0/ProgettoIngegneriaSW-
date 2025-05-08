@@ -60,27 +60,39 @@ export default function VisualizzaImmobili() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const parametri = searchParams.get('param');
+  const searchkey = searchParams.get('searchkey');
   const [decodedParams, setParametri] = useState<Parametri | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
   const fetchImmobili = async () => {
-    if (!parametri) return;
+    if (!parametri || !searchkey) return;
 
     try {
       const parsedParams = JSON.parse(decodeURIComponent(parametri));
       setParametri(parsedParams);
 
-      const response = await fetch(`http://localhost:3001/api/showImmobili`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(parsedParams),
-      });
+      let response;
 
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Errore HTTP: ${response.status} - ${text}`);
+      if(searchkey=='1'){
+          response = await fetch(`http://localhost:3001/api/getImmobiliByCoords`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsedParams),
+        });
+      }else if(searchkey=='2'){
+          response = await fetch(`http://localhost:3001/api/getImmobiliByFilter`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsedParams),
+        });
+      }else{
+          response = await fetch(`http://localhost:3001/api/getImmobiliByAdvancedFilter`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsedParams),
+        });
       }
 
       const data = await response.json();
@@ -91,12 +103,7 @@ export default function VisualizzaImmobili() {
         setError('Nessun immobile trovato nella zona.');
       }
 
-      //Cambio parametri per ottenere altri immobili
-      parsedParams.id = -1;
-
-      console.log('Parametri per altri immobili:', parsedParams);
-      
-      const responseOther = await fetch(`http://localhost:3001/api/showImmobili`, {
+      const responseOther = await fetch(`http://localhost:3001/api/getImmobiliByCoords`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsedParams),
@@ -130,30 +137,29 @@ export default function VisualizzaImmobili() {
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       <div className="relative w-full z-99">
         <div className="absolute top-0 left-0 w-full h-32 border-b border-t-4 border-blue-700 border-b-0" />
-        <div className="relative border-b-2 border-b-blue-700">
-          <Banner />
+        {/*Banner and Search Bar Top*/}
+          <div className="relative border-b-2 border-b-blue-700">
+            <Banner />
+          </div>
+          <div className='text-blue-700'>
+            <AdvancedSearchBar />
+          </div>
         </div>
-        <div className='text-blue-700'>
-          <AdvancedSearchBar />
-        </div>
-      </div>
 
 
+      {/* Container sotto il banner diviso in due */}
       <div className="p-0 flex-grow flex flex-col lg:flex-row gap-4 h-[calc(100vh-128px)]">
         <div className="w-full lg:w-[60%] p-0">
+          {/* Mappa immobili */}
           <div className="relative w-full h-full relative">
             <MappaImmobili immobili={immobili} otherImmobili={otherImmobili}/>
           </div>
         </div>
 
+        {/* Lista immobili */}
         <div className="lg:w-[40%] h-[97%] overflow-y-scroll pl-4">
           <h2 className="text-4xl font-extrabold text-blue-800 mt-10 mb-4 drop-shadow-md">
-            Case in vendita a:{' '}
-            {immobili.length > 0
-              ? immobili[0].citta
-              : otherImmobili.length > 0
-              ? otherImmobili[0].citta
-              : ''}
+          Case in {(immobili[0]?.tipo_annuncio || otherImmobili[0]?.tipo_annuncio || 'vendita')} a: {(immobili[0]?.citta || otherImmobili[0]?.citta || '')}
           </h2>
 
 
@@ -166,7 +172,7 @@ export default function VisualizzaImmobili() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-4">
             {immobili.length > 0 ? (
               immobili.map((immobile) => (
-                <a href='/Immobile' key={immobile.id}>
+                <a href={`/Immobile?id=${immobile.id}`} key={immobile.id}>
                   <div className="h-[280px] w-full p-0 rounded-xl shadow-lg bg-white hover:shadow-xl transition-all duration-200">
                     <div className="relative h-[150px] w-full">
                       <Image
@@ -183,7 +189,14 @@ export default function VisualizzaImmobili() {
 
                     <div className="bg-blue-50 rounded-b-xl h-[46%] p-2">
                       <h3 className="font-semibold text-xl truncate">{immobile.titolo}</h3>
-                      <p className="text-sm text-gray-600 truncate mt-2">{immobile.indirizzo}</p>
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600 mt-2">{immobile.indirizzo}</p>
+                        </div>
+                        <div>
+                          <p className="text-right text-md font-bold text-red-600 mt-2">{immobile.tipo_annuncio.toLocaleUpperCase()}</p>
+                        </div>
+                      </div>
 
                       <div className="border-t-2 border-gray-300 mt-2">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2 py-3 text-sm">
@@ -220,6 +233,7 @@ export default function VisualizzaImmobili() {
             )}
           </div>
 
+          {/* Altri immobili */}
           <div className='flex flex-col items-center'>
             <div className='w-full border-b-2 border-t-2 border-blue-700 mt-6 mb-2'>
               <p className='mt-2 mb-2'>Altri risultati ({otherImmobili.length})</p>
@@ -228,8 +242,7 @@ export default function VisualizzaImmobili() {
           <div className="grid grid-cols-1 w-full md:grid-cols-2 gap-4 pr-4 mt-4 mb-2">
             
               {otherImmobili.map((immobile) => (
-                //////////////////////////////////////////////////
-                //<a href={`/Immobili?id=${immobile.id}`}>
+                <a href={`/Immobile?id=${immobile.id}`} key={immobile.id}>
                 <div className="h-[280px] w-full p-0 rounded-xl shadow-lg bg-white hover:shadow-xl transition-all duration-200">
                     <div className="relative h-[150px] w-full">
                       <Image
@@ -246,8 +259,15 @@ export default function VisualizzaImmobili() {
 
                     <div className="bg-blue-50 rounded-b-xl h-[46%] p-2">
                       <h3 className="font-semibold text-xl truncate">{immobile.titolo}</h3>
-                      <p className="text-sm text-gray-600 truncate mt-2">{immobile.indirizzo}</p>
-
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600 mt-2">{immobile.indirizzo}</p>
+                        </div>
+                        <div>
+                          <p className="text-right text-md font-bold text-red-600 mt-2">{immobile.tipo_annuncio.toLocaleUpperCase()}</p>
+                        </div>
+                      </div>
+                      
                       <div className="border-t-2 border-gray-300 mt-2">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2 py-3 text-sm">
                           <div className="flex items-center space-x-2">
@@ -274,12 +294,13 @@ export default function VisualizzaImmobili() {
                       </div>
                     </div>
                   </div>
-                //////////////////////////////////////////////////////
-                //</a>
+                </a>
               ))}
             </div>
         </div>
       </div>
+
+      {/* Footer */}
       <footer className='h-[200px] bg-gray text-white text-center py-4 mt-auto'>
         lebron
       </footer>

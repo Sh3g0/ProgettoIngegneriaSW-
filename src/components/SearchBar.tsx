@@ -45,6 +45,10 @@ export default function SearchBar() {
   const handleSearch = async () => {
     const zoneSearch = zone.trim();
 
+    localStorage.setItem('activeLink', 'proprieta');
+    localStorage.setItem('ultimaZonaSelezionata', zoneSearch);
+
+
     try {
       const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${zoneSearch}&key=${API_KEY}`);
       const data = await response.json();
@@ -52,31 +56,18 @@ export default function SearchBar() {
       if (data.results.length > 0) {
         const { lat, lng } = data.results[0].geometry;
         const parametri = {
-          id: -1, //Per cercare solo con lat e lng
           lat,
-          lng,
-          prezzo_min: 0,
-          prezzo_max: 1000000,
-          dimensione_mq: 0,
-          piano: 0,
-          stanze: 0,
-          ascensore: false,
-          classe_energetica: 'q',
-          portineria: false,
-          climatizzazione: false,
-          tipo_annuncio: 'vendita',
+          lng
         };
 
         if (zoneSearch) {
           const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
-          router.push(`/VisualizzaImmobili?param=${encodedParametri}`);
+          router.push(`/VisualizzaImmobili?param=${encodedParametri}&searchkey=${'1'}`); //searchkey 1 per la ricerca con lat e lng
         }
       }
     } catch (error) {
       console.error('Errore durante la ricerca delle coordinate:', error);
     }
-
-
   }
 
   return (

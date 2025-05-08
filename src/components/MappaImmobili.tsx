@@ -106,6 +106,7 @@ const MappaImmobili = ({ immobili, otherImmobili }: Props) => {
               }}
               onMouseOver={() => setActiveMarker(immobile)}
               onMouseOut={() => setActiveMarker(null)}
+              onClick={() => window.location.href = `/Immobili?id=${immobile.id}`}
             />
           ))}
 
@@ -123,6 +124,7 @@ const MappaImmobili = ({ immobili, otherImmobili }: Props) => {
               }}
               onMouseOver={() => setActiveMarker(immobile)}
               onMouseOut={() => setActiveMarker(null)}
+              onClick={() => window.location.href = `/Immobili?id=${immobile.id}`}
             />
           ))}
         </GoogleMap>

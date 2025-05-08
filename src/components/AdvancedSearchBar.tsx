@@ -10,10 +10,10 @@ export default function AdvancedSearchBar() {
   const router = useRouter();
   const [zone, setZone] = useState('');
   const [zoneInput, setZoneInput] = useState('');
-  const [tipoAnnuncio, setTipoAnnuncio] = useState('affitto');
+  const [tipoAnnuncio, setTipoAnnuncio] = useState('qualsiasi');
   const [prezzoMin, setPrezzoMin] = useState(0);
   const [prezzoMax, setPrezzoMax] = useState(2000000);
-  const [superficie, setSuperficie] = useState(0);
+  const [superficie, setSuperficie] = useState<number | null>(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
@@ -21,20 +21,43 @@ export default function AdvancedSearchBar() {
   const [selectedPrezzoLabel, setSelectedPrezzoLabel] = useState('Prezzo');
   const [activeMenu, setActiveMenu] = useState<string | null>(null); // Stato per tenere traccia del menu attivo
   const [stanze, setStanze] = useState(0);
-  const [piano, setPiano] = useState(0);
+  const [piano, setPiano] = useState<number | null>(null);
   const [ascensore, setAscensore] = useState(false);
   const [classeEnergetica, setClasseEnergetica] = useState('q');
   const [portineria, setPortineria] = useState(false);
   const [climatizzazione, setClimatizzazione] = useState(false);
 
+  useEffect(() => {
+    const savedZone = localStorage.getItem('ultimaZonaSelezionata');
+    if (savedZone) {
+      setZone(savedZone);
+      setZoneInput(savedZone);
+    }
+  
+    const savedTipoAnnuncio = localStorage.getItem('ultimoTipoSelezionato');
+    if (savedTipoAnnuncio) {
+      setTipoAnnuncio(savedTipoAnnuncio);
+    }    
 
-const handleSearch = async () => {
+    const savedSuperficie = localStorage.getItem('ultimaSuperficieSelezionata');
+    if (savedSuperficie) {
+      setSuperficie(Number(savedSuperficie));
+    }
+  }, []);
+  
+  
+const handleAdvancedSearch = async () => {
 
   if (!zone || !suggestions.includes(zone)) {
     alert('Per favore, seleziona una zona valida');
     return;
   }
   
+  localStorage.setItem('ultimaZonaSelezionata', zone);
+  localStorage.setItem('ultimoTipoSelezionato', tipoAnnuncio);
+  localStorage.setItem('ultimoPrezzoMinSelezionato', String(prezzoMin));
+  localStorage.setItem('ultimoPrezzoMaxSelezionato', String(prezzoMax));
+  localStorage.setItem('ultimaSuperficieSelezionata', String(superficie));
 
   try{
     const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${zone}&key=${API_KEY}`);
@@ -43,7 +66,6 @@ const handleSearch = async () => {
     if (data.results.length > 0) {
       const { lat, lng } = data.results[0].geometry;
       const parametri = {
-        id: -2, // Per cercare con i parametri completi
         lat,
         lng,
         tipoAnnuncio,
@@ -59,6 +81,10 @@ const handleSearch = async () => {
       }
       try{
         const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
+
+        const timestamp = new Date().getTime(); // Aggiungi un parametro unico per evitare cache
+        window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}&searchkey=${'3'}`;
+
         console.log('Esegui ricerca con:', {
           lat,
           lng,
@@ -73,9 +99,61 @@ const handleSearch = async () => {
           portineria,
           climatizzazione,
         });
+        
+      }catch (error) {
+        console.error('Errore durante la ricerca:', error);
+      }
+    } 
+  }catch (error) {
+    console.error('Errore durante la ricerca delle coordinate:', error);
+  }
+}
+
+const handleNormalSearch = async () => {
+
+  if (!zone || !suggestions.includes(zone)) {
+    alert('Per favore, seleziona una zona valida');
+    return;
+  }  
+
+  localStorage.setItem('ultimaZonaSelezionata', zone);
+  localStorage.setItem('ultimoTipoSelezionato', tipoAnnuncio);
+  localStorage.setItem('ultimoPrezzoMinSelezionato', String(prezzoMin));
+  localStorage.setItem('ultimoPrezzoMaxSelezionato', String(prezzoMax));
+  localStorage.setItem('ultimaSuperficieSelezionata', String(superficie));
+  localStorage.setItem('ultimaStanzaSelezionata', String(stanze));
+  localStorage.setItem('ultimoPianoSelezionato', String(piano));
+  localStorage.setItem('ultimaClasseSelezionata', String(classeEnergetica));
+
+
+  try{
+    const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${zone}&key=${API_KEY}`);
+    const data = await response.json();
+
+    if (data.results.length > 0) {
+      const { lat, lng } = data.results[0].geometry;      
+      const parametri = {
+        lat,
+        lng,
+        tipoAnnuncio,
+        prezzoMin,
+        prezzoMax,
+        superficie,
+      }
+      try{
+        const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
 
         const timestamp = new Date().getTime(); // Aggiungi un parametro unico per evitare cache
-        window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}`;
+        window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}&searchkey=${'2'}`;
+
+        console.log('Esegui ricerca con:', {
+          lat,
+          lng,
+          tipoAnnuncio,
+          prezzoMin,
+          prezzoMax,
+          superficie,
+        });
         
       }catch (error) {
         console.error('Errore durante la ricerca:', error);
@@ -90,7 +168,6 @@ const handleSearch = async () => {
     fetch('/italian_locations.json')
       .then((res) => res.json())
       .then((data) => {
-        console.log('Dati caricati:', data);  // Verifica cosa viene restituito
         setSuggestions(data);
       })
       .catch((error) => {
@@ -132,11 +209,12 @@ const handleSearch = async () => {
 
   const resetAll = () => {
     setZone('');
-    setTipoAnnuncio('affitto');
+    setZoneInput('');
+    setTipoAnnuncio('qualsiasi');
     setPrezzoMin(0);
     setPrezzoMax(2000000);
     setSelectedPrezzoLabel('Prezzo');
-    setSuperficie(0);
+    setSuperficie(null);
     setFiltersVisible(false);
     setActiveMenu(null); // Chiudi tutti i menu
   };
@@ -213,7 +291,7 @@ const handleSearch = async () => {
           {activeMenu === 'tipoAnnuncio' && (
             <div className="absolute bg-white border rounded shadow-lg w-full">
               <ul>
-                {['affitto', 'vendita'].map((val) => (
+                {['qualsiasi', 'affitto', 'vendita'].map((val) => (
                   <li
                     key={val}
                     onClick={() => {
@@ -303,8 +381,113 @@ const handleSearch = async () => {
             <span className="ml-0 mr-1">{filtersVisible ? '▲' : '▼'}</span>
           </button>
         </div>
+        {/* Modal Altri filtri */}
+        {filtersVisible && (
+          <>
+            <div
+              className="fixed inset-0 bg-black bg-opacity-40"
+              onClick={() => {
+                setFiltersVisible(false);
+                setActiveMenu(null); // Chiudi il menu quando si clicca fuori
+              }}
+            />
 
-        {/* Pulsanti azione */}
+            {/* Stanze */}
+            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
+              <div>
+                <label htmlFor="stanze" className="block text-sm font-medium">Numero di stanze</label>
+                <input
+                  type="number"
+                  id="stanze"
+                  placeholder="Stanze"
+                  min="1"
+                  className="w-full mt-2 px-2 py-1 border rounded text-sm"
+                  value={stanze}
+                  onChange={(e) => setStanze(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label htmlFor="piano" className="block text-sm font-medium">Piano</label>
+                <select
+                  id="piano"
+                  className="w-full mt-2 px-2 py-1 border rounded text-sm"
+                  value={piano === null ? '' : piano}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setPiano(value === '' ? null : Number(value));
+                  }}
+                >
+                  <option value="">Qualsiasi</option>
+                  {Array.from({ length: 51 }, (_, i) => (
+                    <option key={i} value={i}>{i}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="classeEnergetica" className="block text-sm font-medium">Classe energetica</label>
+                <select
+                  id="classeEnergetica"
+                  className="w-full mt-2 px-2 py-1 border rounded text-sm"
+                  value={classeEnergetica}
+                  onChange={(e) => setClasseEnergetica(e.target.value)}
+                >
+                  <option value="all">Qualsiasi</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox" 
+                  id="ascensore" 
+                  className="h-4 w-4"
+                  checked={ascensore}
+                  onChange={(e) => setAscensore(e.target.checked)}
+                />
+                <label htmlFor="ascensore" className="text-sm">Presenza ascensore</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox" 
+                  id="portineria" 
+                  className="h-4 w-4" 
+                  checked={portineria}
+                  onChange={(e) => setPortineria(e.target.checked)}
+                  />
+                <label htmlFor="portineria" className="text-sm">Portineria</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox" 
+                  id="climatizzazione" 
+                  className="h-4 w-4" 
+                  checked={climatizzazione}
+                  onChange={(e) => setClimatizzazione(e.target.checked)}
+                  />
+                <label htmlFor="climatizzazione" className="text-sm">Climatizzazione</label>
+              </div>
+              <button
+                onClick={toggleFilters}
+                className="w-full mt-4 bg-red-600 text-white py-2 rounded hover:bg-red-700"
+              >
+                Chiudi
+              </button>
+                <button
+                  onClick={() => {
+                    if (filtersVisible) toggleFilters();
+                    handleAdvancedSearch();
+                    setZoneInput(zone);
+                  }}
+                  className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                >
+                  Cerca
+                </button>
+            </div>
+          </>
+        )}
+        {/* Pulsanti */}
         <div className="flex items-center justify-end pr-6 pl-4 w-[25%] space-x-3 bg-transparent">
           {/* Pulsante Pulisci */}
           <button
@@ -314,13 +497,14 @@ const handleSearch = async () => {
             🧹 Pulisci
           </button>
 
-          {/* Pulsante Cerca con sfondo smussato */}
+          {/* Pulsante Cerca */}
           <div className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2 shadow-sm">
             <button
               onClick={() => {
+                console.log('eseguo normal search');
                 if (filtersVisible) toggleFilters();
-                handleSearch();
-                
+                handleNormalSearch();
+                setZoneInput(zone);
               }}
               className="text-sm font-semibold"
             >
@@ -329,96 +513,6 @@ const handleSearch = async () => {
           </div>
         </div>
       </div>
-
-      {/* Modal Altri filtri */}
-      {filtersVisible && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-40"
-            onClick={() => {
-              setFiltersVisible(false);
-              setActiveMenu(null); // Chiudi il menu quando si clicca fuori
-            }}
-          />
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
-            <div>
-              <label htmlFor="stanze" className="block text-sm font-medium">Numero di stanze</label>
-              <input
-                type="number"
-                id="stanze"
-                placeholder="Stanze"
-                min="0"
-                className="w-full mt-2 px-2 py-1 border rounded text-sm"
-                value={stanze}
-                onChange={(e) => setStanze(Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <label htmlFor="piano" className="block text-sm font-medium">Piano</label>
-              <input
-                type="number"
-                id="piano"
-                placeholder="Piano"
-                min="1"
-                className="w-full mt-2 px-2 py-1 border rounded text-sm"
-                value={piano}
-                onChange={(e) => setPiano(Number(e.target.value))}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <input 
-                type="checkbox" 
-                id="ascensore" 
-                className="h-4 w-4"
-                checked={ascensore}
-                onChange={(e) => setAscensore(e.target.checked)}
-               />
-              <label htmlFor="ascensore" className="text-sm">Presenza ascensore</label>
-            </div>
-            <div>
-              <label htmlFor="classeEnergetica" className="block text-sm font-medium">Classe energetica</label>
-              <select
-                id="classeEnergetica"
-                className="w-full mt-2 px-2 py-1 border rounded text-sm"
-                value={classeEnergetica}
-                onChange={(e) => setClasseEnergetica(e.target.value)}
-              >
-                <option value="q">Qualsiasi</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input 
-                type="checkbox" 
-                id="portineria" 
-                className="h-4 w-4" 
-                checked={portineria}
-                onChange={(e) => setPortineria(e.target.checked)}
-                />
-              <label htmlFor="portineria" className="text-sm">Portineria</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input 
-                type="checkbox" 
-                id="climatizzazione" 
-                className="h-4 w-4" 
-                checked={climatizzazione}
-                onChange={(e) => setClimatizzazione(e.target.checked)}
-                />
-              <label htmlFor="climatizzazione" className="text-sm">Climatizzazione</label>
-            </div>
-            <button
-              onClick={toggleFilters}
-              className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-            >
-              Chiudi
-            </button>
-          </div>
-        </>
-      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getUserRoleController, addClientController, showImmobiliController } = require('../controllers/postsController');
+const { getUserRoleController, addClientController, getImmobiliByCoordsController, getImmobiliByFilterController, getImmobiliByIdController, getImmobiliByAdvancedFilterController } = require('../controllers/postsController');
 
 router.get('/', (req, res) => {
   res.send('Pagina principale del server');
@@ -13,6 +13,12 @@ router.post('/login', getUserRoleController);  // POST per login
 router.post('/signup', addClientController);  // POST per registrazione
 
 //Route per mostrare gli immobili
-router.post('/showImmobili', showImmobiliController);
+router.post('/getImmobiliById', getImmobiliByIdController);
+
+router.post('/getImmobiliByCoords', getImmobiliByCoordsController);
+
+router.post('/getImmobiliByAdvancedFilter', getImmobiliByAdvancedFilterController);
+
+router.post('/getImmobiliByFilter', getImmobiliByFilterController);
 
 module.exports = router;

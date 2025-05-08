@@ -36,9 +36,7 @@ async function addClient(email, username, passwordHash, ruolo = "cliente", idAge
     }
 }  
 
-//Se l'id è -1, effettua una ricerca con i parametri
-//Se l'id è -2, effettua una ricerca solo con latitudine e longitudine
-async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='q', portineria=false, tipo_annuncio='vendita', climatizzazione=false) {
+async function getImmobiliByAdvancedFilters(lat=0, lng=0, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='all', portineria=false, tipo_annuncio='qualsiasi', climatizzazione=false) {
   try {
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
@@ -48,44 +46,22 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
       throw new Error('Coordinate non valide');
     }
 
-    let query = '';
-    let values = [];
+    query = `
+    SELECT * FROM immobile
+    WHERE latitudine BETWEEN $1 AND $2
+      AND longitudine BETWEEN $3 AND $4
+      AND prezzo BETWEEN $5 AND $6
+      AND piano BETWEEN $7 AND $8
+      AND stanze BETWEEN $9 AND $10
+      AND ascensore = $11
+      AND classe_energetica = ANY($12::text[])
+      AND portineria = $13
+      AND tipo_annuncio = ANY($14::text[])
+      AND climatizzazione = $15
+    `;
 
-    if(id === -1) {
-
-      query = `
-      SELECT * FROM immobile
-      WHERE latitudine BETWEEN $1 AND $2
-      AND longitudine BETWEEN $3 AND $4`;
-
-      values = [
-        latNum - 0.1,
-        latNum + 0.1,
-        lngNum - 0.1,
-        lngNum + 0.1,
-      ];
-      console.log('Query eseguita con questi parametri con id -1:', values);
-
-
-    }else if(id === -2) {
-
-      query = `
-      SELECT * FROM immobile
-      WHERE latitudine BETWEEN $1 AND $2
-        AND longitudine BETWEEN $3 AND $4
-        AND prezzo BETWEEN $5 AND $6
-        AND dimensione_mq >= $7
-        AND piano >= $8
-        AND stanze >= $9
-        AND ascensore = $10
-        AND classe_energetica = ANY($11::text[])
-        AND portineria = $12
-        AND tipo_annuncio = $13
-        AND climatizzazione = $14
-      `;
-      
-      classe_energetica = classe_energetica === 'q' ? ['A', 'B', 'C', 'D', 'E'] : [classe_energetica];
-
+    if(dimensione != null){
+      query = query + 'AND dimensione_mq BETWEEN $16 AND 17';
       values = [
         latNum - 0.1, //$1
         latNum + 0.1, //$2
@@ -93,28 +69,118 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
         lngNum + 0.1, //$4
         prezzo_min, //$5
         prezzo_max, //$6
-        dimensione, //$7
-        piano, //$8
-        stanze, //$9
-        ascensore, //$10
-        classe_energetica, //$11
-        portineria, //$12
-        tipo_annuncio, //$13
-        climatizzazione //$14
-      ];
-
-      console.log('Query eseguita con questi parametri con id -2:', values);
-
+        piano - 1, //$7
+        piano + 1, //8$
+        stanze - 1, //$9
+        stanze + 1, //$10
+        ascensore, //$11
+        classe_energetica, //$12
+        portineria, //$13
+        tipo_annuncio, //$14
+        climatizzazione ,//$15
+        dimensione - 10, //$16
+        dimensione + 10, //$17
+      ];  
     }else{
-      query = 'SELECT * FROM immobile WHERE id = $1';
-
-      values = [id];
-    }
+      values = [
+        latNum - 0.1, //$1
+        latNum + 0.1, //$2
+        lngNum - 0.1, //$3
+        lngNum + 0.1, //$4
+        prezzo_min, //$5
+        prezzo_max, //$6
+        piano - 1, //$7
+        piano + 1, //8$
+        stanze - 1, //$9
+        stanze + 1, //$10
+        ascensore, //$11
+        classe_energetica, //$12
+        portineria, //$13
+        tipo_annuncio, //$14
+        climatizzazione ,//$15
+      ]; 
+    }  
 
     const result = await queryDB(query, values);
+    return result;
 
-    console.log('Risultato della query:', result);
+  } catch (error) {
+    console.error('Errore in getImmobiliByCoords:', error);
+    throw error;
+  }
+}
 
+async function getImmobiliById(id) {
+  try {
+    const query = 'SELECT * FROM immobile WHERE id = $1';
+    const values = [id];
+    const result = await queryDB(query, values);
+    return result;
+  } catch (error) {
+    console.error('Errore in getImmobiliByCoords:', error);
+    throw error;
+  }
+}
+
+async function getImmobiliByFilter(lat=0, lng=0, prezzo_min=0, prezzo_max=2000000, dimensione=null, tipo_annuncio='qualsiasi') {
+  try {
+    query = 'SELECT * FROM immobile WHERE latitudine BETWEEN $1 AND $2 AND longitudine BETWEEN $3 AND $4 AND prezzo BETWEEN $5 AND $6 AND tipo_annuncio = ANY($7::text[])'
+
+    if(dimensione != null){
+      query = query + 'AND dimensione_mq BETWEEN $8 AND $9';
+      values = [
+        lat - 0.1, //$1
+        lat + 0.1, //$2
+        lng - 0.1, //$3
+        lng + 0.1, //$4
+        prezzo_min, //$5
+        prezzo_max, //$6
+        tipo_annuncio, //$7
+        dimensione - 10,
+        dimensione + 10
+      ];   
+    }else{
+      values = [
+        lat - 0.1, //$1
+        lat + 0.1, //$2
+        lng - 0.1, //$3
+        lng + 0.1, //$4
+        prezzo_min, //$5
+        prezzo_max, //$6
+        tipo_annuncio, //$7
+      ];   
+    }  
+    
+    const result = await queryDB(query, values);
+    return result;
+  } catch (error) {
+    console.error('Errore in getImmobiliByCoords:', error);
+    throw error;
+  }
+}
+
+async function getImmobiliByCoords(lat, lng) {
+  try {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+
+    // Verifica validità dei numeri
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      throw new Error('Coordinate non valide');
+    }
+
+    const query = `
+    SELECT * FROM immobile
+    WHERE latitudine BETWEEN $1 AND $2
+    AND longitudine BETWEEN $3 AND $4`;
+
+    const values = [
+      latNum - 0.1,
+      latNum + 0.1,
+      lngNum - 0.1,
+      lngNum + 0.1,
+    ];
+    const result = await queryDB(query, values);
     return result;
 
   } catch (error) {
@@ -127,6 +193,9 @@ async function getImmobili(id, lat, lng, prezzo_min=0, prezzo_max=2000000, dimen
 module.exports = {
     getRoleByUsernameAndPassword,
     addClient,
-    getImmobili
+    getImmobiliByCoords,
+    getImmobiliByFilter,
+    getImmobiliByAdvancedFilters,
+    getImmobiliById
 };
 
