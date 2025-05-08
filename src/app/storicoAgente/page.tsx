@@ -1,6 +1,6 @@
-import LogoConScrittaStorico from "../components/logoConScrittaStorico";
-import StoricoOfferteAgente from "../components/storicoOfferteAgente";
-import TendinaLateraleTracking from "../components/tendinaLateraleTracking";
+import LogoConScrittaStorico from "../registrazione/logoConScrittaStorico";
+import StoricoOfferteAgente from "../registrazione/storicoOfferteAgente";
+import TendinaLateraleTracking from "../registrazione/tendinaLateraleTracking";
 
 export default function TrackingOfferte() {
   return (

@@ -1,8 +1,8 @@
 'use client'
-import InserimentoOffertaAgente from "../components/inserimentoOffertaAgente";
-import LogoConScrittaTracking from "../components/logoConScrittaTracking";
-import TendinaLateraleTracking from "../components/tendinaLateraleTracking";
-import TrackingOfferteAgente from "../components/trackingOfferteAgente";
+import InserimentoOffertaAgente from "../registrazione/inserimentoOffertaAgente";
+import LogoConScrittaTracking from "../registrazione/logoConScrittaTracking";
+import TendinaLateraleTracking from "../registrazione/tendinaLateraleTracking";
+import TrackingOfferteAgente from "../registrazione/trackingOfferteAgente";
 import { useRouter } from 'next/navigation';
 
 
