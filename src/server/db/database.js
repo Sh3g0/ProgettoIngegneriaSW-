@@ -1,14 +1,14 @@
-const { Pool } = require('pg');
+import pkg from 'pg';
+const { Pool } = pkg;
 
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'ING',
-  password: 'giuseppe',
+  database: 'ingegneriaSW',
+  password: 'claudia',
   port: 5432,
 });
 
-//Funzione GENERICA per eseguire qualsiasi query
 async function queryDB(query, params = []) {
   try {
     const { rows } = await pool.query(query, params);
@@ -19,7 +19,4 @@ async function queryDB(query, params = []) {
   }
 }
 
-module.exports = {
-  pool,
-  queryDB
-};
+export { pool, queryDB };  // Aggiungi 'pool' all'esportazione

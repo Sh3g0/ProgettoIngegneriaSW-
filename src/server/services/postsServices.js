@@ -1,7 +1,7 @@
-const { queryDB } = require('../db/database');
+import { queryDB } from '../db/database.js';
 
-//Funzione per ottenere il ruolo di un utente
-async function getRoleByUsernameAndPassword(username, password) {
+// Funzione per ottenere il ruolo di un utente
+ async function getRoleByUsernameAndPassword(username, password) {
   const query = `
     SELECT ruolo 
     FROM utente 
@@ -10,31 +10,31 @@ async function getRoleByUsernameAndPassword(username, password) {
   const params = [username, password];
   console.log('Query eseguita con questi parametri:', params);
 
-  const result = await queryDB(query, params);
+  const result = await queryDB(query, params); 
 
   if (result.length > 0) {
-    return result[0].ruolo;  //Restituisce il ruolo se trovato
+    return result[0].ruolo;  // Restituisce il ruolo se trovato
   } else {
-    return "";  //Restituisce una stringa vuota se non trovato
+    return "";  // Restituisce una stringa vuota se non trovato
   }
 }
 
-//Funzione per inserire un nuovo cliente
-async function addClient(email, username, passwordHash, ruolo = "cliente", idAgenzia = null) {
-    const query = `
-      INSERT INTO utente (email, username, password_hash, ruolo, id_agenzia) 
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id;
-    `;
-    const params = [email, username, passwordHash, ruolo, idAgenzia];
-    const result = await queryDB(query, params);
-  
-    if (result.length > 0) {
-      return result[0].id;  //Restituisce l'ID del nuovo cliente
-    } else {
-      throw new Error('Errore nell\'inserimento del cliente');
-    }
-}  
+// Funzione per inserire un nuovo cliente
+ async function addClient(email, username, passwordHash, ruolo = "cliente", idAgenzia = null) {
+  const query = `
+    INSERT INTO utente (email, username, password_hash, ruolo, id_agenzia) 
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id;
+  `;
+  const params = [email, username, passwordHash, ruolo, idAgenzia];
+  const result = await queryDB(query, params);
+
+  if (result.length > 0) {
+    return result[0].id;  // Restituisce l'ID del nuovo cliente
+  } else {
+    throw new Error("Errore nell'inserimento del cliente");
+  }
+}
 
 async function getImmobiliByAdvancedFilters(lat=0, lng=0, prezzo_min=0, prezzo_max=2000000, dimensione=0, piano=0, stanze=0, ascensore=false, classe_energetica='all', portineria=false, tipo_annuncio='qualsiasi', climatizzazione=false) {
   try {

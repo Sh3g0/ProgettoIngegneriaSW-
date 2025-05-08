@@ -1,18 +1,28 @@
-const express = require('express');
+import express from 'express';
+import passport from 'passport';
+
+import {
+  getUserRole,
+  createClient,
+  creazioneAgenzia,
+  getUserInfo,
+  getImmobiliByAdvancedFilterController,
+  getImmobiliByCoordsController,
+  getImmobiliByIdController,
+  getImmobiliByFilterController
+} from '../controllers/postsController.js';
+
+import { authenticateToken } from '../middlewares/authenticateToken.js';
+
 const router = express.Router();
-const { getUserRoleController, addClientController, getImmobiliByCoordsController, getImmobiliByFilterController, getImmobiliByIdController, getImmobiliByAdvancedFilterController } = require('../controllers/postsController');
 
-router.get('/', (req, res) => {
-  res.send('Pagina principale del server');
-});
+// Rotta protetta per recuperare info utente loggato
+router.get('/user', authenticateToken, getUserInfo);
 
-//Route per ottenere il ruolo dell'utente
-router.post('/login', getUserRoleController);  // POST per login
-
-//Route di registrazione
-router.post('/signup', addClientController);  // POST per registrazione
-
-//Route per mostrare gli immobili
+// Autenticazione standard
+router.post('/login', getUserRole);
+router.post('/signup', createClient);
+router.post('/creazioneAzienda', creazioneAgenzia);
 router.post('/getImmobiliById', getImmobiliByIdController);
 
 router.post('/getImmobiliByCoords', getImmobiliByCoordsController);
@@ -21,4 +31,22 @@ router.post('/getImmobiliByAdvancedFilter', getImmobiliByAdvancedFilterControlle
 
 router.post('/getImmobiliByFilter', getImmobiliByFilterController);
 
-module.exports = router;
+// Login con Google
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email'],
+}));
+
+router.get('/google/callback', passport.authenticate('google', {
+  successRedirect: 'http://localhost:3000/homeCliente',
+  failureRedirect: '/login',
+}));
+
+// Login con Facebook
+router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+
+router.get('/facebook/callback', passport.authenticate('facebook', {
+  successRedirect: 'http://localhost:3000/homeCliente',
+  failureRedirect: '/login',
+}));
+
+export default router;

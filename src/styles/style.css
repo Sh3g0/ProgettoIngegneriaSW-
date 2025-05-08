@@ -1,4 +1,6 @@
-* {
+* 
+
+{
     box-sizing: border-box;
     font-family: 'Roboto', 'premier-sans';
   }
@@ -58,6 +60,8 @@
     margin-top: auto;
     font-size: 0.9rem;
   }
+
+  
   
   .left .credits b {
     display: block;
