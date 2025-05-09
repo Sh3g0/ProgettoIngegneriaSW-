@@ -7,27 +7,14 @@ const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
 
 export default function Banner() {
 
-    const [activeLink, setActiveLink] = useState<string>('home'); // default attivo
     const [lastZone, setLastZone] = useState('Roma');
 
     useEffect(() => {
-
         const lastZone = localStorage.getItem('ultimaZonaSelezionata');
         if (lastZone) {
           setLastZone(lastZone);
         }
-
-        const savedLink = localStorage.getItem('activeLink');
-        if (savedLink) {
-          setActiveLink(savedLink);
-        }
     });
-
-    const handleClick = (linkName: string, callback?: () => void) => (e: React.MouseEvent) => {
-        setActiveLink(linkName);
-        localStorage.setItem('activeLink', linkName);
-        if (callback) callback();
-    };
            
     const switchToPropieties = async () => {
         try {
@@ -52,8 +39,7 @@ export default function Banner() {
         <div className='relative top-0 w-full h-full flex items-center justify-between'>
             {/* Parte sinistra con il logo */}
             <div className="flex items-center justify-start w-[50%] pl-6">
-                <a href='/homeCliente'
-                onClick={handleClick('home')}>
+                <a href='/homeCliente'>
                     <img
                         src="/img/logo_oriz.png"
                         alt="Logo"
@@ -66,39 +52,28 @@ export default function Banner() {
             <div className="flex gap-4 text-black font-semibold text-lg pr-6">
                 <a
                     href="/homeCliente"
-                    onClick={handleClick('home')}
-                    className={`px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 ${
-                        activeLink === 'home' ? 'bg-blue-600 text-white' : 'hover:bg-blue-600 hover:text-white'
-                    }`}
+                    className='px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 hover:bg-blue-600'
                     >
                     <Home size={18} /> Home
                 </a>
 
                 <a
                     href="#"
-                    onClick={handleClick('proprieta', switchToPropieties)}
-                    className={`px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 ${
-                        activeLink === 'proprieta' ? 'bg-blue-600 text-white' : 'hover:bg-blue-600 hover:text-white'
-                    }`}
+                    className='px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 hover:bg-blue-600'
                     >
                     <Building size={18} /> Proprietà
                 </a>
 
                 <a
                     href="#"
-                    className={`px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 ${
-                        activeLink === 'contatti' ? 'bg-blue-600 text-white' : 'hover:bg-blue-600 hover:text-white'
-                    }`}
+                    className='px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 hover:bg-blue-600'
                     >
                     <Phone size={18} /> Contatti
                 </a>
 
                 <a
                     href="#"
-                    onClick={handleClick('accedi')}
-                    className={`px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 ${
-                        activeLink === 'accedi' ? 'bg-blue-600 text-white' : 'hover:bg-blue-600 hover:text-white'
-                    }`}
+                    className='px-4 py-1 rounded-full flex items-center gap-2 transition-all duration-300 hover:bg-blue-600'
                     >
                     <User size={18} /> Accedi
                 </a>
