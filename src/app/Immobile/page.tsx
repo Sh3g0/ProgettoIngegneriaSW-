@@ -57,6 +57,55 @@ export default function ImmobilePage() {
     const [offerta, setOfferta] = useState("");
     const [menuCaratteristiche, setMenuCaratteristiche] = useState(false);
 
+    const [showForm, setShowForm] = useState(false); // Stato per il controllo della visibilità del form
+    const [selectedDate, setSelectedDate] = useState<string | null>(null); // Stato per la data selezionata
+    const [selectedTime, setSelectedTime] = useState<string | null>(null); // Stato per l'orario selezionato
+
+    // Funzione per confrontare due date solo per giorno, mese e anno
+    const compareDates = (date1: string, date2: string) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+
+    // Confronta solo anno, mese e giorno (ignora l'ora)
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+  };
+
+    const generateAvailableDays = (daysCount: number = 14): string[] => {
+        const days: string[] = [];
+        const today = new Date();
+        today.setDate(today.getDate() + 14); // aggiunge 14 giorni
+      
+        for (let i = 0; i < daysCount; i++) {
+          const futureDate = new Date(today);
+          futureDate.setDate(today.getDate() + i);
+          days.push(futureDate.toISOString());
+        }
+      
+        return days;
+    };
+      
+    const availableDays = generateAvailableDays();
+
+    const availableTimes = ['09:00', '11:00', '14:00', '16:00', '18:00'];
+
+    // Funzione per aprire il form
+    const openForm = () => {
+        setShowForm(true);
+    };
+
+    // Funzione per chiudere il form
+    const closeForm = () => {
+        setShowForm(false);
+        setSelectedDate(null);
+        setSelectedTime(null);
+    };
+
+    const handleSendAppointment = () => {
+        //Invia dati all'agente immobiliare
+    }
+
     const formatNumber = (value: string) => {
         const numeric = value.replace(/[^\d]/g, ""); // Rimuove tutto tranne le cifre
         const formatted = Number(numeric).toLocaleString("it-IT");
@@ -212,28 +261,177 @@ export default function ImmobilePage() {
                         }
                         `}
                     </style>
-                    <a
-                        href={`/PrenotaAppuntamento?id=${immobile?.id}`}
-                        className='h-full w-full text-center flex items-center justify-center gap-2 hover:animate-wiggle'
-                    >
-                        <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
+                    <div>
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                            e.preventDefault(); // Previene il comportamento di navigazione
+                            openForm();
+                            }}
+                            className="h-full w-full text-center flex items-center justify-center gap-2 hover:animate-wiggle"
                         >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                        </svg>
-                        Prenota un appuntamento
-                    </a>
-                </div>
+                            <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-8 w-8 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                            </svg>
+                            Prenota un appuntamento
+                        </a>
 
+                        {/* Modal/Popup Form */}
+                        {showForm && (
+                            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+                                <div className="bg-white p-6 rounded-lg w-96 min-w-[40%] relative">
+                                    <button
+                                    onClick={closeForm}
+                                    className="absolute top-2 right-2 text-3xl p-4 text-gray-500 hover:text-black"
+                                    >
+                                    &times;
+                                    </button>
+                                    <h2 className="text-3xl text-black font-semibold mb-4">Prenota il tuo appuntamento</h2>
+                                    <form>
+                                        {/* Data di visita - Card scrollabili */}
+                                        <div className="mb-4">
+                                            <label htmlFor="date" className="block text-sm text-gray-700">
+                                                Giorno di visita
+                                            </label>
+                                            <div className="flex overflow-x-auto gap-4 py-2 mt-2">
+                                                {availableDays.map((dayIso) => {
+                                                    const date = new Date(dayIso);
+                                                    const day = date.getDate();
+                                                    const month = date.toLocaleDateString('it-IT', { month: 'long' });
+                                                    const year = date.getFullYear();
+
+                                                    // Verifica se la data è selezionata, usando la funzione compareDates
+                                                    const isSelected = compareDates(selectedDate ?? '', dayIso);
+
+                                                    return (
+                                                        <div
+                                                        key={dayIso}
+                                                        className={`
+                                                            cursor-pointer min-w-[120px] w-28 h-24 rounded-lg overflow-hidden 
+                                                            border-2 hover:shadow-md transition-all
+                                                            ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}
+                                                        `}
+                                                        onClick={() => setSelectedDate(dayIso)} // Seleziona la data quando clicchi
+                                                        >
+                                                            {/* Parte superiore: mese */}
+                                                            <div className="bg-blue-600 text-white text-xs uppercase text-center py-1">
+                                                                {month}
+                                                            </div>
+
+                                                            {/* Parte centrale: giorno */}
+                                                            <div className="flex flex-col justify-center items-center h-full -my-2">
+                                                                <span className={`text-2xl ${isSelected ? 'text-blue-600' : 'text-black'}`}>
+                                                                {day}
+                                                                </span>
+                                                                <span className={`text-xs mt-1 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`}>
+                                                                {year}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Orario - Card scrollabili */}
+                                        <div className="mb-4">
+                                            <label htmlFor="time" className="block text-sm font-medium text-gray-700">
+                                                Orario
+                                            </label>
+                                            <div className="flex overflow-x-auto gap-4 py-2 mt-2">
+                                                {availableTimes.map((time) => (
+                                                    <div
+                                                        key={time}
+                                                        className={`
+                                                        cursor-pointer min-w-[120px] w-28 h-16 rounded-lg overflow-hidden 
+                                                        border-2 hover:shadow-md flex items-center justify-center
+                                                        text-xl font-semibold transition-all duration-300
+                                                        ${selectedTime === time ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-gray-300 text-black'}
+                                                        `}
+                                                        onClick={() => setSelectedTime(time)}
+                                                    >
+                                                        {time}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Dati personali disposti uno accanto all'altro */}
+                                        <div className="grid grid-cols-2 gap-4 mb-4">
+                                            <div className="col-span-1">
+                                                <label htmlFor="name" className="block text-sm text-gray-700">
+                                                Nome
+                                                </label>
+                                                <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            <div className="col-span-1">
+                                                <label htmlFor="surname" className="block text-sm text-gray-700">
+                                                Cognome
+                                                </label>
+                                                <input
+                                                type="text"
+                                                id="surname"
+                                                name="surname"
+                                                className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            <div className="col-span-1">
+                                                <label htmlFor="phone" className="block text-sm text-gray-700">
+                                                Telefono
+                                                </label>
+                                                <input
+                                                type="tel"
+                                                id="phone"
+                                                name="phone"
+                                                className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            <div className="col-span-1">
+                                                <label htmlFor="email" className="block text-sm text-gray-700">
+                                                Email
+                                                </label>
+                                                <input
+                                                type="email"
+                                                id="email"
+                                                name="email"
+                                                className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                        </div>
+
+
+
+                                        <div className="flex justify-center">
+                                            <button
+                                            type="submit"
+                                            className="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 transition duration-300"
+                                            onClick={() => handleSendAppointment()}
+                                            >
+                                                Invia richiesta
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/*Visualizzazione immagini*/}
@@ -565,7 +763,7 @@ export default function ImmobilePage() {
                         <div className="text-lg text-center mt-auto pt-4">
                             <button
                                 className="text-blue-700 font-bold hover:underline"
-                                onClick={() => setMenuCaratteristiche(false)}
+                                onClick={() => setMenuCaratteristiche(true)}
                             >
                                 Mostra altro
                             </button>
@@ -582,7 +780,6 @@ export default function ImmobilePage() {
             <div className='mt-4'>
                 <Footer/>
             </div>
-        </div>
-                
+        </div>         
     );
 }

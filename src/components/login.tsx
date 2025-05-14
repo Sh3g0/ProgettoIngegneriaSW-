@@ -20,16 +20,10 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error('Login fallito');
       const data = await response.json();
-      console.log(data);
+      console.log(data, 'cliente');
 
-      if (data === 'cliente') {
+      if (data.ruolo !== undefined) {
         router.push('/homeCliente');
-      } else if (data === 'agente') {
-        router.push('/homeAgente');
-      } else if (data === 'gestore') {
-        router.push('/homeGestoreAgenzia');
-      } else {
-        alert('Ruolo non riconosciuto.');
       }
 
     } catch (error) {

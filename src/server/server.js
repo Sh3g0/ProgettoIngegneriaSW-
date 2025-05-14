@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+dotenv.config();
 
-import postRoutes from './Router/postsRoute.js'; // Rotte generali
+import postRoutes from './router/postsRoute.js'; // Rotte generali
 
 const app = express();
 
@@ -10,6 +13,8 @@ app.use(cors({
   origin: '*'
 }));
 
+app.use(cookieParser());
+
 // Middleware
 app.use(express.json());
 
@@ -17,4 +22,4 @@ app.use(express.json());
 app.use('/api', postRoutes); // Rotte generali
 
 // Avvio del server
-app.listen(3001, () => console.log('Database attivo sulla porta 3001'));
+app.listen(process.env.DB_PORT, () => console.log(`Database attivo sulla porta ${process.env.DB_PORT}`));

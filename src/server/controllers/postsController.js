@@ -1,6 +1,6 @@
-import { queryDB } from '../db/database.js';
+import jwt from 'jsonwebtoken';
 
-import { getRoleByUsernameAndPassword, 
+import { getUser, 
         getImmobiliByCoords, 
         getImmobiliByFilter, 
         getImmobiliById, 
@@ -8,12 +8,12 @@ import { getRoleByUsernameAndPassword,
       } from '../services/postsServices.js';
 
 //Controller per ottenere il ruolo di un utente dato username e password
-async function getUserRoleController(req, res) {
+async function login(req, res) {
   try {
     const { username, password } = req.body;
-    const ruolo = await getRoleByUsernameAndPassword(username, password);
+    const user = await getUser(username, password);
 
-    return res.json(ruolo)
+    return res.json(user)
   } catch (error) {
     console.error("Errore login:", error);
     res.status(500).json({ message: "Errore login" });
@@ -92,7 +92,7 @@ async function getImmobiliByFilterController(req, res) {
 }
 
 export {
-  getUserRoleController,
+  login,
   getImmobiliByCoordsController,
   getImmobiliByFilterController,
   getImmobiliByAdvancedFilterController,
