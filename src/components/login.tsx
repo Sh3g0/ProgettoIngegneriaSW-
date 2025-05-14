@@ -20,19 +20,10 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error('Login fallito');
       const data = await response.json();
-      console.log(data);
+      console.log(data, 'cliente');
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('utente', JSON.stringify({ username, ruolo: data.ruolo }));
-
-      if (data.ruolo === 'cliente') {
+      if (data.ruolo !== undefined) {
         router.push('/homeCliente');
-      } else if (data.ruolo === 'agente') {
-        router.push('/homeAgente');
-      } else if (data.ruolo === 'gestore') {
-        router.push('/homeGestoreAgenzia');
-      } else {
-        alert('Ruolo non riconosciuto.');
       }
 
     } catch (error) {
@@ -43,10 +34,8 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
-      <div className="left">
-        <img src="/img/logo.png" alt="Logo" />
-        <h1>DietiEstates25</h1>
-        <p>Dove l’arte incontra l’immobiliare</p>
+      <div className="left justify-center mt-32">
+        <img src="/img/logo_prova.png" alt="Logo" />
         <div className="credits">
           Designed by<br /><b>STICY Tech.</b>
         </div>

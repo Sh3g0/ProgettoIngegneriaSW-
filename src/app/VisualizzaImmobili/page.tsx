@@ -7,6 +7,7 @@ import Banner from '@/components/Banner';
 import AdvancedSearchBar from '@/components/AdvancedSearchBar';
 import MappaImmobili from '@/components/MappaImmobili';
 import Image from 'next/image';
+import Footer from '@/components/Footer';
 
 const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
 
@@ -300,10 +301,9 @@ export default function VisualizzaImmobili() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className='h-[200px] bg-gray text-white text-center py-4 mt-auto'>
-        lebron
-      </footer>
+      <div>
+        <Footer/>
+      </div>
     </div>
   );
 }
