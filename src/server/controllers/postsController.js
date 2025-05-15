@@ -33,13 +33,14 @@ async function login(req, res) {
     // Creazione del token (opzionale se vuoi usare autenticazione JWT)
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
-    // Rispondi con il token e altri dati utente
-    return res.status(201).json({
-      message: 'Creazione agenzia riuscita',
-      agenziaId: agenzia.id,
-      nomeAgenzia: agenzia.nome,
-      sedeAgenzia: agenzia.sede,
-      emailAgenzia: agenzia.email
+    res.status(200).json({
+      message: 'Login riuscito',
+      token: token,
+      user: {
+        id: user.id,
+        ruolo: user.ruolo,
+        username: user.username
+      }
     });
 
 
