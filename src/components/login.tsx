@@ -8,37 +8,37 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async () => {
-  const username = (document.getElementById('username') as HTMLInputElement).value;
-  const password = (document.getElementById('password') as HTMLInputElement).value;
+    const username = (document.getElementById('username') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
 
-  try {
-    const response = await fetch('http://localhost:3001/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const response = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      // Salvo il token
-      localStorage.setItem('token', data.token);
-      console.log('Login fatto. Token salvato:', data.token);
+      if (response.ok) {
+        // Salvo il token
+        localStorage.setItem('token', data.token);
+        console.log('Login fatto. Token salvato:', data.token);
 
-      // Controllo il ruolo
-      if (data.ruolo !== undefined) {
-        router.push('/homeCliente');
+        // Controllo il ruolo
+        if (data.user && data.user.ruolo !== undefined) {
+          router.push('/homeCliente');
+        } else {
+          console.log('Ruolo non specificato, resto fermo.');
+        }
       } else {
-        console.log('Ruolo non specificato, resto fermo.');
+        throw new Error(data.message || 'Login fallito');
       }
-    } else {
-      throw new Error(data.message || 'Login fallito');
+    } catch (error) {
+      console.error('Errore di login:', error);
+      alert('Username o password errati.');
     }
-  } catch (error) {
-    console.error('Errore di login:', error);
-    alert('Username o password errati.');
-  }
-};
+  };
 
   return (
     <div className="login-container">
