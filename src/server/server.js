@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -13,7 +12,6 @@ app.use(cors({
   origin: '*'
 }));
 
-app.use(cookieParser());
 
 // Middleware
 app.use(express.json());
