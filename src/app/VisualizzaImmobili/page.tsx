@@ -8,8 +8,10 @@ import AdvancedSearchBar from '@/components/AdvancedSearchBar';
 import MappaImmobili from '@/components/MappaImmobili';
 import Image from 'next/image';
 import Footer from '@/components/Footer';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
+const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 interface Immobile {
   id: number;

@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
+const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
 export default function SearchBar() {
   const router = useRouter();
