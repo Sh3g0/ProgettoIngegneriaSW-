@@ -139,7 +139,7 @@ const FormImmobile: React.FC = () => {
     vicino_parchi: false,
     vicino_trasporti: false,
     indirizzo: null,
-    immagini: null
+    immagini: []
   });
 
   const [showSummary, setShowSummary] = useState(false);
@@ -166,6 +166,8 @@ const FormImmobile: React.FC = () => {
       data.indirizzo?.postalCode,
       data.indirizzo?.country,
     ];
+
+    console.log(requiredFields);
 
     const allFilled = requiredFields.every((field) => field !== "" && field !== null && field !== undefined);
   
@@ -266,7 +268,13 @@ const FormImmobile: React.FC = () => {
               id="tipo_annuncio"
               name="tipo_annuncio"
               value={data.tipo_annuncio}
-              onChange={handleChange}
+              onChange={(e) => {
+                setData((prevData) => ({
+                  ...prevData,
+                  tipo_annuncio: e.target.value,
+                }));
+                console.log(e.target.value); // Mostra valore corretto
+              }}
               style={{ position: "relative", zIndex: 10 }}
               className="w-full h-[70%] border border-gray-300 mt-3 rounded-xl p-2"
             >
@@ -502,7 +510,6 @@ const FormImmobile: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800 max-h-[400px] overflow-y-auto pr-2">
                 <p><strong>Titolo:</strong> {data.titolo}</p>
                 <p><strong>Tipo annuncio:</strong> {data.tipo_annuncio}</p>
-                <p><strong>Descrizione:</strong> {data.descrizione}</p>
                 <p><strong>Prezzo:</strong> {formatPrice(data.prezzo)}</p>
                 <p><strong>Dimensione:</strong> {data.dimensione_mq} mq</p>
                 <p><strong>Piano:</strong> {data.piano}</p>
