@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 import '../styles/style.css'; 
 import { Home, Building, Phone, User } from "lucide-react";  
 import { useRouter } from 'next/navigation';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
+const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
 export default function Banner() {
     const router = useRouter();
@@ -55,11 +57,14 @@ export default function Banner() {
 
                 {/* Parte destra con il menu */}
                 <div className="flex gap-4 text-black font-medium text-sm mt-7">
-                    <a href="page" className='px-3 py-1 rounded-full flex gap-1 transition-all duration-300 hover:bg-blue-700'>
+                    <a href="/homeCliente" className='px-3 py-1 rounded-full flex gap-1 transition-all duration-300 hover:bg-blue-700'>
                         <Home size={16} /> Home
                     </a>
                     <a href="#" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
                         <Building size={16} /> Proprietà
+                    </a>
+                    <a href="/caricaImmobile" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
+                        <Building size={16} /> Vendi proprietà
                     </a>
                     <a href="#" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
                         <Phone size={16} /> Contatti

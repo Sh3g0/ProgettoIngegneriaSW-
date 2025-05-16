@@ -1,23 +1,39 @@
 import { queryDB } from '../db/database.js';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 // Funzione per ottenere il ruolo di un utente
 async function getUser(username, password) {
-    const query = `     SELECT * 
-        FROM utente 
-        WHERE username = $1 AND password_hash = $2;
+    const query = `
+      SELECT * 
+      FROM utente 
+      WHERE username = $1;
     `;
-    const params = [username, password];
-    console.log('Query eseguita con questi parametri:', params);
-
+  
+    const params = [username];
     const result = await queryDB(query, params);
-
-    if (result.length > 0) {
-        return result[0];  // Restituisce il ruolo se trovato
-    } else {
-        return "";  // Restituisce una stringa vuota se non trovato
+  
+    if (!result || result.length === 0) {
+      console.log('Utente non trovato');
+      return "";
     }
-}
+  
+    const user = result[0];
+    const hashedPasswordFromDb = user.password_hash;
+  
+    console.log('Password inserita:', password);
+    console.log('Hash dal DB:', hashedPasswordFromDb);
+  
+    const isMatch = await bcrypt.compare(password, hashedPasswordFromDb);
+  
+    if (isMatch) {
+      console.log("Login riuscito");
+      return user;
+    } else {
+      console.log("Password errata");
+      return "";
+    }
+  }
+  
 
 async function registrazione(email, username, password, ruolo, idAgenzia) {
     console.log('Dati ricevuti per la registrazione:', email, username, password, ruolo, idAgenzia);
@@ -28,7 +44,7 @@ async function registrazione(email, username, password, ruolo, idAgenzia) {
       RETURNING id, username, ruolo, id_agenzia
     `;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);    
     console.log('Password hashata:', hashedPassword);
 
     const params = [email, username, hashedPassword, ruolo, ruolo === 'agente' ? idAgenzia : null];

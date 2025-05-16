@@ -36,65 +36,12 @@ export default function Reg() {
 
       const data = await res.json();
       localStorage.setItem('token', data.token);
-      router.push('/start');
+      router.push('/login');
     } catch (err) {
       console.error(err);
       setError('Errore durante la registrazione');
     }
   };
-  const handleRegAgenzia = async () => {
-    setError('');
-    if (password !== confirmPassword) {
-      setError('Le password non coincidono');
-      return;
-    }
-
-    try {
-      // Crea agenzia
-      const agenziaRes = await fetch('http://localhost:3001/api/registrazioneAgenzia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nomeAgenzia,
-          sedeAgenzia,
-          emailAgenzia
-        }),
-      });
-
-
-      const resText = await agenziaRes.json();
-
-
-      if (!resText.success) {
-        // gestisci errore
-        console.error(resText.message);
-      } else {
-        console.log('Agenzia registrata:', resText.data);
-      }
-      // Crea utente
-      const userRes = await fetch('http://localhost:3001/api/registrazioneUtente', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          ruolo: 'admin',
-          id_agenzia: agenziaId
-        }),
-      });
-
-      if (!userRes.ok) throw new Error('Registrazione utente fallita');
-
-      const data = await userRes.json();
-      localStorage.setItem('token', data.token);
-      router.push('/start');
-    } catch (err) {
-      console.error(err);
-      setError('Errore');
-    }
-  };
-
 
   return (
     <div className="flex h-screen">
@@ -209,57 +156,10 @@ export default function Reg() {
             )}
           </div>
 
-          {/* Se ruolo è agente, mostra campi extra */}
-          {ruolo === 'agente' && (
-            <>
-              <div>
-                <label htmlFor="nomeAgenzia" className="block text-base font-semibold mb-1">
-                  Nome Agenzia
-                </label>
-                <input
-                  id="nomeAgenzia"
-                  type="text"
-                  placeholder="Inserisci il nome dell'agenzia"
-                  value={nomeAgenzia}
-                  onChange={(e) => setNomeAgenzia(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="sedeAgenzia" className="block text-base font-semibold mb-1">
-                  Sede
-                </label>
-                <input
-                  id="sedeAgenzia"
-                  type="text"
-                  placeholder="Inserisci la sede"
-                  value={sedeAgenzia}
-                  onChange={(e) => setSedeAgenzia(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="emailAgenzia" className="block text-base font-semibold mb-1">
-                  Email Agenzia
-                </label>
-                <input
-                  id="emailAgenzia"
-                  type="email"
-                  placeholder="Email dell'agenzia"
-                  value={emailAgenzia}
-                  onChange={(e) => setEmailAgenzia(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </>
-          )}
-
           {/* Bottone Registrazione */}
           <button
             className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
-            onClick={ruolo === 'agente' ? handleRegAgenzia : handleRegUtente}
+            onClick={handleRegUtente}
           >
             Registrati
           </button>
@@ -267,7 +167,7 @@ export default function Reg() {
           {/* Link per Sign in */}
           <p className="text-center mt-4 text-sm">
             Hai già un account?{" "}
-            <a href="/" className="text-blue-600 hover:underline">
+            <a href="/login" className="text-blue-600 hover:underline">
               Sign in
             </a>
           </p>
@@ -326,7 +226,7 @@ export default function Reg() {
               </button>
               <button
                 className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 ml-4"
-                onClick={handleRegAgenzia} // Aggiungi logica per creare agenzia
+                 // Aggiungi logica per creare agenzia
               >
                 Crea Agenzia
               </button>
