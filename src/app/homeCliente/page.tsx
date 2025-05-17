@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 
 export default function Home() {
   const [showAgenteOptions, setAgenteOption] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const backgrounds = [
     'img/sfondo1.jpg',
@@ -20,21 +21,31 @@ export default function Home() {
   
   const [backgroundImage, setBackgroundImage] = useState('');
 
-  /*useEffect(() => {
-    if(role == 'agente'){
-      setAgenteOption(true);
-    }
-  })*/
-
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * backgrounds.length);
     setBackgroundImage(backgrounds[randomIndex]);
   }, []);
 
-
   return (
     <div className="bg-white">
-      <div className="w-full min-h-screen">
+      <div className="w-full min-h-screen relative">
+        {/* Overlay loading */}
+        {loading && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 9999,
+            }}
+          >
+            <div className="loader"></div>
+          </div>
+        )}
+
         {showAgenteOptions && (
           <div className="fixed bottom-5 right-5 w-16 h-16 bg-blue-500 text-white text-3xl rounded-full flex items-center justify-center shadow-xl hover:bg-blue-600 cursor-pointer z-50">
             <a href='/caricaImmobile'>+</a>
@@ -63,7 +74,7 @@ export default function Home() {
             <div className="flex flex-col items-center space-y-2 mt-8">
               <h1 className="text-3xl font-myfont mb-4">TROVA LA TUA CASA</h1>
             </div>
-            <SearchBar />
+            <SearchBar onLoadingChange={setLoading} />
           </div>      
         </div>
         {/* Sezione Chi Siamo + Servizi */}
@@ -74,7 +85,6 @@ export default function Home() {
               DietiEstates25 offre soluzioni immobiliari personalizzate, combinando tecnologia e professionalità.
               Affidati a noi per vendere, affittare o trovare la casa dei tuoi sogni.
             </p>
-
 
             {/* Cards scrollabili */}
             <div className="flex overflow-x-auto gap-28 pb-32 min-h-[90px]">

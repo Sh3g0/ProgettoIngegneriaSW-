@@ -7,7 +7,11 @@ dotenv.config();
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
-export default function SearchBar() {
+interface SearchBarProps {
+  onLoadingChange?: (loading: boolean) => void;
+}
+
+export default function SearchBar({ onLoadingChange }: SearchBarProps) {
   const router = useRouter();
 
   const [zone, setZone] = useState('');
@@ -47,9 +51,10 @@ export default function SearchBar() {
   const handleSearch = async () => {
     const zoneSearch = zone.trim();
 
+    if (onLoadingChange) onLoadingChange(true);
+
     localStorage.setItem('activeLink', 'proprieta');
     localStorage.setItem('ultimaZonaSelezionata', zoneSearch);
-
 
     try {
       const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${zoneSearch}&key=${API_KEY}`);
@@ -64,13 +69,15 @@ export default function SearchBar() {
 
         if (zoneSearch) {
           const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
-          router.push(`/VisualizzaImmobili?param=${encodedParametri}&searchkey=${'1'}`); //searchkey 1 per la ricerca con lat e lng
+          router.push(`/VisualizzaImmobili?param=${encodedParametri}&searchkey=1`); //searchkey 1 per la ricerca con lat e lng
         }
       }
     } catch (error) {
       console.error('Errore durante la ricerca delle coordinate:', error);
+    } finally {
+      if (onLoadingChange) onLoadingChange(false);
     }
-  }
+  };
 
   return (
     <div className="relative w-full">
