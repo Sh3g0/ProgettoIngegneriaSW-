@@ -1,7 +1,7 @@
 // Nel file useJwtPayload.ts (o dove si trova)
 import { useState, useEffect } from 'react';
 
-interface UserInfo {
+export interface UserInfo {
   id: string;
   ruolo: string;
   username?: string;

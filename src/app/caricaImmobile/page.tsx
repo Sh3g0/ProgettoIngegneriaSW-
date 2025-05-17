@@ -3,9 +3,29 @@
 import { Pencil, Home } from "lucide-react"
 import Form from '@/components/formImmobile'
 import Footer from '@/components/Footer'
-import BannerAgente from "@/components/Banner"
+import Banner from "@/components/Banner"
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useJwtPayload } from '@/components/useJwtPayload';
 
 export default function CaricaImmobile() {
+
+  const router = useRouter();
+  const payload = useJwtPayload();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login'); // Non loggato
+      return;
+    }
+
+    if (!payload || payload.ruolo === 'cliente') {
+      router.push('/home'); // Accesso negato per clienti
+    }
+  }, [router]);
+
   return (
     <div className="bg-gray-100">
       <div className="min-h-screen w-full">
@@ -17,9 +37,9 @@ export default function CaricaImmobile() {
             backgroundSize: 'cover'
           }}
         >
-          <div className="h-full flex flex-col">
+          <div className="h-screen flex flex-col">
             <div className="sticky top-0 z-50 w-full">
-              <BannerAgente />
+              <Banner />
             </div>
             <div className="mt-32 ml-16 text-white sm:ml-32 lg:ml-64">
               <h1 className="font-bold text-4xl sm:text-5xl leading-tight mb-2">

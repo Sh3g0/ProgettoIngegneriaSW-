@@ -3,16 +3,11 @@ import { useEffect, useState } from 'react';
 import '../styles/style.css'; 
 import { Home, Building, Phone, User } from "lucide-react";  
 import { useRouter } from 'next/navigation';
-import { useJwtPayload } from '@/components/useJwtPayload';
+import { useJwtPayload, UserInfo } from '@/components/useJwtPayload';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
-
-interface UserInfo {
-  ruolo: string;
-  username?: string;
-}
 
 export default function Banner() {
   const router = useRouter();
@@ -53,7 +48,7 @@ export default function Banner() {
 
         {/* Parte sinistra con il logo */}
         <div className="flex items-start justify-start w-[50%]">
-          <a href='/homeCliente'>
+          <a href='/home'>
             <img
               src="/img/logo_oriz.png"
               alt="Logo"
@@ -64,7 +59,7 @@ export default function Banner() {
 
         {/* Parte destra con il menu */}
         <div className="flex gap-4 text-black font-medium text-sm mt-7">
-          <a href="/homeCliente" className='px-3 py-1 rounded-full flex gap-1 transition-all duration-300 hover:bg-blue-700'>
+          <a href="/home" className='px-3 py-1 rounded-full flex gap-1 transition-all duration-300 hover:bg-blue-700'>
             <Home size={16} /> Home
           </a>
           <a href="/VisualizzaImmobili" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
@@ -91,7 +86,7 @@ export default function Banner() {
 
           {/* Se loggato mostra link al profilo */}
           {user_info && (
-            <a href="/profilo" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
+            <a href='/profilo' className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <User size={16} /> {user_info.username || 'Profilo'}
             </a>
           )}

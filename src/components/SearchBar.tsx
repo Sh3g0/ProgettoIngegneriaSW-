@@ -53,7 +53,6 @@ export default function SearchBar({ onLoadingChange }: SearchBarProps) {
 
     if (onLoadingChange) onLoadingChange(true);
 
-    localStorage.setItem('activeLink', 'proprieta');
     localStorage.setItem('ultimaZonaSelezionata', zoneSearch);
 
     try {

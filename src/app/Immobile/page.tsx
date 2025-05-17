@@ -63,19 +63,19 @@ export default function ImmobilePage() {
 
     // Funzione per confrontare due date solo per giorno, mese e anno
     const compareDates = (date1: string, date2: string) => {
-    const d1 = new Date(date1);
-    const d2 = new Date(date2);
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
 
-    // Confronta solo anno, mese e giorno (ignora l'ora)
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-  };
+        // Confronta solo anno, mese e giorno (ignora l'ora)
+        return d1.getFullYear() === d2.getFullYear() &&
+            d1.getMonth() === d2.getMonth() &&
+            d1.getDate() === d2.getDate();
+    };
 
     const generateAvailableDays = (daysCount: number = 14): string[] => {
         const days: string[] = [];
         const today = new Date();
-        today.setDate(today.getDate() + 14); // aggiunge 14 giorni
+        today.setDate(today.getDate() + 1); // aggiunge 14 giorni
       
         for (let i = 0; i < daysCount; i++) {
           const futureDate = new Date(today);
@@ -88,7 +88,7 @@ export default function ImmobilePage() {
       
     const availableDays = generateAvailableDays();
 
-    const availableTimes = ['09:00', '11:00', '14:00', '16:00', '18:00'];
+    const availableTimes = ['09:00', '10:00', '11:00', '12:00', '15:00', '16:00', '17:00', '18:00'];
 
     // Funzione per aprire il form
     const openForm = () => {
