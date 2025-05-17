@@ -77,40 +77,38 @@ async function checkUserExists(email, username) {
     throw new Error('Errore durante il controllo dell\'utente esistente');
   }
 }
-
 async function registrazioneUtente(req, res) {
+  console.log('Dati ricevuti per registrazione:', req.body);
   const { email, username, password, ruolo, idAgenzia } = req.body;
 
-  // Controllo dei parametri in entrata
   if (!email || !username || !password || !ruolo) {
     return res.status(400).json({ message: 'Tutti i campi sono obbligatori.' });
   }
 
+  if (ruolo === 'agente' && !idAgenzia) {
+    return res.status(400).json({ message: 'idAgenzia è obbligatorio per il ruolo agente.' });
+  }
+
   try {
-    // Verifica se l'utente esiste già
     const userExists = await checkUserExists(email, username);
     if (userExists) {
       return res.status(400).json({ message: 'Utente con email o username già esistente.' });
     }
 
-    // Registrazione dell'utente
-    const user = await registrazione(email, username, password, ruolo, idAgenzia); // Chiamata alla funzione di registrazione
+    const user = await registrazione(email, username, password, ruolo, idAgenzia);
 
     if (!user) {
       throw new Error('Errore: utente non trovato o risultato della query non valido');
     }
 
-    // Payload per il token JWT
     const payload = {
       id: user.id,
       ruolo: user.ruolo,
       username: user.username
     };
 
-    // Creazione del token
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Risposta con il token e i dati utente
     return res.status(201).json({
       message: 'Registrazione riuscita',
       token,
@@ -125,6 +123,7 @@ async function registrazioneUtente(req, res) {
     return res.status(500).json({ message: `Errore del server durante la registrazione: ${error.message}` });
   }
 }
+
 
 async function registrazioneAgenzia(req, res) {
   try {
