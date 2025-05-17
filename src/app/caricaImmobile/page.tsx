@@ -3,7 +3,7 @@
 import { Pencil, Home } from "lucide-react"
 import Form from '@/components/formImmobile'
 import Footer from '@/components/Footer'
-import BannerAgente from "@/components/BannerAgente"
+import BannerAgente from "@/components/Banner"
 
 export default function CaricaImmobile() {
   return (

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 
 interface UserInfo {
+  id: string;
   ruolo: string;
   username?: string;
   // ...altre proprietà del payload
