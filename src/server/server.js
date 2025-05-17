@@ -1,7 +1,11 @@
-import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+import cors from 'cors';
+import express from 'express';
+
+
+
 
 import postRoutes from './router/postsRoute.js'; // Rotte generali
 
@@ -19,5 +23,6 @@ app.use(express.json());
 
 app.use('/api', postRoutes); // Rotte generali
 
-// Avvio del server
-app.listen(process.env.DB_PORT, () => console.log(`Database attivo sulla porta ${process.env.DB_PORT}`));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server attivo sulla porta ${PORT}`));
+

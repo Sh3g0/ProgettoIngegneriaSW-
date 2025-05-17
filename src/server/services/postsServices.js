@@ -1,5 +1,5 @@
 import { queryDB } from '../db/database.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';   //a me funziona solo con bcryptjs a causa del sistema operativo 
 
 // Funzione per ottenere il ruolo di un utente
 async function getUser(username, password) {
@@ -8,32 +8,32 @@ async function getUser(username, password) {
       FROM utente 
       WHERE username = $1;
     `;
-  
+
     const params = [username];
     const result = await queryDB(query, params);
-  
+
     if (!result || result.length === 0) {
-      console.log('Utente non trovato');
-      return "";
+        console.log('Utente non trovato');
+        return "";
     }
-  
+
     const user = result[0];
     const hashedPasswordFromDb = user.password_hash;
-  
+
     console.log('Password inserita:', password);
     console.log('Hash dal DB:', hashedPasswordFromDb);
-  
+
     const isMatch = await bcrypt.compare(password, hashedPasswordFromDb);
-  
+
     if (isMatch) {
-      console.log("Login riuscito");
-      return user;
+        console.log("Login riuscito");
+        return user;
     } else {
-      console.log("Password errata");
-      return "";
+        console.log("Password errata");
+        return "";
     }
-  }
-  
+}
+
 
 async function registrazione(email, username, password, ruolo, idAgenzia) {
     console.log('Dati ricevuti per la registrazione:', email, username, password, ruolo, idAgenzia);
@@ -44,7 +44,7 @@ async function registrazione(email, username, password, ruolo, idAgenzia) {
       RETURNING id, username, ruolo, id_agenzia
     `;
 
-    const hashedPassword = await bcrypt.hash(password, 10);    
+    const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Password hashata:', hashedPassword);
 
     const params = [email, username, hashedPassword, ruolo, ruolo === 'agente' ? idAgenzia : null];
@@ -52,8 +52,11 @@ async function registrazione(email, username, password, ruolo, idAgenzia) {
 
     try {
         const result = await queryDB(query, params);
-        console.log('Risultato della query:', result);
-        
+       console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET non è definita nelle variabili d’ambiente');
+        }
         if (!result || result.length === 0) {
             // Gestisci l'errore, magari con un messaggio che indica che l'utente non è stato trovato
             throw new Error('Errore durante la registrazione');
@@ -147,28 +150,28 @@ async function getImmobiliByAdvancedFilters(lat = 0, lng = 0, prezzo_min = 0, pr
 }
 
 async function registrazioneAgenziaDB(nomeAgenzia, sedeAgenzia, emailAgenzia) {
-  try {
-    const result = await queryDB(
-      `
+    try {
+        const result = await queryDB(
+            `
       INSERT INTO agenzia (nome, sede, email)
       VALUES ($1, $2, $3)
       RETURNING id, nome, sede, email
       `,
-      [nomeAgenzia, sedeAgenzia, emailAgenzia]
-    );
+            [nomeAgenzia, sedeAgenzia, emailAgenzia]
+        );
 
-    console.log('Risultato della query:', result);
+        console.log('Risultato della query:', result);
 
-    if (!result || result.length === 0) {
-      throw new Error('Errore nella registrazione dell\'agenzia');
+        if (!result || result.length === 0) {
+            throw new Error('Errore nella registrazione dell\'agenzia');
+        }
+
+        return result[0]; // restituisci la prima riga
+
+    } catch (error) {
+        console.error('Errore nella registrazione dell\'agenzia:', error);
+        throw new Error('Errore nella registrazione dell\'agenzia');
     }
-
-    return result[0]; // restituisci la prima riga
-
-  } catch (error) {
-    console.error('Errore nella registrazione dell\'agenzia:', error);
-    throw new Error('Errore nella registrazione dell\'agenzia');
-  }
 }
 
 
