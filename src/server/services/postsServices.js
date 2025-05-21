@@ -265,6 +265,10 @@ async function getImmobiliByCoords(lat, lng) {
     }
 }
 
+
+
+
+
 export {
     getUser,
     registrazione,

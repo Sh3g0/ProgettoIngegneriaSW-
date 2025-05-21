@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 export interface UserInfo {
-  id: string;
+  id: number;  
   ruolo: string;
   username?: string;
   // ...altre proprietà del payload
