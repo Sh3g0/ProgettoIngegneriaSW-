@@ -1,12 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import '../styles/style.css';
-import { Home, Building, Phone, User } from "lucide-react";
+import '../styles/style.css'; 
+import { Home, Building, Phone, User } from "lucide-react";  
 import { useRouter } from 'next/navigation';
 import { useJwtPayload, UserInfo } from '@/components/useJwtPayload';
 import dotenv from 'dotenv';
 dotenv.config();
-import { MessageSquare } from "lucide-react";
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
@@ -35,7 +34,7 @@ export default function Banner() {
       const data = await response.json();
       if (data.results.length > 0) {
         const { lat, lng } = data.results[0].geometry;
-        const encodedParametri = encodeURIComponent(JSON.stringify({ lat, lng }));
+        const encodedParametri = encodeURIComponent(JSON.stringify({ lat, lng, status: 'accettato' }));
         window.location.href = (`/VisualizzaImmobili?param=${encodedParametri}&searchkey=1`);
       }
     } catch (error) {
@@ -45,10 +44,10 @@ export default function Banner() {
 
   return (
     <div className={`sticky top-0 z-50 w-full transition-colors duration-500 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
-      <div className='w-full flex items-center justify-between px-6' style={{ height: '80px' }}>
+      <div className='w-full flex items-start justify-between px-6' style={{ height: '80px' }}>
 
         {/* Parte sinistra con il logo */}
-        <div className="flex items-center justify-start w-[50%]">
+        <div className="flex items-start justify-start w-[50%]">
           <a href='/home'>
             <img
               src="/img/logo_oriz.png"
@@ -58,30 +57,16 @@ export default function Banner() {
           </a>
         </div>
 
-
         {/* Parte destra con il menu */}
-
-        <div className="flex gap-4 text-black font-medium text-sm items-center px-3">
-
-          <a href="/home" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
+        <div className="flex gap-4 text-black font-medium text-sm mt-7">
+          <a href="/home" className='px-3 py-1 rounded-full flex gap-1 transition-all duration-300 hover:bg-blue-700'>
             <Home size={16} /> Home
           </a>
-
           <a href="/VisualizzaImmobili" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
             <Building size={16} /> Proprietà
           </a>
 
-          {(user_info?.ruolo === 'agente' || user_info?.ruolo === 'cliente') && (
-            <a
-              href={user_info?.ruolo === 'agente' ? '/notifiche' : '/notificheCliente'}
-              className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'
-            >
-              <MessageSquare size={16} /> Messaggi
-            </a>
-          )}
-
-//aaa
-
+          {/* Solo se ruolo = agente */}
           {user_info?.ruolo === 'agente' && (
             <a href="/caricaImmobile" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <Building size={16} /> Vendi proprietà
@@ -92,12 +77,14 @@ export default function Banner() {
             <Phone size={16} /> Contatti
           </a>
 
+          {/* Se NON loggato mostra "Accedi" */}
           {!user_info && (
             <a href="/login" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <User size={16} /> Accedi
             </a>
           )}
 
+          {/* Se loggato mostra link al profilo */}
           {user_info && (
             <a href='/profilo' className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <User size={16} /> {user_info.username || 'Profilo'}

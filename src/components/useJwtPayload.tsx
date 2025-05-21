@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 
 export interface UserInfo {
-  id: number;  
+  id: string;
   ruolo: string;
   username?: string;
+  email: string;
   // ...altre proprietà del payload
 }
 
@@ -12,7 +13,7 @@ export function useJwtPayload(): UserInfo | null {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
       setUserInfo(null);
       return;

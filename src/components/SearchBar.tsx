@@ -63,7 +63,8 @@ export default function SearchBar({ onLoadingChange }: SearchBarProps) {
         const { lat, lng } = data.results[0].geometry;
         const parametri = {
           lat,
-          lng
+          lng,
+          status: 'accettato',
         };
 
         if (zoneSearch) {

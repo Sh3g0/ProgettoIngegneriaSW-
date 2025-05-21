@@ -1,24 +1,18 @@
 import jwt from 'jsonwebtoken';
-const JWT_SECRET = 'chiave_super_segreta';
-import { pool, queryDB } from '../db/database.js';
+const JWT_SECRET = 'supersegreto123';
+import { queryDB } from '../db/database.js';
+import path from "path";
+import fs from "fs/promises";
+import * as service from '../services/postsServices.js';
 
-
-import {
-  getUser,
-  registrazione,
-  registrazioneAgenziaDB,
-  getImmobiliByCoords,
-  getImmobiliByFilter,
-  getImmobiliById,
-  getImmobiliByAdvancedFilters
-} from '../services/postsServices.js';
+const UPLOAD_DIR = path.resolve("uploads");
 
 //Controller per ottenere il ruolo di un utente dato username e password
 async function login(req, res) {
   const { username, password } = req.body;
 
   try {
-    const user = await getUser(username, password);
+    const user = await service.getUser(username, password);
 
     if (!user || user === "") {
       return res.status(401).json({ message: 'Credenziali non valide' });
@@ -31,7 +25,7 @@ async function login(req, res) {
     };
 
     // Creazione del token (opzionale se vuoi usare autenticazione JWT)
-    const token = jwt.sign(payload, 'chiave_super_segreta', { expiresIn: '1h' });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'Login riuscito',
@@ -95,7 +89,7 @@ async function registrazioneUtente(req, res) {
       return res.status(400).json({ message: 'Utente con email o username già esistente.' });
     }
 
-    const user = await registrazione(email, username, password, ruolo, idAgenzia);
+    const user = await service.registrazione(email, username, password, ruolo, idAgenzia);
 
     if (!user) {
       throw new Error('Errore: utente non trovato o risultato della query non valido');
@@ -124,10 +118,9 @@ async function registrazioneUtente(req, res) {
   }
 }
 
-
 async function registrazioneAgenzia(req, res) {
   try {
-    const nuovaAgenzia = await registrazioneAgenziaDB(
+    const nuovaAgenzia = await service.registrazioneAgenziaDB(
       req.body.nome,
       req.body.sede,
       req.body.email
@@ -140,9 +133,6 @@ async function registrazioneAgenzia(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
-
-
-
 
 async function checkAgenziaExists(emailAgenzia) {
   const query = `
@@ -165,20 +155,16 @@ async function checkAgenziaExists(emailAgenzia) {
   }
 }
 
-
-
-
-
 async function getImmobiliByAdvancedFilterController(req, res) {
   try {
 
     const params = req.body
-    let { lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione } = params;
+    let { lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione, status } = params;
     tipoAnnuncio = tipoAnnuncio === 'qualsiasi' ? ['affitto', 'vendita'] : [tipoAnnuncio];
     classe_energetica = classe_energetica === 'all' ? ['A', 'B', 'C', 'D', 'E'] : [classe_energetica];
 
     // Chiamata al servizio per ottenere gli immobili
-    const immobili = await getImmobiliByAdvancedFilters(lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione);
+    const immobili = await service.getImmobiliByAdvancedFilters(lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione, status);
 
     // Restituisce gli immobili trovati
     return res.json(immobili);
@@ -192,10 +178,10 @@ async function getImmobiliByCoordsController(req, res) {
   try {
 
     const params = req.body
-    const { lat, lng } = params;
+    const { lat, lng, status } = params;
 
     // Chiamata al servizio per ottenere gli immobili
-    const immobili = await getImmobiliByCoords(lat, lng);
+    const immobili = await service.getImmobiliByCoords(lat, lng, status);
 
     // Restituisce gli immobili trovati
     return res.json(immobili);
@@ -209,10 +195,10 @@ async function getImmobiliByIdController(req, res) {
   try {
 
     const params = req.body
-    const { id } = params;
+    const { id, status } = params;
 
     // Chiamata al servizio per ottenere gli immobili
-    const immobili = await getImmobiliById(id);
+    const immobili = await service.getImmobiliById(id, status);
 
     // Restituisce gli immobili trovati
     return res.json(immobili);
@@ -226,11 +212,11 @@ async function getImmobiliByIdController(req, res) {
 async function getImmobiliByFilterController(req, res) {
   try {
 
-    let { lat, lng, tipoAnnuncio, prezzoMin, prezzoMax, superficie } = req.body;
+    let { lat, lng, tipoAnnuncio, prezzoMin, prezzoMax, superficie, status } = req.body;
 
     tipoAnnuncio = tipoAnnuncio === 'qualsiasi' ? ['affitto', 'vendita'] : [tipoAnnuncio];
 
-    const immobili = await getImmobiliByFilter(lat, lng, prezzoMin, prezzoMax, superficie, tipoAnnuncio);
+    const immobili = await service.getImmobiliByFilter(lat, lng, prezzoMin, prezzoMax, superficie, tipoAnnuncio, status);
 
     return res.json(immobili);
 
@@ -240,174 +226,82 @@ async function getImmobiliByFilterController(req, res) {
   }
 }
 
-
-async function prenotaVisitaController(req, res) {
-  console.log('✅ Controller prenotaVisita chiamato');
-
+async function getUserBooksController(req, res) {
   try {
-    const { id_immobile, data_visita } = req.body;
-    const id_cliente = req.user.id;
 
-    if (!id_immobile || !data_visita) {
-      return res.status(400).json({ message: 'Dati incompleti per la prenotazione' });
-    }
+    let { id } = req.body;
 
-    console.log('Data ricevuta:', data_visita);
+    const books = await service.getUserBooks(id);
 
-    const checkQuery = `
-  SELECT * FROM prenotazione_visite 
-  WHERE id_immobile = $1 
-    AND data_visita = $2 
-    AND stato = 'confermata';
-`;
-    const checkResult = await queryDB(checkQuery, [id_immobile, data_visita]);
+    return res.json(books);
 
-    if (checkResult.length > 0) {
-      return res.status(400).json({ message: 'Orario già prenotato per questo immobile.' });
-    }
-
-
-    const query = `
-      INSERT INTO prenotazione_visite (id_immobile, id_cliente, data_visita, stato, data_creazione)
-      VALUES ($1, $2, $3, 'in_attesa', NOW())
-      RETURNING *;
-    `;
-    const params = [id_immobile, id_cliente, data_visita];
-
-    // 🔥 Qui definiamo result fuori dal try interno
-    const result = await queryDB(query, params);
-    console.log('Query result:', result);
-
-    if (result.length === 0) {
-      return res.status(500).json({ message: 'Errore nella prenotazione visita' });
-    }
-
-    res.status(201).json({ message: 'Visita prenotata con successo', prenotazione: result[0] });
-
-  } catch (error) {
-    console.error('Errore prenotazione visita:', error);
-    res.status(500).json({ message: 'Errore server durante la prenotazione visita' });
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
   }
 }
 
-
-
-async function getDateBloccaVisita(req, res) {
+async function getUserStoricoController(req, res) {
   try {
-    const { id_immobile } = req.params;
 
-    const query = `
-      SELECT data_visita FROM prenotazione_visite 
-      WHERE id_immobile = $1 AND stato = 'confermata';
-    `;
-    const result = await queryDB(query, [id_immobile]);
+    let { id } = req.body;
 
-    const dateList = result.map(r => r.data_visita);
-    res.status(200).json({ dateList });
-  } catch (error) {
-    res.status(500).json({ message: 'Errore recupero date occupate' });
+    const storico = await service.getUserStorico(id);
+
+    return res.json(storico);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
   }
 }
 
+async function caricaImmobileController(req, res) {
+  const files = req.files; // array di file
+  const jsonData = JSON.parse(req.body.data); // stringa -> oggetto
 
+  console.log("JSON ricevuto:", jsonData);
+  console.log("Immagini ricevute:", files);
 
-async function getNotifichePrenotazioni(req, res) {
+  let { id, titolo, descrizione, prezzo, dimensione_mq, piano, stanze, ascensore, classe_energetica, portineria, climatizzazione, tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti, indirizzo } = jsonData;
+  let { streetAddress, houseNumber, city, province, lat, lng } = indirizzo;
 
+  streetAddress = streetAddress + ` ${houseNumber}`
 
-  const agenteId = req.user.id; // ← Preso dal middleware verificaToken
-  console.log('ID Agente:', agenteId);
+  const imagePaths = []; //Percorso immagini da salvare sul db
 
-  if (!agenteId) {
-    return res.status(400).json({ error: 'Missing agenteId' });
-  }
-  try {
-    const result = await pool.query(`
-  SELECT 
-  p.id,
-  u.username AS nome_cliente,
-  i.titolo AS titolo_immobile,
-  p.data_visita,
-  p.stato
-FROM prenotazione_visite p
-JOIN utente u ON p.id_cliente = u.id
-JOIN immobile i ON p.id_immobile = i.id
-WHERE i.id_agente = $1
-ORDER BY p.data_visita DESC;
-    `, [agenteId]);
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Errore nella query delle notifiche:', err);
-    res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
-  }
-};
-
-
-async function rispondiPrenotazione(req, res) {
-
-  const { idPrenotazione, azione } = req.body;
-  if (!idPrenotazione || !azione) {
-    return res.status(400).json({ error: 'Dati mancanti' });
-
+  for (const file of files) {
+    const filename = `${Date.now()}-${file.originalname}`; //Identificatore univoco per l'immagine
+    const filePath = path.join(UPLOAD_DIR, filename); //Crea il percorso unendo path e nome file (uploads/"nomefile")
+    await fs.writeFile(filePath, file.buffer); //Scrive fisicamente il file nel percorso
+    imagePaths.push(filename); //Salvo solo il nome del file perchè a prescindere cercherò in /uploads
   }
 
-  const nuovoStato = azione === 'confermata' ? 'confermata' : 'rifiutata';
+  await service.caricaImmobile({
+    id,
+    titolo,
+    descrizione,
+    prezzo,
+    dimensione_mq,
+    piano,
+    stanze,
+    ascensore,
+    classe_energetica,
+    portineria,
+    climatizzazione,
+    tipo_annuncio: tipo_annuncio.toLowerCase(),
+    vicino_scuole,
+    vicino_parchi,
+    vicino_trasporti,
+    indirizzo: { streetAddress, city, province, lat, lng },
+    immagini: imagePaths,
+  });
 
-  try {
-    await pool.query(
-      `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
-      [nuovoStato, idPrenotazione]
-    );
+  //Cancellare le img da uploads se il caricamento non va a buon fine
 
-    res.json({ message: 'Stato aggiornato con successo' });
-  } catch (err) {
-    console.error('Errore aggiornamento stato prenotazione:', err);
-    res.status(500).json({ error: 'Errore nel database' });
-  }
+  return res.status(200).json({ success: true });
 }
 
-async function getPrenotazioniConfermate(req, res) {
-  const idAgente = req.params.idAgente;
-
-  try {
-    const result = await pool.query(`
-      SELECT 
-        p.id,
-        u.username AS nome_cliente,
-        i.titolo AS titolo_immobile,
-        p.data_visita
-      FROM prenotazione_visite p
-      JOIN utente u ON p.id_cliente = u.id
-      JOIN immobile i ON p.id_immobile = i.id
-      WHERE i.id_agente = $1 AND p.stato = 'confermata'
-      ORDER BY p.data_visita ASC
-    `, [idAgente]);
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Errore nel recupero prenotazioni confermate:', err);
-    res.status(500).json({ error: 'Errore nel database' });
-  }
-}
-
-
-
-async function getPrenotazioniAccettateCliente(req, res) {
-  const idCliente = req.params.idCliente;
-
-  try {
-    const result = await pool.query(`
-   SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
-FROM prenotazione_visite p
-JOIN immobile i ON p.id_immobile = i.id
-WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Errore nel recupero prenotazioni confermate:', err);
-    res.status(500).json({ error: 'Errore nel database' });
-  }
-}
 export {
   login,
   getImmobiliByCoordsController,
@@ -416,12 +310,8 @@ export {
   getImmobiliByAdvancedFilterController,
   getImmobiliByIdController,
   registrazioneAgenzia,
-  getNotifichePrenotazioni,
-  rispondiPrenotazione,
-  getDateBloccaVisita,
-  getPrenotazioniConfermate,
-  getPrenotazioniAccettateCliente,
-  prenotaVisitaController,
-
+  getUserBooksController,
+  getUserStoricoController,
+  caricaImmobileController,
 };
 

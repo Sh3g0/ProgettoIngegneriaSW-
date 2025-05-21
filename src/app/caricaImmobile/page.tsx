@@ -14,8 +14,8 @@ export default function CaricaImmobile() {
   const router = useRouter();
   const payload = useJwtPayload();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
+  /*useEffect(() => {
+    const token = sessionStorage.getItem('token');
     if (!token) {
       router.push('/login'); // Non loggato
       return;
@@ -24,7 +24,7 @@ export default function CaricaImmobile() {
     if (!payload || payload.ruolo === 'cliente') {
       router.push('/home'); // Accesso negato per clienti
     }
-  }, [router]);
+  }, [router]);*/
 
   return (
     <div className="bg-gray-100">

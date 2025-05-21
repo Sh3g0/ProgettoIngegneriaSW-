@@ -22,8 +22,8 @@ export default function LoginPage() {
 
       if (response.ok) {
         // Salvo il token
-        localStorage.setItem('token', data.token);
-        console.log('Login fatto. Token salvato:', data.token);
+        sessionStorage.setItem('token', data.token);
+        console.log('Login fatto. Token salvato:', sessionStorage.getItem('token'));
 
         // Controllo il ruolo e faccio redirect
         if (data.user && data.user.ruolo) {
