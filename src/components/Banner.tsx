@@ -59,7 +59,7 @@ export default function Banner() {
         </div>
 
 
-        {/* Parte destra con il menu */}
+        {/* Parte destra /*aaaaaaaaa con il menu */}
 
         <div className="flex gap-4 text-black font-medium text-sm items-center px-3">
 
@@ -80,7 +80,6 @@ export default function Banner() {
             </a>
           )}
 
-//aaa
 
           {user_info?.ruolo === 'agente' && (
             <a href="/caricaImmobile" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
