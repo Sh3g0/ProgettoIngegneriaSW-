@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-const JWT_SECRET = 'supersegreto123';
-import { queryDB } from '../db/database.js';
+const JWT_SECRET = 'chiave_super_segreta';
+import { pool, queryDB } from '../db/database.js';
 
 
 import {
@@ -31,7 +31,7 @@ async function login(req, res) {
     };
 
     // Creazione del token (opzionale se vuoi usare autenticazione JWT)
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, 'chiave_super_segreta', { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'Login riuscito',
@@ -169,7 +169,6 @@ async function checkAgenziaExists(emailAgenzia) {
 
 
 
-
 async function getImmobiliByAdvancedFilterController(req, res) {
   try {
 
@@ -241,6 +240,174 @@ async function getImmobiliByFilterController(req, res) {
   }
 }
 
+
+async function prenotaVisitaController(req, res) {
+  console.log('✅ Controller prenotaVisita chiamato');
+
+  try {
+    const { id_immobile, data_visita } = req.body;
+    const id_cliente = req.user.id;
+
+    if (!id_immobile || !data_visita) {
+      return res.status(400).json({ message: 'Dati incompleti per la prenotazione' });
+    }
+
+    console.log('Data ricevuta:', data_visita);
+
+    const checkQuery = `
+  SELECT * FROM prenotazione_visite 
+  WHERE id_immobile = $1 
+    AND data_visita = $2 
+    AND stato = 'confermata';
+`;
+    const checkResult = await queryDB(checkQuery, [id_immobile, data_visita]);
+
+    if (checkResult.length > 0) {
+      return res.status(400).json({ message: 'Orario già prenotato per questo immobile.' });
+    }
+
+
+    const query = `
+      INSERT INTO prenotazione_visite (id_immobile, id_cliente, data_visita, stato, data_creazione)
+      VALUES ($1, $2, $3, 'in_attesa', NOW())
+      RETURNING *;
+    `;
+    const params = [id_immobile, id_cliente, data_visita];
+
+    // 🔥 Qui definiamo result fuori dal try interno
+    const result = await queryDB(query, params);
+    console.log('Query result:', result);
+
+    if (result.length === 0) {
+      return res.status(500).json({ message: 'Errore nella prenotazione visita' });
+    }
+
+    res.status(201).json({ message: 'Visita prenotata con successo', prenotazione: result[0] });
+
+  } catch (error) {
+    console.error('Errore prenotazione visita:', error);
+    res.status(500).json({ message: 'Errore server durante la prenotazione visita' });
+  }
+}
+
+
+
+async function getDateBloccaVisita(req, res) {
+  try {
+    const { id_immobile } = req.params;
+
+    const query = `
+      SELECT data_visita FROM prenotazione_visite 
+      WHERE id_immobile = $1 AND stato = 'confermata';
+    `;
+    const result = await queryDB(query, [id_immobile]);
+
+    const dateList = result.map(r => r.data_visita);
+    res.status(200).json({ dateList });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore recupero date occupate' });
+  }
+}
+
+
+
+async function getNotifichePrenotazioni(req, res) {
+
+
+  const agenteId = req.user.id; // ← Preso dal middleware verificaToken
+  console.log('ID Agente:', agenteId);
+
+  if (!agenteId) {
+    return res.status(400).json({ error: 'Missing agenteId' });
+  }
+  try {
+    const result = await pool.query(`
+  SELECT 
+  p.id,
+  u.username AS nome_cliente,
+  i.titolo AS titolo_immobile,
+  p.data_visita,
+  p.stato
+FROM prenotazione_visite p
+JOIN utente u ON p.id_cliente = u.id
+JOIN immobile i ON p.id_immobile = i.id
+WHERE i.id_agente = $1
+ORDER BY p.data_visita DESC;
+    `, [agenteId]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Errore nella query delle notifiche:', err);
+    res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
+  }
+};
+
+
+async function rispondiPrenotazione(req, res) {
+
+  const { idPrenotazione, azione } = req.body;
+  if (!idPrenotazione || !azione) {
+    return res.status(400).json({ error: 'Dati mancanti' });
+
+  }
+
+  const nuovoStato = azione === 'confermata' ? 'confermata' : 'rifiutata';
+
+  try {
+    await pool.query(
+      `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
+      [nuovoStato, idPrenotazione]
+    );
+
+    res.json({ message: 'Stato aggiornato con successo' });
+  } catch (err) {
+    console.error('Errore aggiornamento stato prenotazione:', err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function getPrenotazioniConfermate(req, res) {
+  const idAgente = req.params.idAgente;
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        p.id,
+        u.username AS nome_cliente,
+        i.titolo AS titolo_immobile,
+        p.data_visita
+      FROM prenotazione_visite p
+      JOIN utente u ON p.id_cliente = u.id
+      JOIN immobile i ON p.id_immobile = i.id
+      WHERE i.id_agente = $1 AND p.stato = 'confermata'
+      ORDER BY p.data_visita ASC
+    `, [idAgente]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Errore nel recupero prenotazioni confermate:', err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+
+
+async function getPrenotazioniAccettateCliente(req, res) {
+  const idCliente = req.params.idCliente;
+
+  try {
+    const result = await pool.query(`
+   SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
+FROM prenotazione_visite p
+JOIN immobile i ON p.id_immobile = i.id
+WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Errore nel recupero prenotazioni confermate:', err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
 export {
   login,
   getImmobiliByCoordsController,
@@ -249,6 +416,12 @@ export {
   getImmobiliByAdvancedFilterController,
   getImmobiliByIdController,
   registrazioneAgenzia,
+  getNotifichePrenotazioni,
+  rispondiPrenotazione,
+  getDateBloccaVisita,
+  getPrenotazioniConfermate,
+  getPrenotazioniAccettateCliente,
+  prenotaVisitaController,
 
 };
 
