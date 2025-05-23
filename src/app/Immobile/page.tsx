@@ -7,7 +7,7 @@ import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
 import { useJwtPayload } from '@/components/useJwtPayload';
 
-const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
+const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
 interface Immobile {
     id: number;
@@ -32,7 +32,6 @@ interface Immobile {
     vicino_parchi: boolean;
     vicino_trasporti: boolean;
     data: string;
-    immagine_url: string;
 }
 
 interface Immagine {
@@ -139,7 +138,7 @@ export default function ImmobilePage() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ id: immID }),
+                    body: JSON.stringify({ id: immID, status: 'accettato' }),
                 });
 
                 if (!response.ok) {

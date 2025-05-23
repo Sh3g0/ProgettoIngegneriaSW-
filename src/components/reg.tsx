@@ -35,7 +35,7 @@ export default function Reg() {
       if (!res.ok) throw new Error('Registrazione cliente fallita');
 
       const data = await res.json();
-      localStorage.setItem('token', data.token);
+      sessionStorage.setItem('token', data.token);
       router.push('/login');
     } catch (err) {
       console.error(err);

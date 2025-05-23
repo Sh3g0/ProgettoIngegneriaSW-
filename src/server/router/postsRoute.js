@@ -1,35 +1,20 @@
 import express from 'express';
 import { verificaToken } from '../middlewares/verificaToken.js';
-
-
-import {
-  login,
-  getImmobiliByAdvancedFilterController,
-  getImmobiliByCoordsController,
-  registrazioneUtente,
-  getImmobiliByIdController,
-  registrazioneAgenzia,
-  prenotaVisitaController,
-  getImmobiliByFilterController,
-  rispondiPrenotazione,
-  getNotifichePrenotazioni,
-  getPrenotazioniConfermate,
-  getPrenotazioniAccettateCliente,
-  getDateBloccaVisita,
-
-} from '../controllers/postsController.js';
+import multer from "multer";
+import * as controller from '../controllers/postsController.js';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Autenticazione standard
-router.post('/login', login);
-router.post('/registrazione', registrazioneUtente);
-router.post('/registrazioneAgenzia', registrazioneAgenzia);
+router.post('/login', controller.login);
+router.post('/registrazione', controller.registrazioneUtente);
+router.post('/registrazioneAgenzia', controller.registrazioneAgenzia);
 
-router.post('/getImmobiliById', getImmobiliByIdController);
-router.post('/getImmobiliByCoords', getImmobiliByCoordsController);
-router.post('/getImmobiliByAdvancedFilter', getImmobiliByAdvancedFilterController);
-router.post('/getImmobiliByFilter', getImmobiliByFilterController);
+router.post('/getImmobiliById', controller.getImmobiliByIdController);
+router.post('/getImmobiliByCoords', controller.getImmobiliByCoordsController);
+router.post('/getImmobiliByAdvancedFilter', controller.getImmobiliByAdvancedFilterController);
+router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
 
 router.post('/prenotazioneVisita', verificaToken, prenotaVisitaController);
 router.get('/notificaAppuntamento/:agenteId', verificaToken, getNotifichePrenotazioni);
@@ -44,6 +29,9 @@ router.get('/prenotazioniConfermateCliente/:idCliente', getPrenotazioniAccettate
 
 
 //Rotta protetta
-//router.post('/prenotaVisita', authenticateJWT, prenotaVisitaController);
+router.post('/getUserBooks', verificaToken, controller.getUserBooksController);
+router.post('/getUserStorico', verificaToken, controller.getUserStoricoController);
+router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
+//router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
 
 export default router;

@@ -79,7 +79,8 @@ const handleAdvancedSearch = async () => {
         ascensore,
         classeEnergetica,
         portineria,
-        climatizzazione
+        climatizzazione,
+        status: 'accettato'
       }
       try{
         const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
@@ -87,20 +88,7 @@ const handleAdvancedSearch = async () => {
         const timestamp = new Date().getTime(); // Aggiungi un parametro unico per evitare cache
         window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}&searchkey=${'3'}`;
 
-        console.log('Esegui ricerca con:', {
-          lat,
-          lng,
-          tipoAnnuncio,
-          prezzoMin,
-          prezzoMax,
-          superficie,
-          stanze,
-          piano,
-          ascensore,
-          classeEnergetica,
-          portineria,
-          climatizzazione,
-        });
+        console.log('Esegui ricerca con:', parametri);
         
       }catch (error) {
         console.error('Errore durante la ricerca:', error);
@@ -141,6 +129,7 @@ const handleNormalSearch = async () => {
         prezzoMin,
         prezzoMax,
         superficie,
+        status: 'accettato',
       }
       try{
         const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
@@ -148,14 +137,7 @@ const handleNormalSearch = async () => {
         const timestamp = new Date().getTime(); // Aggiungi un parametro unico per evitare cache
         window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}&searchkey=${'2'}`;
 
-        console.log('Esegui ricerca con:', {
-          lat,
-          lng,
-          tipoAnnuncio,
-          prezzoMin,
-          prezzoMax,
-          superficie,
-        });
+        console.log('Esegui ricerca con:', parametri);
         
       }catch (error) {
         console.error('Errore durante la ricerca:', error);

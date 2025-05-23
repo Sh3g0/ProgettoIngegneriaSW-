@@ -35,7 +35,7 @@ export default function Banner() {
       const data = await response.json();
       if (data.results.length > 0) {
         const { lat, lng } = data.results[0].geometry;
-        const encodedParametri = encodeURIComponent(JSON.stringify({ lat, lng }));
+        const encodedParametri = encodeURIComponent(JSON.stringify({ lat, lng, status: 'accettato' }));
         window.location.href = (`/VisualizzaImmobili?param=${encodedParametri}&searchkey=1`);
       }
     } catch (error) {

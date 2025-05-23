@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import FormIndirizzo from "@/components/formIndirizzo";
+import { useJwtPayload } from "./useJwtPayload";
 
 interface Indirizzo {
   streetAddress: string;
@@ -13,6 +14,7 @@ interface Indirizzo {
 }
 
 interface ImmobileData {
+  id: string,
   titolo: string;
   descrizione: string;
   prezzo: string | number | "";
@@ -123,7 +125,9 @@ const FloatingInput: React.FC<{
   
 
 const FormImmobile: React.FC = () => {
+
   const [data, setData] = useState<ImmobileData>({
+    id: "",
     titolo: "",
     descrizione: "",
     prezzo: "",
@@ -148,6 +152,8 @@ const FormImmobile: React.FC = () => {
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState(false);
 
+  const id = useJwtPayload()?.id ?? ""; //Otteniamo l'id dell'agente che sta caricando l'immobile
+
 
   const validateForm = (): boolean => {
     const requiredFields = [
@@ -167,7 +173,7 @@ const FormImmobile: React.FC = () => {
       data.indirizzo?.country,
     ];
 
-    console.log(requiredFields);
+    console.log(data);
 
     const allFilled = requiredFields.every((field) => field !== "" && field !== null && field !== undefined);
   
@@ -190,20 +196,44 @@ const FormImmobile: React.FC = () => {
   };
   
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+  
     const formData = new FormData();
-  
-    // aggiungi dati immobile (stringify gli oggetti complessi)
+
     formData.append("data", JSON.stringify(data));
-  
-    // aggiungi immagini
-    images.forEach((file, index) => {
-      formData.append("images", file);
-    });
-  
+
     console.log(formData);
-    //ora quando chiamo l'api posso inviare direttamente formData senza stringify
+
+
+    images.forEach((file) => {
+      formData.append("immagini", file);
+    });
+
+  
+    try {
+      const response = await fetch("http://localhost:3001/api/caricaImmobile", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+        },
+        body: formData,
+      });      
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Errore durante l'invio del form.");
+      }
+  
+      const result = await response.json();
+      alert("Inviato con successo!");
+      console.log("Risposta:", result);
+  
+    } catch (error) {
+      console.error("Errore API:", error);
+      alert("Si è verificato un errore durante l'invio.");
+    }
   };
+  
   
 
   const handleChange = (
@@ -385,18 +415,20 @@ const FormImmobile: React.FC = () => {
           </p>
           <input
             type="file"
+            name="images"
             multiple
             accept="image/*"
             onChange={(e) => {
               const files = e.target.files;
               if (files) {
                 setImages(Array.from(files));
-                setImageError(false); // reset errore se caricate
+                setImageError(false);
                 console.log("Immagini selezionate:", files);
               }
             }}
             className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
           />
+
 
         </div>
 
@@ -479,10 +511,11 @@ const FormImmobile: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottone "Invia" per mostrare il riepilogo */}
+      {/* Bottone per mostrare il riepilogo */}
         <div className="col-span-3 flex justify-end">
         <button
             onClick={() => {
+                data.id = id;
                 if (validateForm()) {
                     setShowSummary(true);
                 }

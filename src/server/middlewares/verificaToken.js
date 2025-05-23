@@ -1,9 +1,21 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import jwt from 'jsonwebtoken';
-const SECRET_KEY = 'chiave_super_segreta'; // La stessa usata quando crei il token
+const SECRET_KEY = process.env.JWT_SECRET; // La stessa usata quando crei il token
+//import { useRouter } from 'next/navigation';
 
 function verificaToken(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Token mancante' });
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+  //const router = useRouter();
+
+  console.log(token);
+  console.log(SECRET_KEY);
+  if (!token) {
+    //router.push('\login');
+    return res.status(403).json({ message: 'Token mancante' });
+  }
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);

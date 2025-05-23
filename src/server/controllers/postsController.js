@@ -1,24 +1,20 @@
 import jwt from 'jsonwebtoken';
-const JWT_SECRET = 'chiave_super_segreta';
-import { pool, queryDB } from '../db/database.js';
+import dotenv from 'dotenv';
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
+import { queryDB } from '../db/database.js';
+import path from "path";
+import fs from "fs/promises";
+import * as service from '../services/postsServices.js';
 
-
-import {
-  getUser,
-  registrazione,
-  registrazioneAgenziaDB,
-  getImmobiliByCoords,
-  getImmobiliByFilter,
-  getImmobiliById,
-  getImmobiliByAdvancedFilters
-} from '../services/postsServices.js';
+const UPLOAD_DIR = path.resolve("uploads");
 
 //Controller per ottenere il ruolo di un utente dato username e password
 async function login(req, res) {
   const { username, password } = req.body;
 
   try {
-    const user = await getUser(username, password);
+    const user = await service.getUser(username, password);
 
     if (!user || user === "") {
       return res.status(401).json({ message: 'Credenziali non valide' });
@@ -95,7 +91,7 @@ async function registrazioneUtente(req, res) {
       return res.status(400).json({ message: 'Utente con email o username già esistente.' });
     }
 
-    const user = await registrazione(email, username, password, ruolo, idAgenzia);
+    const user = await service.registrazione(email, username, password, ruolo, idAgenzia);
 
     if (!user) {
       throw new Error('Errore: utente non trovato o risultato della query non valido');
@@ -124,10 +120,9 @@ async function registrazioneUtente(req, res) {
   }
 }
 
-
 async function registrazioneAgenzia(req, res) {
   try {
-    const nuovaAgenzia = await registrazioneAgenziaDB(
+    const nuovaAgenzia = await service.registrazioneAgenziaDB(
       req.body.nome,
       req.body.sede,
       req.body.email
@@ -140,9 +135,6 @@ async function registrazioneAgenzia(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
-
-
-
 
 async function checkAgenziaExists(emailAgenzia) {
   const query = `
@@ -169,16 +161,17 @@ async function checkAgenziaExists(emailAgenzia) {
 
 
 
+
 async function getImmobiliByAdvancedFilterController(req, res) {
   try {
 
     const params = req.body
-    let { lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione } = params;
+    let { lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione, status } = params;
     tipoAnnuncio = tipoAnnuncio === 'qualsiasi' ? ['affitto', 'vendita'] : [tipoAnnuncio];
     classe_energetica = classe_energetica === 'all' ? ['A', 'B', 'C', 'D', 'E'] : [classe_energetica];
 
     // Chiamata al servizio per ottenere gli immobili
-    const immobili = await getImmobiliByAdvancedFilters(lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione);
+    const immobili = await service.getImmobiliByAdvancedFilters(lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione, status);
 
     // Restituisce gli immobili trovati
     return res.json(immobili);
@@ -192,10 +185,10 @@ async function getImmobiliByCoordsController(req, res) {
   try {
 
     const params = req.body
-    const { lat, lng } = params;
+    const { lat, lng, status } = params;
 
     // Chiamata al servizio per ottenere gli immobili
-    const immobili = await getImmobiliByCoords(lat, lng);
+    const immobili = await service.getImmobiliByCoords(lat, lng, status);
 
     // Restituisce gli immobili trovati
     return res.json(immobili);
@@ -209,10 +202,10 @@ async function getImmobiliByIdController(req, res) {
   try {
 
     const params = req.body
-    const { id } = params;
+    const { id, status } = params;
 
     // Chiamata al servizio per ottenere gli immobili
-    const immobili = await getImmobiliById(id);
+    const immobili = await service.getImmobiliById(id, status);
 
     // Restituisce gli immobili trovati
     return res.json(immobili);
@@ -226,11 +219,11 @@ async function getImmobiliByIdController(req, res) {
 async function getImmobiliByFilterController(req, res) {
   try {
 
-    let { lat, lng, tipoAnnuncio, prezzoMin, prezzoMax, superficie } = req.body;
+    let { lat, lng, tipoAnnuncio, prezzoMin, prezzoMax, superficie, status } = req.body;
 
     tipoAnnuncio = tipoAnnuncio === 'qualsiasi' ? ['affitto', 'vendita'] : [tipoAnnuncio];
 
-    const immobili = await getImmobiliByFilter(lat, lng, prezzoMin, prezzoMax, superficie, tipoAnnuncio);
+    const immobili = await service.getImmobiliByFilter(lat, lng, prezzoMin, prezzoMax, superficie, tipoAnnuncio, status);
 
     return res.json(immobili);
 
@@ -238,6 +231,158 @@ async function getImmobiliByFilterController(req, res) {
     console.log("Errore: ", e);
     return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
   }
+}
+
+async function getUserBooksController(req, res) {
+  try {
+
+    let { id } = req.body;
+
+    const books = await service.getUserBooks(id);
+
+    return res.json(books);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
+async function getUserStoricoController(req, res) {
+  try {
+
+    let { id } = req.body;
+
+    const storico = await service.getUserStorico(id);
+
+    return res.json(storico);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
+async function caricaImmobileController(req, res) {
+  const files = req.files; // array di file
+  const jsonData = JSON.parse(req.body.data); // stringa -> oggetto
+
+  console.log("JSON ricevuto:", jsonData);
+  console.log("Immagini ricevute:", files);
+
+  let { id, titolo, descrizione, prezzo, dimensione_mq, piano, stanze, ascensore, classe_energetica, portineria, climatizzazione, tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti, indirizzo } = jsonData;
+  let { streetAddress, houseNumber, city, province, lat, lng } = indirizzo;
+
+  streetAddress = streetAddress + ` ${houseNumber}`
+
+  const imagePaths = []; //Percorso immagini da salvare sul db
+
+  for (const file of files) {
+    const filename = `${Date.now()}-${file.originalname}`; //Identificatore univoco per l'immagine
+    const filePath = path.join(UPLOAD_DIR, filename); //Crea il percorso unendo path e nome file (uploads/"nomefile")
+    await fs.writeFile(filePath, file.buffer); //Scrive fisicamente il file nel percorso
+    imagePaths.push(filename); //Salvo solo il nome del file perchè a prescindere cercherò in /uploads
+  }
+
+  await service.caricaImmobile({
+    id,
+    titolo,
+    descrizione,
+    prezzo,
+    dimensione_mq,
+    piano,
+    stanze,
+    ascensore,
+    classe_energetica,
+    portineria,
+    climatizzazione,
+    tipo_annuncio: tipo_annuncio.toLowerCase(),
+    vicino_scuole,
+    vicino_parchi,
+    vicino_trasporti,
+    indirizzo: { streetAddress, city, province, lat, lng },
+    immagini: imagePaths,
+  });
+
+  //Cancellare le img da uploads se il caricamento non va a buon fine
+
+  return res.status(200).json({ success: true });
+}
+
+async function getUserBooksController(req, res) {
+  try {
+
+    let { id } = req.body;
+
+    const books = await service.getUserBooks(id);
+
+    return res.json(books);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
+async function getUserStoricoController(req, res) {
+  try {
+
+    let { id } = req.body;
+
+    const storico = await service.getUserStorico(id);
+
+    return res.json(storico);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
+async function caricaImmobileController(req, res) {
+  const files = req.files; // array di file
+  const jsonData = JSON.parse(req.body.data); // stringa -> oggetto
+
+  console.log("JSON ricevuto:", jsonData);
+  console.log("Immagini ricevute:", files);
+
+  let { id, titolo, descrizione, prezzo, dimensione_mq, piano, stanze, ascensore, classe_energetica, portineria, climatizzazione, tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti, indirizzo } = jsonData;
+  let { streetAddress, houseNumber, city, province, lat, lng } = indirizzo;
+
+  streetAddress = streetAddress + ` ${houseNumber}`
+
+  const imagePaths = []; //Percorso immagini da salvare sul db
+
+  for (const file of files) {
+    const filename = `${Date.now()}-${file.originalname}`; //Identificatore univoco per l'immagine
+    const filePath = path.join(UPLOAD_DIR, filename); //Crea il percorso unendo path e nome file (uploads/"nomefile")
+    await fs.writeFile(filePath, file.buffer); //Scrive fisicamente il file nel percorso
+    imagePaths.push(filename); //Salvo solo il nome del file perchè a prescindere cercherò in /uploads
+  }
+
+  await service.caricaImmobile({
+    id,
+    titolo,
+    descrizione,
+    prezzo,
+    dimensione_mq,
+    piano,
+    stanze,
+    ascensore,
+    classe_energetica,
+    portineria,
+    climatizzazione,
+    tipo_annuncio: tipo_annuncio.toLowerCase(),
+    vicino_scuole,
+    vicino_parchi,
+    vicino_trasporti,
+    indirizzo: { streetAddress, city, province, lat, lng },
+    immagini: imagePaths,
+  });
+
+  //Cancellare le img da uploads se il caricamento non va a buon fine
+
+  return res.status(200).json({ success: true });
 }
 
 
@@ -422,6 +567,8 @@ export {
   getPrenotazioniConfermate,
   getPrenotazioniAccettateCliente,
   prenotaVisitaController,
-
+  getUserBooksController,
+  getUserStoricoController,
+  caricaImmobileController,
 };
 
