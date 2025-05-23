@@ -213,6 +213,9 @@ const FormImmobile: React.FC = () => {
     try {
       const response = await fetch("http://localhost:3001/api/caricaImmobile", {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+        },
         body: formData,
       });      
   

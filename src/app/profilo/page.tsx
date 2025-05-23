@@ -6,11 +6,13 @@ import { useJwtPayload } from '@/components/useJwtPayload';
 import Banner from '@/components/Banner';
 import { Profile } from '@/components/Profile';
 import Books from '@/components/Books';
+import Storico from '@/components/Storico';
 
 export default function UserProfile() {
   const router = useRouter();
   const payload = useJwtPayload();
   const [selectedMenu, setSelectedMenu] = useState('Profilo'); // valore iniziale
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     console.log('Payload:', payload);
@@ -21,6 +23,14 @@ export default function UserProfile() {
     }
 
   }, [payload, router]);
+
+  useEffect(() => {
+    if (isLoggingOut) {
+      sessionStorage.removeItem('token');
+      router.push('/home');
+    }
+  }, [isLoggingOut, router]);
+
 
   if (payload === null) {
     return <div className="p-6">Caricamento profilo...</div>;
@@ -36,13 +46,12 @@ export default function UserProfile() {
       case 'Notifiche':
         return <div>Qui ci sono le tue Notifiche.</div>;
       case 'Storico':
-        return <Books id={id}/>
+        return <Storico id={id}/>
       case 'Appuntamenti':
-        return <div>Qui puoi vedere gli Appuntamenti.</div>;
+        return <Books id={id}/>
       case 'Logout':
-        sessionStorage.removeItem('token');
-        router.push('/home');
-        return <div>Logout in corso...</div>
+        setIsLoggingOut(true);
+        return <div>Logout in corso...</div>;
     }
   }
 

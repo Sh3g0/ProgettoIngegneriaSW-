@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
-const JWT_SECRET = 'supersegreto123';
+import dotenv from 'dotenv';
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
 import { queryDB } from '../db/database.js';
 import path from "path";
 import fs from "fs/promises";
