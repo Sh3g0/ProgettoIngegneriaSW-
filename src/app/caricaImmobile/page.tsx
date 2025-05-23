@@ -5,26 +5,7 @@ import Form from '@/components/formImmobile'
 import Footer from '@/components/Footer'
 import Banner from "@/components/Banner"
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useJwtPayload } from '@/components/useJwtPayload';
-
 export default function CaricaImmobile() {
-
-  const router = useRouter();
-  const payload = useJwtPayload();
-
-  /*useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (!token) {
-      router.push('/login'); // Non loggato
-      return;
-    }
-
-    if (!payload || payload.ruolo === 'cliente') {
-      router.push('/home'); // Accesso negato per clienti
-    }
-  }, [router]);*/
 
   return (
     <div className="bg-gray-100">
