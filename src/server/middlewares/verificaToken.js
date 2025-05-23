@@ -17,12 +17,14 @@ function verificaToken(req, res, next) {
     return res.status(403).json({ message: 'Token mancante' });
   }
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Token non valido' });
-
-    req.user = user; // lo user (username, ruolo...) che avevi messo nel token
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    // usa la tua chiave
+    req.user = decoded; // ⚠️ Questo deve contenere l'id!
     next();
-  });
+  } catch (err) {
+    res.status(403).json({ message: 'Token non valido' });
+  }
 }
 
 export { verificaToken };
