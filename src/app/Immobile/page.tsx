@@ -6,7 +6,7 @@ import MappaImmobili from '@/components/MappaImmobili';
 import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
 
-const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
+const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
 interface Immobile {
     id: number;

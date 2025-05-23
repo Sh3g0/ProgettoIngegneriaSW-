@@ -19,7 +19,7 @@ router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
 //Rotta protetta
 router.post('/getUserBooks', verificaToken, controller.getUserBooksController);
 router.post('/getUserStorico', verificaToken, controller.getUserStoricoController);
-router.post('/caricaImmobile', /*verificaToken,*/ upload.array("immagini"), controller.caricaImmobileController);
+router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
 //router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
 
 export default router;

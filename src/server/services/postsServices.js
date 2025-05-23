@@ -281,7 +281,7 @@ async function getUserBooks(id) {
         const query = `
         SELECT *
         FROM prenotazione_visite
-        WHERE id_utente = $1;
+        WHERE id_cliente = $1;
         `;
 
         const result = await queryDB(query,[id]);
