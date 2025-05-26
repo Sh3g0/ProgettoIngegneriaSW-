@@ -351,6 +351,13 @@ async function caricaImmobile(data) {
   }
 }
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+>>>>>>> Stashed changes
 export {
     getUser,
     registrazione,

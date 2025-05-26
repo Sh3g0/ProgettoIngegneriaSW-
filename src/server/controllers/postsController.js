@@ -399,7 +399,10 @@ ORDER BY p.data_visita DESC;
     `, [agenteId]);
 
     res.json(result);
+<<<<<<< Updated upstream
     res.json(result);
+=======
+>>>>>>> Stashed changes
   } catch (err) {
     console.error('Errore nella query delle notifiche:', err);
     res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
@@ -448,7 +451,10 @@ async function getPrenotazioniConfermate(req, res) {
     `, [idAgente]);
 
     res.json(result);
+<<<<<<< Updated upstream
     res.json(result);
+=======
+>>>>>>> Stashed changes
   } catch (err) {
     console.error('Errore nel recupero prenotazioni confermate:', err);
     res.status(500).json({ error: 'Errore nel database' });
@@ -474,7 +480,10 @@ WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
   }
 }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 export {
   login,
   getImmobiliByCoordsController,

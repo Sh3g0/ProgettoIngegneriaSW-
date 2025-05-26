@@ -19,6 +19,7 @@ export default function NotificheClienteComponent({ idCliente }: { idCliente: nu
                 const res = await fetch(`http://localhost:3001/api/prenotazioniConfermateCliente/${idCliente}`);
                 const data = await res.json();
                 setNotifiche(data);
+                console.log("Notifiche recuperate:", data);
             } catch (err) {
                 console.error("Errore nel recupero delle notifiche:", err);
             } finally {
