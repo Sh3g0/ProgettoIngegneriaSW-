@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import '../styles/style.css'; 
-import { Home, Building, Phone, User } from "lucide-react";  
+import { Home, Building, Phone, User, MessageSquare } from "lucide-react";  
 import { useRouter } from 'next/navigation';
 import { useJwtPayload, UserInfo } from '@/components/useJwtPayload';
 import dotenv from 'dotenv';
@@ -67,6 +67,15 @@ export default function Banner() {
           </a>
 
           {/* Solo se ruolo = agente */}
+          {(user_info?.ruolo === 'agente' || user_info?.ruolo === 'cliente') && (
+            <a
+              href={user_info?.ruolo === 'agente' ? '/notifiche' : '/notificheCliente'}
+              className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'
+            >
+              <MessageSquare size={16} /> Messaggi
+            </a>
+          )}
+
           {user_info?.ruolo === 'agente' && (
             <a href="/caricaImmobile" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <Building size={16} /> Vendi proprietà

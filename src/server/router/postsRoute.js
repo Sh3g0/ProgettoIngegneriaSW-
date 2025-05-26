@@ -16,6 +16,18 @@ router.post('/getImmobiliByCoords', controller.getImmobiliByCoordsController);
 router.post('/getImmobiliByAdvancedFilter', controller.getImmobiliByAdvancedFilterController);
 router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
 
+router.post('/prenotazioneVisita', verificaToken, controller.prenotaVisitaController);
+router.get('/notificaAppuntamento/:agenteId', verificaToken, controller.getNotifichePrenotazioni);
+router.get('/dateOccupate/:id_immobile', controller.getDateBloccaVisita);
+
+router.post('/notifiche/rispondi', verificaToken, controller.rispondiPrenotazione);
+router.get('/prenotazioni/confermate/:idAgente', controller.getPrenotazioniConfermate);
+router.get('/prenotazioniConfermateCliente/:idCliente', controller.getPrenotazioniAccettateCliente);
+
+
+
+
+
 //Rotta protetta
 router.post('/getUserBooks', verificaToken, controller.getUserBooksController);
 router.post('/getUserStorico', verificaToken, controller.getUserStoricoController);
