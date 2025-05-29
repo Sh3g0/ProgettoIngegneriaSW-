@@ -27,7 +27,7 @@ async function login(req, res) {
     };
 
     // Creazione del token (opzionale se vuoi usare autenticazione JWT)
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, 'chiave_super_segreta', { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'Login riuscito',
@@ -156,6 +156,11 @@ async function checkAgenziaExists(emailAgenzia) {
     throw error;
   }
 }
+
+
+
+
+
 
 async function getImmobiliByAdvancedFilterController(req, res) {
   try {
@@ -304,6 +309,83 @@ async function caricaImmobileController(req, res) {
   return res.status(200).json({ success: true });
 }
 
+async function getUserBooksController(req, res) {
+  try {
+
+    let { id } = req.body;
+
+    const books = await service.getUserBooks(id);
+
+    return res.json(books);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
+async function getUserStoricoController(req, res) {
+  try {
+
+    let { id } = req.body;
+
+    const storico = await service.getUserStorico(id);
+
+    return res.json(storico);
+
+  } catch (e) {
+    console.log("Errore: ", e);
+    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+  }
+}
+
+async function caricaImmobileController(req, res) {
+  const files = req.files; // array di file
+  const jsonData = JSON.parse(req.body.data); // stringa -> oggetto
+
+  console.log("JSON ricevuto:", jsonData);
+  console.log("Immagini ricevute:", files);
+
+  let { id, titolo, descrizione, prezzo, dimensione_mq, piano, stanze, ascensore, classe_energetica, portineria, climatizzazione, tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti, indirizzo } = jsonData;
+  let { streetAddress, houseNumber, city, province, lat, lng } = indirizzo;
+
+  streetAddress = streetAddress + ` ${houseNumber}`
+
+  const imagePaths = []; //Percorso immagini da salvare sul db
+
+  for (const file of files) {
+    const filename = `${Date.now()}-${file.originalname}`; //Identificatore univoco per l'immagine
+    const filePath = path.join(UPLOAD_DIR, filename); //Crea il percorso unendo path e nome file (uploads/"nomefile")
+    await fs.writeFile(filePath, file.buffer); //Scrive fisicamente il file nel percorso
+    imagePaths.push(filename); //Salvo solo il nome del file perchè a prescindere cercherò in /uploads
+  }
+
+  await service.caricaImmobile({
+    id,
+    titolo,
+    descrizione,
+    prezzo,
+    dimensione_mq,
+    piano,
+    stanze,
+    ascensore,
+    classe_energetica,
+    portineria,
+    climatizzazione,
+    tipo_annuncio: tipo_annuncio.toLowerCase(),
+    vicino_scuole,
+    vicino_parchi,
+    vicino_trasporti,
+    indirizzo: { streetAddress, city, province, lat, lng },
+    immagini: imagePaths,
+  });
+
+  //Cancellare le img da uploads se il caricamento non va a buon fine
+
+  return res.status(200).json({ success: true });
+}
+
+
 async function prenotaVisitaController(req, res) {
   console.log('✅ Controller prenotaVisita chiamato');
 
@@ -417,6 +499,7 @@ async function rispondiPrenotazione(req, res) {
   const nuovoStato = azione === 'confermata' ? 'confermata' : 'rifiutata';
 
   try {
+
     await queryDB(`
       UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
       [nuovoStato, idPrenotazione]
@@ -433,6 +516,7 @@ async function getPrenotazioniConfermate(req, res) {
   const idAgente = req.params.idAgente;
 
   try {
+
     const result = await queryDB(`
       SELECT 
         p.id,
@@ -445,6 +529,7 @@ async function getPrenotazioniConfermate(req, res) {
       WHERE i.id_agente = $1 AND p.stato = 'confermata'
       ORDER BY p.data_visita ASC
     `, [idAgente]);
+
 
     res.json(result);
   } catch (err) {
@@ -459,6 +544,7 @@ async function getPrenotazioniAccettateCliente(req, res) {
   const idCliente = req.params.idCliente;
 
   try {
+
     const result = await queryDB(`
    SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
 FROM prenotazione_visite p
@@ -471,6 +557,7 @@ WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
     res.status(500).json({ error: 'Errore nel database' });
   }
 }
+
 
 export {
   login,
@@ -485,6 +572,7 @@ export {
   getDateBloccaVisita,
   getPrenotazioniConfermate,
   getPrenotazioniAccettateCliente,
+  prenotaVisitaController,
   getUserBooksController,
   getUserStoricoController,
   caricaImmobileController,

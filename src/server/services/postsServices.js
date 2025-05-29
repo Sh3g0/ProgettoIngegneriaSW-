@@ -351,6 +351,85 @@ async function caricaImmobile(data) {
   }
 }
 
+async function getUserBooks(id) {
+    try{
+        const query = `
+        SELECT *
+        FROM prenotazione_visite
+        WHERE id_cliente = $1;
+        `;
+
+        const result = await queryDB(query,[id]);
+        return result;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+async function getUserStorico(id) {
+    try{
+        const query = `
+        SELECT *
+        FROM storico_cliente
+        WHERE id_utente = $1;
+        `;
+
+        const result = await queryDB(query,[id]);
+        return result;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+async function caricaImmobile(data) {
+  try {
+    await queryDB('BEGIN');
+
+    console.log('in begin.................');
+
+    const immobileQuery = `
+      INSERT INTO immobile (
+        id_agente, titolo, descrizione, prezzo, dimensione_mq, piano, stanze,
+        ascensore, classe_energetica, portineria, climatizzazione,
+        tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti,
+        indirizzo, citta, comune, latitudine, longitudine
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+      RETURNING id
+    `;
+
+    const immobileValues = [
+      data.id, data.titolo, data.descrizione, data.prezzo, data.dimensione_mq,
+      data.piano, data.stanze, data.ascensore, data.classe_energetica,
+      data.portineria, data.climatizzazione, data.tipo_annuncio,
+      data.vicino_scuole, data.vicino_parchi, data.vicino_trasporti,
+      data.indirizzo.streetAddress, data.indirizzo.city,
+      data.indirizzo.province, data.indirizzo.lat, data.indirizzo.lng
+    ];
+
+    const result = await queryDB(immobileQuery, immobileValues);
+    const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
+
+    for (const path of data.immagini) {
+      await queryDB(
+        `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
+        [immobileId, path]
+      );
+    }
+
+    await queryDB('COMMIT');
+  } catch (err) {
+    await queryDB('ROLLBACK');
+    console.error("Errore nel salvataggio immobile:", err);
+    throw err;
+  }
+}
+
+
+
+
+
 export {
     getUser,
     registrazione,
