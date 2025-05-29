@@ -1,12 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import '../styles/style.css';
-import { Home, Building, Phone, User } from "lucide-react";
+import '../styles/style.css'; 
+import { Home, Building, Phone, User, MessageSquare } from "lucide-react";  
 import { useRouter } from 'next/navigation';
 import { useJwtPayload, UserInfo } from '@/components/useJwtPayload';
 import dotenv from 'dotenv';
 dotenv.config();
-import { MessageSquare } from "lucide-react";
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
@@ -71,6 +70,7 @@ export default function Banner() {
             <Building size={16} /> Proprietà
           </a>
 
+
           {(user_info?.ruolo === 'agente' || user_info?.ruolo === 'cliente') && (
             <a
               href={user_info?.ruolo === 'agente' ? '/notifiche' : '/notificheCliente'}
@@ -80,7 +80,6 @@ export default function Banner() {
             </a>
           )}
 
-//aaa
 
           {user_info?.ruolo === 'agente' && (
             <a href="/caricaImmobile" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>

@@ -25,11 +25,13 @@ export default function UserProfile() {
   }, [payload, router]);
 
   useEffect(() => {
-    if (isLoggingOut) {
-      sessionStorage.removeItem('token');
-      router.push('/home');
+    if (selectedMenu === 'Logout') {
+      setIsLoggingOut(true);
+      sessionStorage.removeItem('token'); // rimuovi il token JWT
+      router.push('/'); // reindirizza alla home
     }
-  }, [isLoggingOut, router]);
+  }, [selectedMenu]);
+
 
 
   if (payload === null) {
@@ -50,8 +52,8 @@ export default function UserProfile() {
       case 'Appuntamenti':
         return <Books id={id}/>
       case 'Logout':
-        setIsLoggingOut(true);
         return <div>Logout in corso...</div>;
+
     }
   }
 

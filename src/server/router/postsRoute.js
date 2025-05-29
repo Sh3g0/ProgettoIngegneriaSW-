@@ -16,14 +16,14 @@ router.post('/getImmobiliByCoords', controller.getImmobiliByCoordsController);
 router.post('/getImmobiliByAdvancedFilter', controller.getImmobiliByAdvancedFilterController);
 router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
 
-router.post('/prenotazioneVisita', verificaToken, prenotaVisitaController);
-router.get('/notificaAppuntamento/:agenteId', verificaToken, getNotifichePrenotazioni);
-router.get('/dateOccupate/:id_immobile', getDateBloccaVisita);
 
-router.post('/notifiche/rispondi', verificaToken, rispondiPrenotazione);
-router.get('/prenotazioni/confermate/:idAgente', getPrenotazioniConfermate);
-router.get('/prenotazioniConfermateCliente/:idCliente', getPrenotazioniAccettateCliente);
+router.post('/prenotazioneVisita', verificaToken, controller.prenotaVisitaController);
+router.get('/notificaAppuntamento/:agenteId', verificaToken, controller.getNotifichePrenotazioni);
+router.get('/dateOccupate/:id_immobile', controller.getDateBloccaVisita);
 
+router.post('/notifiche/rispondi', verificaToken, controller.rispondiPrenotazione);
+router.get('/prenotazioni/confermate/:idAgente', controller.getPrenotazioniConfermate);
+router.get('/prenotazioniConfermateCliente/:idCliente', controller.getPrenotazioniAccettateCliente);
 
 
 

@@ -466,7 +466,7 @@ async function getNotifichePrenotazioni(req, res) {
     return res.status(400).json({ error: 'Missing agenteId' });
   }
   try {
-    const result = await pool.query(`
+    const result = await queryDB(`
   SELECT 
   p.id,
   u.username AS nome_cliente,
@@ -480,7 +480,7 @@ WHERE i.id_agente = $1
 ORDER BY p.data_visita DESC;
     `, [agenteId]);
 
-    res.json(result.rows);
+    res.json(result);
   } catch (err) {
     console.error('Errore nella query delle notifiche:', err);
     res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
@@ -499,8 +499,9 @@ async function rispondiPrenotazione(req, res) {
   const nuovoStato = azione === 'confermata' ? 'confermata' : 'rifiutata';
 
   try {
-    await pool.query(
-      `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
+
+    await queryDB(`
+      UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
       [nuovoStato, idPrenotazione]
     );
 
@@ -515,7 +516,8 @@ async function getPrenotazioniConfermate(req, res) {
   const idAgente = req.params.idAgente;
 
   try {
-    const result = await pool.query(`
+
+    const result = await queryDB(`
       SELECT 
         p.id,
         u.username AS nome_cliente,
@@ -528,7 +530,8 @@ async function getPrenotazioniConfermate(req, res) {
       ORDER BY p.data_visita ASC
     `, [idAgente]);
 
-    res.json(result.rows);
+
+    res.json(result);
   } catch (err) {
     console.error('Errore nel recupero prenotazioni confermate:', err);
     res.status(500).json({ error: 'Errore nel database' });
@@ -541,7 +544,8 @@ async function getPrenotazioniAccettateCliente(req, res) {
   const idCliente = req.params.idCliente;
 
   try {
-    const result = await pool.query(`
+
+    const result = await queryDB(`
    SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
 FROM prenotazione_visite p
 JOIN immobile i ON p.id_immobile = i.id
@@ -553,6 +557,8 @@ WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
     res.status(500).json({ error: 'Errore nel database' });
   }
 }
+
+
 export {
   login,
   getImmobiliByCoordsController,
@@ -570,5 +576,6 @@ export {
   getUserBooksController,
   getUserStoricoController,
   caricaImmobileController,
+  prenotaVisitaController,
 };
 
