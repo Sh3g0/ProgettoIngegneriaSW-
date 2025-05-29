@@ -17,11 +17,12 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
 
 
 
-  const gestisciRisposta = async (azione: 'confermata' | 'rifiuta') => {
+  const gestisciRisposta = async (azione: 'confermata' | 'rifiutata') => {
     console.log('Cliccato su:', azione);
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
+
       console.log('Token:', token);
       const res = await fetch('http://localhost:3001/api/notifiche/rispondi', {
         method: 'POST',
@@ -32,6 +33,8 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
         body: JSON.stringify({ idPrenotazione: notifica.id, azione }),
       });
       console.log('Risposta fetch:', res.status);
+      console.log('Cliccato su:', azione);
+
       if (!res.ok) {
         const errorText = await res.text();
         throw new Error(`Errore: ${res.status} - ${errorText}`);
@@ -99,7 +102,7 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
                 {loading ? 'Conferma in corso...' : 'Conferma appuntamento'}
               </button>
               <button
-                onClick={() => gestisciRisposta('rifiuta')}
+                onClick={() => gestisciRisposta('rifiutata')}
                 disabled={loading}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
                 ${loading ? 'bg-gray-200' : 'bg-white hover:bg-gray-50'} 
