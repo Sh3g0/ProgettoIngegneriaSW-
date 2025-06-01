@@ -232,6 +232,9 @@ const FormImmobile: React.FC = () => {
       console.error("Errore API:", error);
       alert("Si è verificato un errore durante l'invio.");
     }
+
+    window.location.reload(); // Ricarica la pagina dopo l'invio
+
   };
   
   

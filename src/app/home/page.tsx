@@ -5,10 +5,13 @@ import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
+import { useJwtPayload } from '@/components/useJwtPayload';
 
 export default function Home() {
-  const [showAgenteOptions, setAgenteOption] = useState(true);
+  const [showAgenteOptions, setAgenteOption] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const user = useJwtPayload();
 
   const backgrounds = [
     'img/sfondo1.jpg',
@@ -24,6 +27,10 @@ export default function Home() {
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * backgrounds.length);
     setBackgroundImage(backgrounds[randomIndex]);
+
+    if(user && user.ruolo === 'agente') {
+      setAgenteOption(true);
+    }
   }, []);
 
   return (

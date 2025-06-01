@@ -254,7 +254,7 @@ async function getUserStoricoController(req, res) {
 
   } catch (e) {
     console.log("Errore: ", e);
-    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+    return res.status(500).json({ error: 'Errore nel recupero dello storico' });
   }
 }
 
@@ -465,9 +465,67 @@ FROM prenotazione_visite p
 JOIN immobile i ON p.id_immobile = i.id
 WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
 
-    res.json(result.rows);
+    res.json(result);
   } catch (err) {
     console.error('Errore nel recupero prenotazioni confermate:', err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function updateStoricoController(req, res) {
+  const params = req.body;
+  let { id_utente, id_immobile, tipo_attivita } = params;
+
+  console.log("Dati ricevuti per l'aggiornamento dello storico:", params);
+
+  try{
+    const result = await service.updateStorico(id_utente, id_immobile, tipo_attivita);
+    return res.status(200).json({ success: true });
+  }catch(err){
+    console.error("Errore nell'aggiornamento dello storico:", err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function getImmaginiController(req, res) {
+  const id_immobile = req.params.id_immobile;
+
+  try {
+    const result = await queryDB(
+      `SELECT path FROM immagini_immobile WHERE immobile_id = $1`,
+      [id_immobile]
+    );
+
+    // Restituisci i percorsi completi
+    const immagini = result.map(r => `/uploads/${r.path}`);
+
+    res.json({ immagini });
+  } catch (err) {
+    console.error("Errore nel recupero immagini:", err);
+    res.status(500).json({ error: "Errore nel recupero immagini" });
+  }
+}
+
+async function cleanStoricoController(req, res) {
+  const id_utente = req.params.id_utente;
+
+  try {
+    await service.cleanStorico(id_utente);
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Errore nella pulizia dello storico:", err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function removeStoricoController(req, res) {
+  const id = req.params.id;
+
+  try {
+    await service.removeStorico(id);
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Errore nella rimozione dello storico:", err);
     res.status(500).json({ error: 'Errore nel database' });
   }
 }
@@ -489,5 +547,9 @@ export {
   getUserStoricoController,
   caricaImmobileController,
   prenotaVisitaController,
+  updateStoricoController,
+  getImmaginiController,
+  cleanStoricoController,
+  removeStoricoController,
 };
 

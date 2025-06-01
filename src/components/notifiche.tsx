@@ -22,7 +22,9 @@ export default function Notifiche({ agenteId }: NotificheProps) {
   useEffect(() => {
     const fetchPrenotazioni = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
+
+        console.log('agente id:', agenteId);
 
         const res = await fetch(`http://localhost:3001/api/notificaAppuntamento/${agenteId}`, {
           method: 'GET',

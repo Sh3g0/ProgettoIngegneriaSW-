@@ -296,7 +296,7 @@ async function getUserStorico(id) {
     try{
         const query = `
         SELECT *
-        FROM storico_cliente
+        FROM storico
         WHERE id_utente = $1;
         `;
 
@@ -336,7 +336,16 @@ async function caricaImmobile(data) {
     const result = await queryDB(immobileQuery, immobileValues);
     const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
 
+    let i=0;
     for (const path of data.immagini) {
+        if(i === 0) {
+            // Se è la prima immagine, aggiorno l'immobile con il path dell'immagine principale
+            await queryDB(
+                `UPDATE immobile SET immagine_url = $1 WHERE id = $2`,
+                [path, immobileId]
+            );
+            i++;
+        }
       await queryDB(
         `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
         [immobileId, path]
@@ -351,6 +360,57 @@ async function caricaImmobile(data) {
   }
 }
 
+async function updateStorico(id_utente, id_immobile=-1, tipo_attivita){
+    try{
+        const query = `
+        INSERT INTO storico (id_utente, id_immobile, tipo_attivita)
+        VALUES ($1, $2, $3);
+        `;
+
+        const values = [
+            id_utente,
+            id_immobile,
+            tipo_attivita
+        ];
+
+        const result = await queryDB(query, values);
+        return result;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+async function cleanStorico(id_utente) {
+    try {
+        const query = `
+        DELETE FROM storico
+        WHERE id_utente = $1;
+        `;
+
+        const result = await queryDB(query, [id_utente]);
+        return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+async function removeStorico(id) {
+    try {
+        const query = `
+        DELETE FROM storico
+        WHERE id = $1;
+        `;
+
+        const result = await queryDB(query, [id]);
+        return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 export {
     getUser,
     registrazione,
@@ -361,5 +421,8 @@ export {
     getImmobiliById,
     getUserBooks,
     getUserStorico,
-    caricaImmobile
+    caricaImmobile,
+    updateStorico,
+    cleanStorico,
+    removeStorico,
 };

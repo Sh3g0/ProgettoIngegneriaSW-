@@ -16,22 +16,23 @@ router.post('/getImmobiliByCoords', controller.getImmobiliByCoordsController);
 router.post('/getImmobiliByAdvancedFilter', controller.getImmobiliByAdvancedFilterController);
 router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
 
+router.get('/getImmagini/:id_immobile', controller.getImmaginiController);
+
+//Rotte protette
 router.post('/prenotazioneVisita', verificaToken, controller.prenotaVisitaController);
 router.get('/notificaAppuntamento/:agenteId', verificaToken, controller.getNotifichePrenotazioni);
-router.get('/dateOccupate/:id_immobile', controller.getDateBloccaVisita);
+router.get('/dateOccupate/:id_immobile', verificaToken, controller.getDateBloccaVisita);
 
 router.post('/notifiche/rispondi', verificaToken, controller.rispondiPrenotazione);
-router.get('/prenotazioni/confermate/:idAgente', controller.getPrenotazioniConfermate);
-router.get('/prenotazioniConfermateCliente/:idCliente', controller.getPrenotazioniAccettateCliente);
+router.get('/prenotazioni/confermate/:idAgente', verificaToken, controller.getPrenotazioniConfermate);
+router.get('/prenotazioniConfermateCliente/:idCliente', verificaToken, controller.getPrenotazioniAccettateCliente);
 
-
-
-
-
-//Rotta protetta
 router.post('/getUserBooks', verificaToken, controller.getUserBooksController);
 router.post('/getUserStorico', verificaToken, controller.getUserStoricoController);
 router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
-//router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
+
+router.post('/updateStorico', controller.updateStoricoController);
+router.post('/cleanStorico/:id_utente', controller.cleanStoricoController);
+router.post('/removeStorico/:id', controller.removeStoricoController);
 
 export default router;

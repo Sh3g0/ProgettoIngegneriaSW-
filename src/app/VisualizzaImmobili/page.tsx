@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Banner from '@/components/Banner';
 import AdvancedSearchBar from '@/components/AdvancedSearchBar';
 import MappaImmobili from '@/components/MappaImmobili';
-import Image from 'next/image';
 import Footer from '@/components/Footer';
 
 const API_KEY = 'a8413d6ab16245ac94b1d5f489a18b9c';
@@ -99,10 +98,18 @@ export default function VisualizzaImmobili() {
       const data = await response.json();
 
       if (data && data.length > 0) {
-        setImmobili(data);
-      } else {
+        const immobiliConUrl = data.map((immobile: Immobile) => ({
+          ...immobile,
+          immagine_url: immobile.immagine_url 
+            ? `http://localhost:3001/uploads/${immobile.immagine_url}` 
+            : '', // fallback se manca
+        }));
+        setImmobili(immobiliConUrl);
+      }
+      else {
         setError('Nessun immobile trovato nella zona.');
       }
+
 
       const responseOther = await fetch(`http://localhost:3001/api/getImmobiliByCoords`, {
         method: 'POST',
@@ -117,9 +124,18 @@ export default function VisualizzaImmobili() {
       
       let otherData = await responseOther.json();
       if (otherData && otherData.length > 0) {
-      const filtered = otherData.filter(
-        (item1: Immobile) => !data.some((item2: Immobile) => item2.id === item1.id));
-        setOtherImmobili(filtered);
+        const filtered = otherData.filter(
+          (item1: Immobile) => !data.some((item2: Immobile) => item2.id === item1.id)
+        );
+
+        const altriImmobiliConUrl = filtered.map((immobile: Immobile) => ({
+          ...immobile,
+          immagine_url: immobile.immagine_url
+            ? `http://localhost:3001/uploads/${immobile.immagine_url}`
+            : '',
+        }));
+
+        setOtherImmobili(altriImmobiliConUrl);
       }
     } catch (error) {
       console.error('Errore durante il recupero degli immobili:', error);
@@ -176,12 +192,12 @@ export default function VisualizzaImmobili() {
                 <a href={`/Immobile?id=${immobile.id}`} key={immobile.id}>
                   <div className="h-[280px] w-full p-0 rounded-xl shadow-lg bg-white hover:shadow-xl transition-all duration-200">
                     <div className="relative h-[150px] w-full">
-                      <Image
+                      <img
                         src={immobile.immagine_url || '/img/sfondo5.jpg'}
-                        layout="fill"
+                        //layout="fill"
                         alt=""
-                        objectFit="cover"
-                        className="rounded-t-xl"
+                        //objectFit="cover"
+                        className="rounded-t-xl w-full h-full object-cover"
                       />
                       <p className="absolute top-0 right-0 text-blue-700 font-bold text-lg bg-blue-100 p-1 rounded-bl-xl rounded-tr-xl">
                         €{Number(immobile.prezzo).toLocaleString('it-IT')}
@@ -246,12 +262,12 @@ export default function VisualizzaImmobili() {
                 <a href={`/Immobile?id=${immobile.id}`} key={immobile.id}>
                 <div className="h-[280px] w-full p-0 rounded-xl shadow-lg bg-white hover:shadow-xl transition-all duration-200">
                     <div className="relative h-[150px] w-full">
-                      <Image
+                      <img
                         src={immobile.immagine_url || '/img/sfondo5.jpg'}
-                        layout="fill"
+                        //layout="fill"
                         alt=""
-                        objectFit="cover"
-                        className="rounded-t-xl"
+                        //objectFit="cover"
+                        className="rounded-t-xl w-full h-full object-cover"
                       />
                       <p className="absolute top-0 right-0 text-blue-700 font-bold text-lg bg-blue-100 p-1 rounded-bl-xl rounded-tr-xl">
                         €{Number(immobile.prezzo).toLocaleString('it-IT')}
