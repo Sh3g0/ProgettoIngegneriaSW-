@@ -384,9 +384,9 @@ async function getNotifichePrenotazioni(req, res) {
 
     // Query per prendere tutte le prenotazioni di questo agente
     const result = await queryDB(
-      `SELECT id, id_immobile, id_cliente, data_visita, stato, data_creazione 
+      `SELECT *
    FROM prenotazione_visite 
-   WHERE idagente = $1 AND stato = 'in_attesa' 
+   WHERE id_cliente = $1 AND stato = 'in_attesa' 
    ORDER BY data_creazione DESC`,
       [agenteId]
     );
@@ -542,7 +542,7 @@ async function inviaOfferta(req, res) {
     const idParsed = parseInt(id_immobile);
     if (isNaN(idParsed)) return res.status(400).json({ message: "ID immobile non valido" });
 
-    const immobile = await service.getImmobiliByOnlyId(idParsed);
+    const immobile = await service.getImmobiliById(idParsed);
 
     if (!immobile || immobile.length === 0) {
       console.log("DEBUG - immobile non trovato per ID:", idParsed);

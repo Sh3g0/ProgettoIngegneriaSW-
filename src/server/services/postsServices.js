@@ -198,19 +198,6 @@ async function getImmobiliById(id, status) {
     }
 }
 
-
-async function getImmobiliByOnlyId(id) {
-    try {
-        console.log("DEBUG getImmobiliByOnlyId - id ricevuto:", id);
-        const result = await queryDB('SELECT * FROM immobile WHERE id = $1', [id]);
-        console.log("DEBUG risultato query immobile:", result);
-        return result;
-    } catch (error) {
-        console.error('Errore in getImmobiliById:', error);
-        throw error;
-    }
-}
-
 async function getImmobiliByFilter(lat = 0, lng = 0, prezzo_min, prezzo_max, dimensione = null, tipo_annuncio = 'qualsiasi', status) {
     try {
         let query = ` SELECT * FROM immobile 
@@ -439,7 +426,6 @@ export {
     getImmobiliById,
     getUserBooks,
     getUserStorico,
-    getImmobiliByOnlyId,
     caricaImmobile,
     updateStorico,
     cleanStorico,

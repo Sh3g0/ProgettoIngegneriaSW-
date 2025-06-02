@@ -19,7 +19,7 @@ const __dirname = dirname(__filename);
 import path from 'path';
 // Configurazione CORS
 app.use(cors({
-  origin: 'http://localhost:3000',  // frontend URL
+  origin: '*',  // frontend URL
   credentials: true,
 }));
 
