@@ -1,4 +1,3 @@
-// Nel file useJwtPayload.ts (o dove si trova)
 import { useState, useEffect } from 'react';
 
 export interface UserInfo {
