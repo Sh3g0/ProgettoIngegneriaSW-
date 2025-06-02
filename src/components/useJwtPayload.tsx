@@ -28,6 +28,7 @@ export function useJwtPayload(): UserInfo | null {
           .join('')
       );
       const payload = JSON.parse(jsonPayload) as UserInfo;
+      console.log('🎯 Payload:', payload);
       setUserInfo(payload);
     } catch {
       setUserInfo(null);

@@ -13,6 +13,8 @@ async function getUser(username, password) {
     const params = [username];
     const result = await queryDB(query, params);
 
+    console.log('Risultato query getUser:', result);
+
     if (!result || result.length === 0) {
         console.log('Utente non trovato');
         return "";
@@ -21,6 +23,8 @@ async function getUser(username, password) {
     const user = result[0];
     const hashedPasswordFromDb = user.password_hash;
 
+    console.log('Username richiesto:', username);
+    console.log('Utente dal DB:', user.username);
     console.log('Password inserita:', password);
     console.log('Hash dal DB:', hashedPasswordFromDb);
 
@@ -34,6 +38,7 @@ async function getUser(username, password) {
         return "";
     }
 }
+
 
 
 async function registrazione(email, username, password, ruolo, idAgenzia) {
@@ -53,7 +58,7 @@ async function registrazione(email, username, password, ruolo, idAgenzia) {
 
     try {
         const result = await queryDB(query, params);
-       console.log('JWT_SECRET:', process.env.JWT_SECRET);
+        console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
         if (!process.env.JWT_SECRET) {
             throw new Error('JWT_SECRET non è definita nelle variabili d’ambiente');
@@ -193,6 +198,19 @@ async function getImmobiliById(id, status) {
     }
 }
 
+
+async function getImmobiliByOnlyId(id) {
+    try {
+        console.log("DEBUG getImmobiliByOnlyId - id ricevuto:", id);
+        const result = await queryDB('SELECT * FROM immobile WHERE id = $1', [id]);
+        console.log("DEBUG risultato query immobile:", result);
+        return result;
+    } catch (error) {
+        console.error('Errore in getImmobiliById:', error);
+        throw error;
+    }
+}
+
 async function getImmobiliByFilter(lat = 0, lng = 0, prezzo_min, prezzo_max, dimensione = null, tipo_annuncio = 'qualsiasi', status) {
     try {
         let query = ` SELECT * FROM immobile 
@@ -277,44 +295,44 @@ async function getImmobiliByCoords(lat, lng, status) {
 }
 
 async function getUserBooks(id) {
-    try{
+    try {
         const query = `
         SELECT *
         FROM prenotazione_visite
         WHERE id_cliente = $1;
         `;
 
-        const result = await queryDB(query,[id]);
+        const result = await queryDB(query, [id]);
         return result;
-    }catch(error){
+    } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
 async function getUserStorico(id) {
-    try{
+    try {
         const query = `
         SELECT *
         FROM storico
         WHERE id_utente = $1;
         `;
 
-        const result = await queryDB(query,[id]);
+        const result = await queryDB(query, [id]);
         return result;
-    }catch(error){
+    } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
 async function caricaImmobile(data) {
-  try {
-    await queryDB('BEGIN');
+    try {
+        await queryDB('BEGIN');
 
-    console.log('in begin.................');
+        console.log('in begin.................');
 
-    const immobileQuery = `
+        const immobileQuery = `
       INSERT INTO immobile (
         id_agente, titolo, descrizione, prezzo, dimensione_mq, piano, stanze,
         ascensore, classe_energetica, portineria, climatizzazione,
@@ -324,17 +342,17 @@ async function caricaImmobile(data) {
       RETURNING id
     `;
 
-    const immobileValues = [
-      data.id, data.titolo, data.descrizione, data.prezzo, data.dimensione_mq,
-      data.piano, data.stanze, data.ascensore, data.classe_energetica,
-      data.portineria, data.climatizzazione, data.tipo_annuncio,
-      data.vicino_scuole, data.vicino_parchi, data.vicino_trasporti,
-      data.indirizzo.streetAddress, data.indirizzo.city,
-      data.indirizzo.province, data.indirizzo.lat, data.indirizzo.lng
-    ];
+        const immobileValues = [
+            data.id, data.titolo, data.descrizione, data.prezzo, data.dimensione_mq,
+            data.piano, data.stanze, data.ascensore, data.classe_energetica,
+            data.portineria, data.climatizzazione, data.tipo_annuncio,
+            data.vicino_scuole, data.vicino_parchi, data.vicino_trasporti,
+            data.indirizzo.streetAddress, data.indirizzo.city,
+            data.indirizzo.province, data.indirizzo.lat, data.indirizzo.lng
+        ];
 
-    const result = await queryDB(immobileQuery, immobileValues);
-    const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
+        const result = await queryDB(immobileQuery, immobileValues);
+        const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
 
     let i=0;
     for (const path of data.immagini) {
@@ -421,6 +439,7 @@ export {
     getImmobiliById,
     getUserBooks,
     getUserStorico,
+    getImmobiliByOnlyId,
     caricaImmobile,
     updateStorico,
     cleanStorico,

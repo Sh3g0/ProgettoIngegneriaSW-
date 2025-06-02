@@ -12,6 +12,7 @@ const UPLOAD_DIR = path.resolve("uploads");
 //Controller per ottenere il ruolo di un utente dato username e password
 async function login(req, res) {
   const { username, password } = req.body;
+  console.log('Controller req.utente:', req.utente);
 
   try {
     const user = await service.getUser(username, password);
@@ -372,53 +373,44 @@ async function getDateBloccaVisita(req, res) {
   }
 }
 
-
-
 async function getNotifichePrenotazioni(req, res) {
-
-
-  const agenteId = req.user.id; // ← Preso dal middleware verificaToken
-  console.log('ID Agente:', agenteId);
-
-  if (!agenteId) {
-    return res.status(400).json({ error: 'Missing agenteId' });
-  }
   try {
-    const result = await queryDB(`
-  SELECT 
-  p.id,
-  u.username AS nome_cliente,
-  i.titolo AS titolo_immobile,
-  p.data_visita,
-  p.stato
-FROM prenotazione_visite p
-JOIN utente u ON p.id_cliente = u.id
-JOIN immobile i ON p.id_immobile = i.id
-WHERE i.id_agente = $1
-ORDER BY p.data_visita DESC;
-    `, [agenteId]);
+    // Check autorizzazione agente
+    if (!req.utente || req.utente.ruolo !== 'agente') {
+      return res.status(403).json({ message: 'Accesso negato: solo agenti' });
+    }
 
-    res.json(result);
+    const agenteId = req.utente.id;
+
+    // Query per prendere tutte le prenotazioni di questo agente
+    const result = await queryDB(
+      `SELECT id, id_immobile, id_cliente, data_visita, stato, data_creazione 
+   FROM prenotazione_visite 
+   WHERE idagente = $1 AND stato = 'in_attesa' 
+   ORDER BY data_creazione DESC`,
+      [agenteId]
+    );
+
+
+    return res.json(result);
+
   } catch (err) {
-    console.error('Errore nella query delle notifiche:', err);
-    res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
+    console.error('❌ Errore nella query delle notifiche:', err);
+    return res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
   }
-};
-
+}
 
 async function rispondiPrenotazione(req, res) {
-
   const { idPrenotazione, azione } = req.body;
+
   if (!idPrenotazione || !azione) {
     return res.status(400).json({ error: 'Dati mancanti' });
-
   }
 
   const nuovoStato = azione === 'confermata' ? 'confermata' : 'rifiutata';
-
   try {
-    await queryDB(`
-      UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
+    await queryDB(
+      `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
       [nuovoStato, idPrenotazione]
     );
 
@@ -428,6 +420,7 @@ async function rispondiPrenotazione(req, res) {
     res.status(500).json({ error: 'Errore nel database' });
   }
 }
+
 
 async function getPrenotazioniConfermate(req, res) {
   const idAgente = req.params.idAgente;
@@ -453,19 +446,28 @@ async function getPrenotazioniConfermate(req, res) {
   }
 }
 
-
-
 async function getPrenotazioniAccettateCliente(req, res) {
-  const idCliente = req.params.idCliente;
+  console.log("Controller req.utente:", req.utente);
+
+  const idCliente = req.utente.id;
 
   try {
     const result = await queryDB(`
-   SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
-FROM prenotazione_visite p
-JOIN immobile i ON p.id_immobile = i.id
-WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
+      SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
+      FROM prenotazione_visite p
+      JOIN immobile i ON p.id_immobile = i.id
+      WHERE p.id_cliente = $1 AND p.stato = 'confermata';
+    `, [idCliente]);
 
-    res.json(result);
+    console.log("Prenotazioni trovate:", result);
+
+    // Protezione contro result o rows undefined
+    const prenotazioni = (Array.isArray(result)) ? result : [];
+
+    res.json(prenotazioni);
+
+
+
   } catch (err) {
     console.error('Errore nel recupero prenotazioni confermate:', err);
     res.status(500).json({ error: 'Errore nel database' });
@@ -530,6 +532,153 @@ async function removeStoricoController(req, res) {
   }
 }
 
+async function inviaOfferta(req, res) {
+  try {
+    const id_cliente = req.utente?.id || req.session?.userId; // fallback doppio
+
+    const { id_immobile, prezzo_offerto, tipo_offerta, provenienza } = req.body;
+    console.log("BODY RICEVUTO:", req.body);
+
+    const idParsed = parseInt(id_immobile);
+    if (isNaN(idParsed)) return res.status(400).json({ message: "ID immobile non valido" });
+
+    const immobile = await service.getImmobiliByOnlyId(idParsed);
+
+    if (!immobile || immobile.length === 0) {
+      console.log("DEBUG - immobile non trovato per ID:", idParsed);
+      return res.status(404).json({ message: "Immobile non trovato" });
+    }
+
+    const id_agente = immobile[0].id_agente;
+
+    const query = `
+      INSERT INTO offerte (id_immobile, id_cliente, id_agente, prezzo_offerto, tipo_offerta, stato, provenienza)
+      VALUES ($1, $2, $3, $4, $5, 'in_attesa', $6)
+      RETURNING *
+    `;
+    const values = [idParsed, id_cliente, id_agente, prezzo_offerto, tipo_offerta, provenienza];
+    const result = await queryDB(query, values);
+
+    await queryDB(`
+      INSERT INTO notifiche (id_utente, messaggio)
+      VALUES ($1, $2)
+    `, [id_agente, `Hai ricevuto una nuova offerta per l'immobile "${immobile[0].titolo}"`]);
+
+    console.log("Offerta salvata:", result[0]);
+
+    res.status(201).json({ message: "Offerta inviata con successo", offerta: result[0] });
+
+  } catch (error) {
+    console.error("Errore in inviaOfferta:", error);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+}
+
+
+async function offerteRicevuteAgente(req, res) {
+  try {
+    const id_agente = req.utente.id;
+
+    const query = `
+ SELECT offerte.*, immobile.titolo AS titolo_immobile
+  FROM offerte
+  JOIN immobile ON offerte.id_immobile = immobile.id
+  WHERE offerte.id_agente = $1 AND offerte.stato = 'in_attesa'
+`;
+    const result = await queryDB(query, [id_agente]);
+
+    res.json(result);
+  } catch (err) {
+    console.error("Errore nel recupero offerte:", err);
+    res.status(500).json({ message: "Errore nel recupero delle offerte" });
+  }
+};
+
+
+
+async function rispondi(req, res) {
+  try {
+    const { id_offerta, stato } = req.body;
+    if (!["accettata", "rifiutata"].includes(stato)) {
+      return res.status(400).json({ message: "Stato non valido" });
+    }
+
+    const query = `UPDATE offerte SET stato = $1 WHERE id = $2 RETURNING *`;
+    const result = await queryDB(query, [stato, id_offerta]);
+
+    if (result.length === 0) return res.status(404).json({ message: "Offerta non trovata" });
+
+    res.json({ message: `Offerta ${stato}`, offerta: result[0] });
+  } catch (err) {
+    console.error("Errore nel rispondere all'offerta:", err);
+    res.status(500).json({ message: "Errore nel rispondere all'offerta" });
+  }
+};
+
+
+async function controproponi(req, res) {
+  const { id_offerta, nuovo_prezzo } = req.body;
+
+  try {
+    const result = await queryDB(`
+      UPDATE offerte
+      SET prezzo_offerto = $1,
+          tipo_offerta = 'controfferta',
+          stato = 'in_attesa'
+      WHERE id = $2
+      RETURNING *;
+    `, [nuovo_prezzo, id_offerta]);
+
+    res.json({ message: "Controproposta inviata", data: result[0] });
+  } catch (err) {
+    console.error("Errore nella controproposta:", err);
+    res.status(500).json({ error: "Errore nella controproposta" });
+  }
+};
+
+
+ async function getOfferteCliente(req, res) {
+  const idCliente = req.utente.id; // Assicurati che req.user venga settato dal middleware auth
+  const sql = `
+    SELECT o.id, o.prezzo_offerto, o.tipo_offerta, o.stato, i.titolo AS titolo_immobile
+    FROM offerte o
+    JOIN immobile i ON o.id_immobile = i.id
+    WHERE o.id_cliente = $1
+  `;
+
+  try {
+    const result = await queryDB(sql, [idCliente]);
+    console.log("Offerte trovate:", result);
+    return res.json(result);
+  } catch (error) {
+    console.error("Errore nel recupero offerte:", error);
+    return res.status(500).json({ error: "Errore server" });
+  }
+}
+
+
+async function inviaContropropostaCliente(req, res) {
+  const { id_offerta, nuovo_prezzo } = req.body;
+
+  try {
+    const result = await queryDB(`
+      UPDATE offerte
+      SET prezzo_offerto = $1,
+          tipo_offerta = 'controfferta',
+          stato = 'in_attesa'
+      WHERE id = $2
+      RETURNING *;
+    `, [nuovo_prezzo, id_offerta]);
+
+    res.json({ message: "Controproposta inviata dal cliente", data: result[0] });
+  } catch (err) {
+    console.error("Errore durante l'invio della controproposta cliente:", err);
+    res.status(500).json({ error: "Errore nella controproposta del cliente" });
+  }
+}
+
+
+
 export {
   login,
   getImmobiliByCoordsController,
@@ -551,5 +700,11 @@ export {
   getImmaginiController,
   cleanStoricoController,
   removeStoricoController,
+  inviaOfferta,
+  offerteRicevuteAgente,
+  rispondi,
+  controproponi,
+  getOfferteCliente,
+  inviaContropropostaCliente,
 };
 
