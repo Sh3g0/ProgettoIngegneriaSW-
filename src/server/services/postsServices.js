@@ -441,6 +441,36 @@ async function getAgenzia(email, password) {
     }
 }
 
+async function getAgenzia(email, password) {
+    try{
+        const query = `
+            SELECT * FROM agenzia
+            WHERE email = $1 AND password = $2`
+        ;
+        
+        const result = await queryDB(query, [email, password]);
+        return result;
+    }catch(e){
+        console.log(error);
+        throw e;
+    }
+}
+
+async function getAgenzia(email, password) {
+    try{
+        const query = `
+            SELECT * FROM agenzia
+            WHERE email = $1 AND password = $2`
+        ;
+        
+        const result = await queryDB(query, [email, password]);
+        return result;
+    }catch(e){
+        console.log(error);
+        throw e;
+    }
+}
+
 export {
     getUser,
     registrazione,
