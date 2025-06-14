@@ -9,10 +9,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Autenticazione standard
 router.post('/login', controller.login);
 router.post('/loginAgenzia', controller.loginAgenzia);
-router.post('/loginAgenzia', controller.loginAgenzia);
 router.post('/registrazione', controller.registrazioneUtente);
 router.post('/registrazioneAgenzia', controller.registrazioneAgenzia);
-router.post('/cambiaPasswordAgenzia', controller.cambiaPasswordAgenzia);
 router.post('/cambiaPasswordAgenzia', controller.cambiaPasswordAgenzia);
 
 router.post('/getImmobiliById', controller.getImmobiliByIdController);
@@ -40,7 +38,13 @@ router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controll
 
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
+<<<<<<< Updated upstream
 router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
+router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
+
+router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
+=======
+>>>>>>> Stashed changes
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
 router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
