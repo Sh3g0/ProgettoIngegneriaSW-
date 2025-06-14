@@ -1,14 +1,25 @@
 'use client';
 
 import '../../styles/style.css'; 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import SearchBar from '@/components/SearchBar';
 import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
+import { useJwtPayload } from '@/components/useJwtPayload';
+import { useSearchParams } from 'next/navigation';
 
 export default function Home() {
   const [showAgenteOptions, setAgenteOption] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const searchParams = useSearchParams();
+  const idAgenzia = searchParams.get('idAgenzia');
+  const primo_accesso_param = searchParams.get('primo_accesso');
+  const [primo_accesso, setPrimoAccesso] = useState(false);
+
+  const [passwordAgenzia, setPasswordAgenzia] = useState('');
+
+  const user = useJwtPayload();
 
   const backgrounds = [
     'img/sfondo1.jpg',
@@ -24,7 +35,29 @@ export default function Home() {
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * backgrounds.length);
     setBackgroundImage(backgrounds[randomIndex]);
+
+    if(user && user.ruolo === 'agente') {
+      setAgenteOption(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if(primo_accesso_param == 'true'){
+      setPrimoAccesso(true);
+    }
+  }, []);
+
+  const handleAgencyPasswordChange = async () => {
+    try{
+      const res = await fetch('http://localhost:3001/api/cambiaPasswordAgenzia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idAgenzia, passwordAgenzia})
+      });
+    }catch(e){
+      console.log(e);
+    }
+  }
 
   return (
     <div className="bg-white">
@@ -50,6 +83,30 @@ export default function Home() {
           <div className="fixed bottom-5 right-5 w-16 h-16 bg-blue-500 text-white text-3xl rounded-full flex items-center justify-center shadow-xl hover:bg-blue-600 cursor-pointer z-50">
             <a href='/caricaImmobile'>+</a>
           </div>
+        )}
+
+        {/* MODALE AGENZIA */}
+        {primo_accesso && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-[400px] shadow-lg relative">
+              <h3 className="text-xl font-semibold mb-4">Per il primo accesso cambia la password</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Nuova password</label>
+                <input
+                  type="password"
+                  value={passwordAgenzia}
+                  onChange={(e) => setPasswordAgenzia(e.target.value)}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+                <button
+                  className="px-4 py-2 border rounded bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={handleAgencyPasswordChange}
+                >
+                  Invio
+                </button>
+              </div>
+            </div>
         )}
 
         {/* Hero Section */}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import MappaImmobili from '@/components/MappaImmobili';
 import Banner from '@/components/Banner';
@@ -38,6 +38,13 @@ interface Immagine {
     url: string;
 }
 
+interface Agenzia {
+    nome: string;
+    sede: string;
+    email: string;
+    descrizione: string;
+}
+
 export default function ImmobilePage() {
 
 
@@ -47,6 +54,9 @@ export default function ImmobilePage() {
         console.error('ID immobile non trovato in URL');
     }
     const [immobile, setImmobile] = useState<Immobile | null>(null);
+
+    const [agenzia, setAgenzia] = useState<Agenzia | null>(null);
+
 
     const immaginiMock: Immagine[] = [
         { url: '/img/sfondo1.jpg' },
@@ -167,21 +177,36 @@ export default function ImmobilePage() {
                     });
 
 
+                setImmagini(immaginiFormattate);
+            } else {
+                console.error('Nessuna immagine trovata');
+            }
+        } catch (e) {
+            console.error('Errore nel recupero immagini:', e);
+        }
+    };
 
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        setImmagini(data);
-                    } else {
-                        console.error('No images found for the immobile');
-                    }
-                }
-                fetchImmagini();
-            } catch (e) {
-                console.error('Error parsing immobile data:', e);
+    fetchImmagini();
+}, [immobile]);
+
+
+    useEffect(() => {
+        const fetchAgenzia = async () => {
+            const res = await fetch(`http://localhost:3001/api/getAgenziaByAgenteId/${immobile?.id_agente}`);
+
+            if (!res.ok) {
+                console.error('Errore nel recupero agenzia');
+                return;
+            }
+            const data = await res.json();
+            if (data) {
+                setAgenzia(data);
             }
         }
-        fetchImmobile();
-    }, [immID]);
+
+        fetchAgenzia();
+
+    }, [immobile]);
 
     useEffect(() => {
         if (isGalleryOpen) {
@@ -873,13 +898,11 @@ export default function ImmobilePage() {
 
                 {/* Colonna destra */}
                 <div className="w-[30%] bg-white rounded-2xl shadow-md p-6 text-gray-800">
-                    <h2 className="text-2xl font-bold text-blue-700 mb-4">Agenzia XYZ</h2>
-                    <p className="mb-2"><span className="font-semibold">Indirizzo:</span> Via Roma 123, Milano</p>
+                    <h2 className="text-2xl font-bold text-blue-700 mb-4">{agenzia?.nome}</h2>
+                    <p className="mb-2"><span className="font-semibold">Indirizzo:</span>{agenzia?.sede}</p>
                     <p className="mb-2"><span className="font-semibold">Telefono:</span> +39 0123 456789</p>
-                    <p className="mb-2"><span className="font-semibold">Email:</span> info@agenziaxyz.it</p>
-                    <p className="mt-4 text-sm text-gray-600">
-                        Siamo un'agenzia con 10 anni di esperienza nel settore immobiliare. Offriamo consulenza personalizzata e un'ampia gamma di immobili.
-                    </p>
+                    <p className="mb-2"><span className="font-semibold">Email:</span>{agenzia?.email}</p>
+                    <p className="mt-4 text-sm text-gray-600">{agenzia?.descrizione}</p>
                 </div>
             </div>
 

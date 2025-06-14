@@ -12,6 +12,7 @@ const UPLOAD_DIR = path.resolve("uploads");
 //Controller per ottenere il ruolo di un utente dato username e password
 async function login(req, res) {
   const { username, password } = req.body;
+  console.log('Controller req.utente:', req.utente);
 
   try {
     const user = await service.getUser(username, password);
@@ -27,7 +28,7 @@ async function login(req, res) {
     };
 
     // Creazione del token (opzionale se vuoi usare autenticazione JWT)
-    const token = jwt.sign(payload, 'chiave_super_segreta', { expiresIn: '1h' });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'Login riuscito',
@@ -39,8 +40,46 @@ async function login(req, res) {
       }
     });
 
+  } catch (error) {
+    console.error('Errore durante il login:', error);
+    res.status(500).json({ message: 'Errore del server durante il login' });
+  }
+}
 
+async function loginAgenzia(req, res) {
+  const { email, password } = req.body;
 
+  try {
+    const risultato = await service.getAgenzia(email, password);
+    const agenzia = risultato[0];
+
+    console.log('Agenzia trovata:', agenzia);
+
+    if (!agenzia || agenzia === "") {
+      return res.status(401).json({ message: 'Credenziali non valide' });
+    }
+
+    console.log('id:', agenzia.id);
+    const payload = {
+      id: agenzia.id,
+      ruolo: 'agenzia', // Ruolo fisso per agenzia
+      username: agenzia.nome,
+    };
+
+    // Creazione del token (opzionale se vuoi usare autenticazione JWT)
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({
+      message: 'Login riuscito',
+      token: token,
+      agenzia: {
+        id: agenzia.id,
+        nome: agenzia.nome,
+        sede: agenzia.sede,
+        email: agenzia.email,
+        primo_accesso: agenzia.primo_accesso
+      }
+    });
 
   } catch (error) {
     console.error('Errore durante il login:', error);
@@ -73,6 +112,7 @@ async function checkUserExists(email, username) {
     throw new Error('Errore durante il controllo dell\'utente esistente');
   }
 }
+
 async function registrazioneUtente(req, res) {
   console.log('Dati ricevuti per registrazione:', req.body);
   const { email, username, password, ruolo, idAgenzia } = req.body;
@@ -97,42 +137,11 @@ async function registrazioneUtente(req, res) {
       throw new Error('Errore: utente non trovato o risultato della query non valido');
     }
 
-    const payload = {
-      id: user.id,
-      ruolo: user.ruolo,
-      username: user.username
-    };
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    return res.status(201).json({
-      message: 'Registrazione riuscita',
-      token,
-      ruolo: user.ruolo,
-      id: user.id,
-      username: user.username,
-      id_agenzia: user.id_agenzia || null
-    });
+    return res.status(201).json({ success: true });;
 
   } catch (error) {
     console.error('Errore durante la registrazione:', error);
     return res.status(500).json({ message: `Errore del server durante la registrazione: ${error.message}` });
-  }
-}
-
-async function registrazioneAgenzia(req, res) {
-  try {
-    const nuovaAgenzia = await service.registrazioneAgenziaDB(
-      req.body.nome,
-      req.body.sede,
-      req.body.email
-    );
-
-    return res.status(201).json({ success: true, data: nuovaAgenzia });
-
-  } catch (error) {
-    console.error('Errore durante la creazione agenzia:', error);
-    return res.status(500).json({ success: false, message: error.message });
   }
 }
 
@@ -156,11 +165,6 @@ async function checkAgenziaExists(emailAgenzia) {
     throw error;
   }
 }
-
-
-
-
-
 
 async function getImmobiliByAdvancedFilterController(req, res) {
   try {
@@ -259,7 +263,7 @@ async function getUserStoricoController(req, res) {
 
   } catch (e) {
     console.log("Errore: ", e);
-    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
+    return res.status(500).json({ error: 'Errore nel recupero dello storico' });
   }
 }
 
@@ -308,83 +312,6 @@ async function caricaImmobileController(req, res) {
 
   return res.status(200).json({ success: true });
 }
-
-async function getUserBooksController(req, res) {
-  try {
-
-    let { id } = req.body;
-
-    const books = await service.getUserBooks(id);
-
-    return res.json(books);
-
-  } catch (e) {
-    console.log("Errore: ", e);
-    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
-  }
-}
-
-async function getUserStoricoController(req, res) {
-  try {
-
-    let { id } = req.body;
-
-    const storico = await service.getUserStorico(id);
-
-    return res.json(storico);
-
-  } catch (e) {
-    console.log("Errore: ", e);
-    return res.status(500).json({ error: 'Errore nel recupero degli immobili' });
-  }
-}
-
-async function caricaImmobileController(req, res) {
-  const files = req.files; // array di file
-  const jsonData = JSON.parse(req.body.data); // stringa -> oggetto
-
-  console.log("JSON ricevuto:", jsonData);
-  console.log("Immagini ricevute:", files);
-
-  let { id, titolo, descrizione, prezzo, dimensione_mq, piano, stanze, ascensore, classe_energetica, portineria, climatizzazione, tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti, indirizzo } = jsonData;
-  let { streetAddress, houseNumber, city, province, lat, lng } = indirizzo;
-
-  streetAddress = streetAddress + ` ${houseNumber}`
-
-  const imagePaths = []; //Percorso immagini da salvare sul db
-
-  for (const file of files) {
-    const filename = `${Date.now()}-${file.originalname}`; //Identificatore univoco per l'immagine
-    const filePath = path.join(UPLOAD_DIR, filename); //Crea il percorso unendo path e nome file (uploads/"nomefile")
-    await fs.writeFile(filePath, file.buffer); //Scrive fisicamente il file nel percorso
-    imagePaths.push(filename); //Salvo solo il nome del file perchè a prescindere cercherò in /uploads
-  }
-
-  await service.caricaImmobile({
-    id,
-    titolo,
-    descrizione,
-    prezzo,
-    dimensione_mq,
-    piano,
-    stanze,
-    ascensore,
-    classe_energetica,
-    portineria,
-    climatizzazione,
-    tipo_annuncio: tipo_annuncio.toLowerCase(),
-    vicino_scuole,
-    vicino_parchi,
-    vicino_trasporti,
-    indirizzo: { streetAddress, city, province, lat, lng },
-    immagini: imagePaths,
-  });
-
-  //Cancellare le img da uploads se il caricamento non va a buon fine
-
-  return res.status(200).json({ success: true });
-}
-
 
 async function prenotaVisitaController(req, res) {
   console.log('✅ Controller prenotaVisita chiamato');
@@ -435,6 +362,27 @@ async function prenotaVisitaController(req, res) {
   }
 }
 
+async function getAgentiByAgenziaIdController(req, res) {
+  const idAgenzia = req.params.idAgenzia;
+
+  try {
+    const result = await queryDB(`
+      SELECT ag.id, ag.email, ag.username, ag.password_hash, ag.email
+      FROM utente ag
+      INNER JOIN agenzia a ON ag.id_agenzia = a.id
+      WHERE ag.id_agenzia = $1;
+    `, [idAgenzia]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Nessun agente trovato per questa agenzia' });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Errore nel recupero agenti:', error);
+    res.status(500).json({ message: 'Errore del server durante il recupero degli agenti' });
+  }
+}
 
 
 async function getDateBloccaVisita(req, res) {
@@ -454,54 +402,44 @@ async function getDateBloccaVisita(req, res) {
   }
 }
 
-
-
 async function getNotifichePrenotazioni(req, res) {
-
-
-  const agenteId = req.user.id; // ← Preso dal middleware verificaToken
-  console.log('ID Agente:', agenteId);
-
-  if (!agenteId) {
-    return res.status(400).json({ error: 'Missing agenteId' });
-  }
   try {
-    const result = await queryDB(`
-  SELECT 
-  p.id,
-  u.username AS nome_cliente,
-  i.titolo AS titolo_immobile,
-  p.data_visita,
-  p.stato
-FROM prenotazione_visite p
-JOIN utente u ON p.id_cliente = u.id
-JOIN immobile i ON p.id_immobile = i.id
-WHERE i.id_agente = $1
-ORDER BY p.data_visita DESC;
-    `, [agenteId]);
+    // Check autorizzazione agente
+    if (!req.utente || req.utente.ruolo !== 'agente') {
+      return res.status(403).json({ message: 'Accesso negato: solo agenti' });
+    }
 
-    res.json(result);
+    const agenteId = req.utente.id;
+
+    // Query per prendere tutte le prenotazioni di questo agente
+    const result = await queryDB(
+      `SELECT *
+   FROM prenotazione_visite 
+   WHERE idagente = $1 AND stato = 'in_attesa' 
+   ORDER BY data_creazione DESC`,
+      [agenteId]
+    );
+
+
+    return res.json(result);
+
   } catch (err) {
-    console.error('Errore nella query delle notifiche:', err);
-    res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
+    console.error('❌ Errore nella query delle notifiche:', err);
+    return res.status(500).json({ error: 'Errore durante il recupero delle notifiche' });
   }
-};
-
+}
 
 async function rispondiPrenotazione(req, res) {
-
   const { idPrenotazione, azione } = req.body;
+
   if (!idPrenotazione || !azione) {
     return res.status(400).json({ error: 'Dati mancanti' });
-
   }
 
   const nuovoStato = azione === 'confermata' ? 'confermata' : 'rifiutata';
-
   try {
-
-    await queryDB(`
-      UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
+    await queryDB(
+      `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
       [nuovoStato, idPrenotazione]
     );
 
@@ -512,11 +450,28 @@ async function rispondiPrenotazione(req, res) {
   }
 }
 
+async function cambiaPasswordAgenzia(req, res){
+  const { idAgenzia, passwordAgenzia } = req.body;
+
+  try{
+    await queryDB(
+      `UPDATE agenzia set password = $1 WHERE id = $2`,
+      [passwordAgenzia, idAgenzia]
+    );
+
+    res.json({ message: 'Password aggiornato con successo' });
+
+  }catch(err){
+    console.error("Errore con l'UPDATE della password agenzia: ", err);
+    res.status(500).json({ error: 'Errore nel database'});
+  }
+}
+
+
 async function getPrenotazioniConfermate(req, res) {
   const idAgente = req.params.idAgente;
 
   try {
-
     const result = await queryDB(`
       SELECT 
         p.id,
@@ -530,7 +485,6 @@ async function getPrenotazioniConfermate(req, res) {
       ORDER BY p.data_visita ASC
     `, [idAgente]);
 
-
     res.json(result);
   } catch (err) {
     console.error('Errore nel recupero prenotazioni confermate:', err);
@@ -538,29 +492,284 @@ async function getPrenotazioniConfermate(req, res) {
   }
 }
 
-
-
 async function getPrenotazioniAccettateCliente(req, res) {
-  const idCliente = req.params.idCliente;
+  console.log("Controller req.utente:", req.utente);
+
+  const idCliente = req.utente.id;
 
   try {
-
     const result = await queryDB(`
-   SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
-FROM prenotazione_visite p
-JOIN immobile i ON p.id_immobile = i.id
-WHERE p.id_cliente = $1 AND p.stato = 'confermata';`, [idCliente]);
+      SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
+      FROM prenotazione_visite p
+      JOIN immobile i ON p.id_immobile = i.id
+      WHERE p.id_cliente = $1 AND p.stato = 'confermata';
+    `, [idCliente]);
 
-    res.json(result.rows);
+    console.log("Prenotazioni trovate:", result);
+
+    // Protezione contro result o rows undefined
+    const prenotazioni = (Array.isArray(result)) ? result : [];
+
+    res.json(prenotazioni);
+
+
+
   } catch (err) {
     console.error('Errore nel recupero prenotazioni confermate:', err);
     res.status(500).json({ error: 'Errore nel database' });
   }
 }
 
+async function updateStoricoController(req, res) {
+  const params = req.body;
+  let { id_utente, id_immobile, tipo_attivita } = params;
+
+  console.log("Dati ricevuti per l'aggiornamento dello storico:", params);
+
+  try{
+    const result = await service.updateStorico(id_utente, id_immobile, tipo_attivita);
+    return res.status(200).json({ success: true });
+  }catch(err){
+    console.error("Errore nell'aggiornamento dello storico:", err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function getImmaginiController(req, res) {
+  const id_immobile = req.params.id_immobile;
+
+  try {
+    const result = await queryDB(
+      `SELECT path FROM immagini_immobile WHERE immobile_id = $1`,
+      [id_immobile]
+    );
+
+    // Restituisci i percorsi completi
+    const immagini = result.map(r => `/uploads/${r.path}`);
+
+    res.json({ immagini });
+  } catch (err) {
+    console.error("Errore nel recupero immagini:", err);
+    res.status(500).json({ error: "Errore nel recupero immagini" });
+  }
+}
+
+async function cleanStoricoController(req, res) {
+  const id_utente = req.params.id_utente;
+
+  try {
+    await service.cleanStorico(id_utente);
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Errore nella pulizia dello storico:", err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function removeStoricoController(req, res) {
+  const id = req.params.id;
+
+  try {
+    await service.removeStorico(id);
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Errore nella rimozione dello storico:", err);
+    res.status(500).json({ error: 'Errore nel database' });
+  }
+}
+
+async function inviaOfferta(req, res) {
+  try {
+    const id_cliente = req.utente?.id || req.session?.userId; // fallback doppio
+
+    const { id_immobile, prezzo_offerto, tipo_offerta, provenienza } = req.body;
+    console.log("BODY RICEVUTO:", req.body);
+
+    const idParsed = parseInt(id_immobile);
+    if (isNaN(idParsed)) return res.status(400).json({ message: "ID immobile non valido" });
+
+    const immobile = await service.getImmobiliById(idParsed);
+
+    if (!immobile || immobile.length === 0) {
+      console.log("DEBUG - immobile non trovato per ID:", idParsed);
+      return res.status(404).json({ message: "Immobile non trovato" });
+    }
+
+    const id_agente = immobile[0].id_agente;
+
+    const query = `
+      INSERT INTO offerte (id_immobile, id_cliente, id_agente, prezzo_offerto, tipo_offerta, stato, provenienza)
+      VALUES ($1, $2, $3, $4, $5, 'in_attesa', $6)
+      RETURNING *
+    `;
+    const values = [idParsed, id_cliente, id_agente, prezzo_offerto, tipo_offerta, provenienza];
+    const result = await queryDB(query, values);
+
+    await queryDB(`
+      INSERT INTO notifiche (id_utente, messaggio)
+      VALUES ($1, $2)
+    `, [id_agente, `Hai ricevuto una nuova offerta per l'immobile "${immobile[0].titolo}"`]);
+
+    console.log("Offerta salvata:", result[0]);
+
+    res.status(201).json({ message: "Offerta inviata con successo", offerta: result[0] });
+
+  } catch (error) {
+    console.error("Errore in inviaOfferta:", error);
+    res.status(500).json({ message: "Errore interno del server" });
+  }
+}
+
+
+async function offerteRicevuteAgente(req, res) {
+  try {
+    const id_agente = req.utente.id;
+
+    const query = `
+ SELECT offerte.*, immobile.titolo AS titolo_immobile
+  FROM offerte
+  JOIN immobile ON offerte.id_immobile = immobile.id
+  WHERE offerte.id_agente = $1 AND offerte.stato = 'in_attesa'
+`;
+    const result = await queryDB(query, [id_agente]);
+
+    res.json(result);
+  } catch (err) {
+    console.error("Errore nel recupero offerte:", err);
+    res.status(500).json({ message: "Errore nel recupero delle offerte" });
+  }
+};
+
+
+
+async function rispondi(req, res) {
+  try {
+    const { id_offerta, stato } = req.body;
+    if (!["accettata", "rifiutata"].includes(stato)) {
+      return res.status(400).json({ message: "Stato non valido" });
+    }
+
+    const query = `UPDATE offerte SET stato = $1 WHERE id = $2 RETURNING *`;
+    const result = await queryDB(query, [stato, id_offerta]);
+
+    if (result.length === 0) return res.status(404).json({ message: "Offerta non trovata" });
+
+    res.json({ message: `Offerta ${stato}`, offerta: result[0] });
+  } catch (err) {
+    console.error("Errore nel rispondere all'offerta:", err);
+    res.status(500).json({ message: "Errore nel rispondere all'offerta" });
+  }
+};
+
+
+async function controproponi(req, res) {
+  const { id_offerta, nuovo_prezzo } = req.body;
+
+  try {
+    const result = await queryDB(`
+      UPDATE offerte
+      SET prezzo_offerto = $1,
+          tipo_offerta = 'controfferta',
+          stato = 'in_attesa'
+      WHERE id = $2
+      RETURNING *;
+    `, [nuovo_prezzo, id_offerta]);
+
+    res.json({ message: "Controproposta inviata", data: result[0] });
+  } catch (err) {
+    console.error("Errore nella controproposta:", err);
+    res.status(500).json({ error: "Errore nella controproposta" });
+  }
+};
+
+
+ async function getOfferteCliente(req, res) {
+  const idCliente = req.utente.id; // Assicurati che req.user venga settato dal middleware auth
+  const sql = `
+    SELECT o.id, o.prezzo_offerto, o.tipo_offerta, o.stato, i.titolo AS titolo_immobile
+    FROM offerte o
+    JOIN immobile i ON o.id_immobile = i.id
+    WHERE o.id_cliente = $1
+  `;
+
+  try {
+    const result = await queryDB(sql, [idCliente]);
+    console.log("Offerte trovate:", result);
+    return res.json(result);
+  } catch (error) {
+    console.error("Errore nel recupero offerte:", error);
+    return res.status(500).json({ error: "Errore server" });
+  }
+}
+
+
+async function inviaContropropostaCliente(req, res) {
+  const { id_offerta, nuovo_prezzo } = req.body;
+
+  try {
+    const result = await queryDB(`
+      UPDATE offerte
+      SET prezzo_offerto = $1,
+          tipo_offerta = 'controfferta',
+          stato = 'in_attesa'
+      WHERE id = $2
+      RETURNING *;
+    `, [nuovo_prezzo, id_offerta]);
+
+    res.json({ message: "Controproposta inviata dal cliente", data: result[0] });
+  } catch (err) {
+    console.error("Errore durante l'invio della controproposta cliente:", err);
+    res.status(500).json({ error: "Errore nella controproposta del cliente" });
+  }
+}
+
+async function registrazioneAgenzia(req, res) {
+  try {
+    const { nomeAgenzia, sedeAgenzia, emailAgenzia, descrizioneAgenzia } = req.body;
+
+    const agenziaExist = await checkAgenziaExists(emailAgenzia);
+    if (agenziaExist) {
+      return res.status(400).json({ message: 'Agenzia con email già esistente.' });
+    }
+
+    const result = await queryDB(`
+      INSERT INTO agenzia (nome, sede, email, descrizione)
+      VALUES ($1, $2, $3, $4)`,
+      [nomeAgenzia, sedeAgenzia, emailAgenzia, descrizioneAgenzia]);
+
+    return res.status(201).json({ success: true });
+
+  } catch (error) {
+    console.error('Errore durante la creazione agenzia:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+async function getAgenziaByAgenteId(req, res) {
+  const id = req.params.id;
+
+  try {
+    const result = await queryDB(`
+      SELECT a.nome, a.sede, a.email, a.descrizione
+      FROM agente ag
+      JOIN agenzia a ON ag.id_agenzia = a.id
+      WHERE ag.id = $1;
+    `, [id]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Agenzia non trovata' });
+    }
+
+    res.json(result[0]);
+  } catch (error) {
+    console.error('Errore nel recupero agenzia:', error);
+    res.status(500).json({ message: 'Errore del server durante il recupero dell\'agenzia' });
+  }
+}
 
 export {
   login,
+  loginAgenzia,
   getImmobiliByCoordsController,
   registrazioneUtente,
   getImmobiliByFilterController,
@@ -572,10 +781,22 @@ export {
   getDateBloccaVisita,
   getPrenotazioniConfermate,
   getPrenotazioniAccettateCliente,
-  prenotaVisitaController,
   getUserBooksController,
   getUserStoricoController,
   caricaImmobileController,
   prenotaVisitaController,
+  updateStoricoController,
+  getImmaginiController,
+  cleanStoricoController,
+  removeStoricoController,
+  inviaOfferta,
+  offerteRicevuteAgente,
+  rispondi,
+  controproponi,
+  getOfferteCliente,
+  getAgentiByAgenziaIdController,
+  inviaContropropostaCliente,
+  getAgenziaByAgenteId,
+  cambiaPasswordAgenzia,
 };
 

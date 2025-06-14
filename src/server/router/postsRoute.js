@@ -8,8 +8,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Autenticazione standard
 router.post('/login', controller.login);
+router.post('/loginAgenzia', controller.loginAgenzia);
 router.post('/registrazione', controller.registrazioneUtente);
 router.post('/registrazioneAgenzia', controller.registrazioneAgenzia);
+router.post('/cambiaPasswordAgenzia', controller.cambiaPasswordAgenzia);
 
 router.post('/getImmobiliById', controller.getImmobiliByIdController);
 router.post('/getImmobiliByCoords', controller.getImmobiliByCoordsController);
@@ -34,4 +36,7 @@ router.post('/getUserStorico', verificaToken, controller.getUserStoricoControlle
 router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
 //router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
 
+router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
+
+router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
 export default router;

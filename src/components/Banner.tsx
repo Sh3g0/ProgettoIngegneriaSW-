@@ -97,6 +97,14 @@ export default function Banner() {
             </a>
           )}
 
+          { /* Se agenzia mostra opzione agenti */}
+          {user_info?.ruolo === 'agenzia' && (
+            <a href="/gestioneAgenti" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
+              <User size={16} /> Agenti
+            </a>
+          )}
+
+          {/* Se loggato mostra link al profilo */}
           {user_info && (
             <a href='/profilo' className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <User size={16} /> {user_info.username || 'Profilo'}
