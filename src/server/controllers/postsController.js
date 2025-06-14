@@ -767,6 +767,31 @@ async function getAgenziaByAgenteId(req, res) {
   }
 }
 
+async function eliminaAgenteController(req, res){
+  const id = req.params.id;
+  try {
+    await queryDB('DELETE FROM utente WHERE id = $1', [id]);
+    res.status(200).json({ message: 'Agente eliminato con successo' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Errore durante l\'eliminazione dell\'agente' });
+  }
+};
+
+async function switchPrimoAccessoController(req, res) {
+  const idAgenzia = req.body.idAgenzia;
+  const primoAccesso = req.body.primoAccesso;
+
+  try {
+    await queryDB('UPDATE agenzia SET primo_accesso = $1 WHERE id = $2', [primoAccesso, idAgenzia]);
+    res.status(200).json({ message: 'Primo accesso completato con successo' });
+  } catch (err) {
+    console.error('Errore durante l\'aggiornamento del primo accesso:', err);
+    res.status(500).json({ message: 'Errore durante l\'aggiornamento del primo accesso' });
+  }
+}
+
+
 export {
   login,
   loginAgenzia,
@@ -798,5 +823,7 @@ export {
   inviaContropropostaCliente,
   getAgenziaByAgenteId,
   cambiaPasswordAgenzia,
+  eliminaAgenteController,
+  switchPrimoAccessoController,
 };
 

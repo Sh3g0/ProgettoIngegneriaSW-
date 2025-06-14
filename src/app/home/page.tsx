@@ -47,17 +47,67 @@ export default function Home() {
     }
   }, []);
 
-  const handleAgencyPasswordChange = async () => {
-    try{
-      const res = await fetch('http://localhost:3001/api/cambiaPasswordAgenzia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idAgenzia, passwordAgenzia})
-      });
-    }catch(e){
-      console.log(e);
+
+const switchPrimoAccesso = async () => {
+  try {
+    const res = await fetch('http://localhost:3001/api/switchPrimoAccesso', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idAgenzia, primo_accesso: !primo_accesso }),
+    });
+
+    if (!res.ok) {
+      // Se lo status HTTP non è 2xx
+      const errorData = await res.json();
+      console.error('Errore dal server:', errorData);
+      alert(`Errore: ${errorData.message || res.statusText}`);
+      return;
     }
+
+    const data = await res.json();
+    console.log('Risposta dal server:', data);
+    setPrimoAccesso(false);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('primo_accesso', 'false');
+    window.location.href = url.toString();  // causa reload
+
+  }catch (e) {
+    console.error('Errore nella richiesta:', e);
+    alert('Errore di rete o altro problema durante la richiesta');
   }
+}
+
+const handleAgencyPasswordChange = async () => {
+  console.log('Invio password agenzia:', passwordAgenzia);
+  try {
+    const res = await fetch('http://localhost:3001/api/cambiaPasswordAgenzia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idAgenzia, passwordAgenzia }),
+    });
+
+    if (!res.ok) {
+      // Se lo status HTTP non è 2xx
+      const errorData = await res.json();
+      console.error('Errore dal server:', errorData);
+      alert(`Errore: ${errorData.message || res.statusText}`);
+      return;
+    }
+
+    const data = await res.json();
+    console.log('Risposta dal server:', data);
+    alert('Password aggiornata con successo!');
+
+    switchPrimoAccesso();
+
+    //window.location.reload();
+  } catch (e) {
+    console.error('Errore nella richiesta:', e);
+    alert('Errore di rete o altro problema durante la richiesta');
+  }
+};
+
 
   return (
     <div className="bg-white">

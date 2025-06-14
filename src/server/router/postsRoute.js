@@ -38,14 +38,15 @@ router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controll
 
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
-<<<<<<< Updated upstream
 router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
 router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
-=======
->>>>>>> Stashed changes
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
 router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdController);
+router.delete('/eliminaAgente/:id', controller.eliminaAgenteController);
+
+router.post('/switchPrimoAccesso', controller.switchPrimoAccessoController);
+
 export default router;

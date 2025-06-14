@@ -10,40 +10,46 @@ export default function GestioneAgentiPage() {
     id: string;
     email: string;
     username: string;
-    ruolo: string;
-    id_agenzia: string;
   };
 
   const [agenti, setAgenti] = useState<Agente[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false); // modale info agente
+  const [selectedAgente, setSelectedAgente] = useState<Agente | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     username: '',
     password: '',
   });
 
-  useEffect(() => {
-    const fetchAgenti = async () => {
-      if (!payload?.id) return;
+  const fetchAgenti = async () => {
+    if (!payload?.id) return;
 
-      try {
-        const res = await fetch(`http://localhost:3001/api/getAgentiByAgenzia/${payload.id}`);
-        const data = await res.json();
-        setAgenti(data || []);
-      } catch (err) {
-        console.error('Errore nel recupero agenti:', err);
-      } finally {
-        setLoading(false);
+    try {
+      const res = await fetch(`http://localhost:3001/api/getAgentiByAgenzia/${payload.id}`);
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setAgenti(data);
+      } else {
+        console.error("La risposta non è un array:", data);
+        setAgenti([]);
       }
-    };
+    } catch (err) {
+      console.error('Errore nel recupero agenti:', err);
+      setAgenti([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAgenti();
   }, [payload]);
 
   const handleAddAgente = async () => {
     try {
-      console.log("Payload agenzia", payload)
       const res = await fetch('http://localhost:3001/api/registrazione', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,7 +65,7 @@ export default function GestioneAgentiPage() {
       const result = await res.json();
 
       if (res.ok) {
-        setAgenti(prev => [...prev, result.nuovoAgente]);
+        await fetchAgenti();
         setShowModal(false);
         setFormData({ email: '', username: '', password: '' });
       } else {
@@ -69,6 +75,41 @@ export default function GestioneAgentiPage() {
       console.error('Errore creazione agente:', err);
       alert('Errore durante la creazione dell\'agente');
     }
+  };
+
+  const handleDeleteAgente = async (id: string) => {
+    const conferma = window.confirm("Sei sicuro di voler eliminare questo agente?");
+    if (!conferma) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/eliminaAgente/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        await fetchAgenti();
+        if (selectedAgente?.id === id) {
+          setSelectedAgente(null);
+          setShowInfoModal(false);
+        }
+      } else {
+        const result = await res.json();
+        alert("Errore nell'eliminazione: " + result.message);
+      }
+    } catch (err) {
+      console.error("Errore nell'eliminazione dell'agente:", err);
+      alert("Errore durante l'eliminazione dell'agente.");
+    }
+  };
+
+  const openInfoModal = (agente: Agente) => {
+    setSelectedAgente(agente);
+    setShowInfoModal(true);
+  };
+
+  const closeInfoModal = () => {
+    setSelectedAgente(null);
+    setShowInfoModal(false);
   };
 
   return (
@@ -85,23 +126,58 @@ export default function GestioneAgentiPage() {
           </button>
         </div>
 
-        {loading ? (       
+        {loading ? (
           <p className="text-gray-500">Caricamento agenti...</p>
         ) : (
           <div className="grid gap-4">
             {agenti.length === 0 ? (
               <p className="text-gray-500">Nessun agente trovato.</p>
             ) : (
-              agenti.map((agente: any) => (
+              agenti.map((agente) => (
                 <div
                   key={agente.id}
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm"
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm flex justify-between items-center"
                 >
-                  <p className="font-semibold text-blue-800">{agente.username}</p>
-                  <p className="text-sm text-gray-600">{agente.email}</p>
+                  <div>
+                    <p
+                      onClick={() => openInfoModal(agente)}
+                      className="font-semibold text-blue-800 cursor-pointer hover:underline"
+                    >
+                      {agente.username}
+                    </p>
+                    <p className="text-sm text-gray-600">{agente.email}</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleDeleteAgente(agente.id)}
+                    className="ml-4 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+                  >
+                    Elimina
+                  </button>
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* MODALE INFORMAZIONI AGENTE */}
+        {showInfoModal && selectedAgente && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative">
+              <h3 className="text-xl font-bold mb-4 text-blue-800">Dettagli Agente</h3>
+              <p><strong>ID:</strong> {selectedAgente.id}</p>
+              <p><strong>Username:</strong> {selectedAgente.username}</p>
+              <p><strong>Email:</strong> {selectedAgente.email}</p>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={closeInfoModal}
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                >
+                  Chiudi
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>
