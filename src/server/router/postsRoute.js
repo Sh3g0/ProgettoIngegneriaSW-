@@ -17,6 +17,7 @@ router.post('/getImmobiliById', controller.getImmobiliByIdController);
 router.post('/getImmobiliByCoords', controller.getImmobiliByCoordsController);
 router.post('/getImmobiliByAdvancedFilter', controller.getImmobiliByAdvancedFilterController);
 router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
+router.get('/getImmobiliByAgente/:id', controller.getImmobiliByAgenteController);
 
 
 router.post('/prenotazioneVisita', verificaToken, controller.prenotaVisitaController);
@@ -39,6 +40,7 @@ router.post('/getUserBooks', verificaToken, controller.getUserBooksController);
 router.post('/getUserStorico', verificaToken, controller.getUserStoricoController);
 
 router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
+router.get('/getImmagini/:id_immobile', controller.getImmaginiController)
 //router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
 
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);

@@ -209,6 +209,7 @@ const FormImmobile: React.FC = () => {
       formData.append("immagini", file);
     });
 
+    console.log(sessionStorage.getItem('token'))
   
     try {
       const response = await fetch("http://localhost:3001/api/caricaImmobile", {
@@ -226,6 +227,7 @@ const FormImmobile: React.FC = () => {
   
       const result = await response.json();
       alert("Inviato con successo!");
+      window.location.href= '/gestisciImmobili';
       console.log("Risposta:", result);
   
     } catch (error) {
@@ -515,7 +517,7 @@ const FormImmobile: React.FC = () => {
         <div className="col-span-3 flex justify-end">
         <button
             onClick={() => {
-                data.id = id;
+                data.id = `${id}`;
                 if (validateForm()) {
                     setShowSummary(true);
                 }

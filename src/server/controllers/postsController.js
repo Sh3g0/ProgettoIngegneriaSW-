@@ -791,6 +791,27 @@ async function switchPrimoAccessoController(req, res) {
   }
 }
 
+async function getImmobiliByAgenteController(req, res) {
+  const idAgente = req.params.id;
+
+  try {
+    const result = await queryDB(`
+      SELECT i.*
+      FROM immobile i
+      WHERE i.id_agente = $1
+    `, [idAgente]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Nessun immobile trovato per questo agente' });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Errore nel recupero immobili per agente:', error);
+    res.status(500).json({ message: 'Errore del server durante il recupero degli immobili' });
+  }
+} 
+
 
 export {
   login,
@@ -825,5 +846,6 @@ export {
   cambiaPasswordAgenzia,
   eliminaAgenteController,
   switchPrimoAccessoController,
+  getImmobiliByAgenteController,
 };
 

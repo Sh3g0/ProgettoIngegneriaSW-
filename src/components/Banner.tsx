@@ -106,6 +106,12 @@ export default function Banner() {
             </a>
           )}
 
+          {user_info?.ruolo === 'agente' && (
+            <a href="/gestioneImmobili" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
+              <User size={16} /> I tuoi immobili
+            </a>
+          )}
+
           {/* Se loggato mostra link al profilo */}
           {user_info && (
             <a href='/profilo' className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
