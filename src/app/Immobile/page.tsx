@@ -94,14 +94,20 @@ export default function ImmobilePage() {
         const today = new Date();
         today.setDate(today.getDate() + 1); // aggiunge 14 giorni
 
+
         for (let i = 0; i < daysCount; i++) {
+            const futureDate = new Date(today);
+            futureDate.setDate(today.getDate() + i);
+            days.push(futureDate.toISOString());
             const futureDate = new Date(today);
             futureDate.setDate(today.getDate() + i);
             days.push(futureDate.toISOString());
         }
 
+
         return days;
     };
+
 
     const availableDays = generateAvailableDays();
 
@@ -215,10 +221,12 @@ export default function ImmobilePage() {
             document.body.style.overflow = '';
         }
 
+
         return () => {
             document.body.style.overflow = '';
         };
     }, [isGalleryOpen]);
+
 
 
     const openGallery = (imageUrl: string, index: number) => {
@@ -237,6 +245,7 @@ export default function ImmobilePage() {
         setCurrentIndex(newIndex);
         setSelectedImage(immagini[newIndex].url);
     };
+
 
     const handleNextImage = () => {
         const newIndex = currentIndex === immagini.length - 1 ? 0 : currentIndex + 1;
@@ -424,6 +433,8 @@ export default function ImmobilePage() {
                             onClick={(e) => {
                                 e.preventDefault(); // Previene il comportamento di navigazione
                                 openForm();
+                                e.preventDefault(); // Previene il comportamento di navigazione
+                                openForm();
                             }}
                             className="h-full w-full text-center flex items-center justify-center gap-2 hover:animate-wiggle"
                         >
@@ -434,7 +445,18 @@ export default function ImmobilePage() {
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
                                 strokeWidth={2}
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-8 w-8 text-white"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
                             >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -451,7 +473,10 @@ export default function ImmobilePage() {
                                     <button
                                         onClick={closeForm}
                                         className="absolute top-2 right-2 text-3xl p-4 text-gray-500 hover:text-black"
+                                        onClick={closeForm}
+                                        className="absolute top-2 right-2 text-3xl p-4 text-gray-500 hover:text-black"
                                     >
+                                        &times;
                                         &times;
                                     </button>
                                     <h2 className="text-3xl text-black font-semibold mb-4">Prenota il tuo appuntamento</h2>
@@ -475,10 +500,13 @@ export default function ImmobilePage() {
                                                         <div
                                                             key={dayIso}
                                                             className={`
+                                                            key={dayIso}
+                                                            className={`
                                                             cursor-pointer min-w-[120px] w-28 h-24 rounded-lg overflow-hidden 
                                                             border-2 hover:shadow-md transition-all
                                                             ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}
                                                         `}
+                                                            onClick={() => setSelectedDate(dayIso)} // Seleziona la data quando clicchi
                                                             onClick={() => setSelectedDate(dayIso)} // Seleziona la data quando clicchi
                                                         >
                                                             {/* Parte superiore: mese */}
@@ -490,8 +518,10 @@ export default function ImmobilePage() {
                                                             <div className="flex flex-col justify-center items-center h-full -my-2">
                                                                 <span className={`text-2xl ${isSelected ? 'text-blue-600' : 'text-black'}`}>
                                                                     {day}
+                                                                    {day}
                                                                 </span>
                                                                 <span className={`text-xs mt-1 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`}>
+                                                                    {year}
                                                                     {year}
                                                                 </span>
                                                             </div>
@@ -524,10 +554,12 @@ export default function ImmobilePage() {
                                             </div>
                                         </div>
 
+
                                         {/* Dati personali disposti uno accanto all'altro */}
                                         <div className="grid grid-cols-2 gap-4 mb-4">
                                             <div className="col-span-1">
                                                 <label htmlFor="name" className="block text-sm text-gray-700">
+                                                    Nome
                                                     Nome
                                                 </label>
                                                 <input
@@ -542,6 +574,7 @@ export default function ImmobilePage() {
                                             <div className="col-span-1">
                                                 <label htmlFor="surname" className="block text-sm text-gray-700">
                                                     Cognome
+                                                    Cognome
                                                 </label>
                                                 <input
                                                     type="text"
@@ -555,6 +588,7 @@ export default function ImmobilePage() {
                                             <div className="col-span-1">
                                                 <label htmlFor="phone" className="block text-sm text-gray-700">
                                                     Telefono
+                                                    Telefono
                                                 </label>
                                                 <input
                                                     type="tel"
@@ -567,6 +601,7 @@ export default function ImmobilePage() {
                                             </div>
                                             <div className="col-span-1">
                                                 <label htmlFor="email" className="block text-sm text-gray-700">
+                                                    Email
                                                     Email
                                                 </label>
                                                 <input
@@ -633,6 +668,18 @@ export default function ImmobilePage() {
                                             className="w-full max-h-[200px] max-w-[100%] rounded-2xl cursor-pointer"
                                         />
                                     </div>
+                                    <div className="relative w-full max-h-[200px]">
+                                        {/* Copertura trasparente grigia */}
+                                        <div className="absolute inset-0 bg-gray-800 hover:bg-gray-900 opacity-50 flex justify-center items-center max-h-[200px] rounded-2xl"
+                                            onClick={() => openGallery(immagine.url, index)}>
+                                            <span className="text-white text-3xl font-bold">+</span>
+                                        </div>
+                                        <img
+                                            src={immagine.url || '/img/sfondo5.jpg'}
+                                            alt={`Immagine ${index + 1}`}
+                                            className="w-full max-h-[200px] max-w-[100%] rounded-2xl cursor-pointer"
+                                        />
+                                    </div>
                                 ) : (
                                     <img
                                         src={immagine.url || '/img/sfondo5.jpg'}
@@ -650,6 +697,59 @@ export default function ImmobilePage() {
             {/* Modal per la galleria */}
             {isGalleryOpen && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex flex-col justify-center items-center">
+                    {/* Bottone Chiudi */}
+                    <div className="absolute top-4 right-4">
+                        <button
+                            onClick={() => setIsGalleryOpen(false)}
+                            className="text-white text-2xl font-bold hover:text-blue-600"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    {/* Immagine con frecce */}
+                    <div className="relative flex items-center justify-center w-full max-w-5xl px-4">
+                        {/* Freccia Sinistra */}
+                        <button
+                            onClick={handlePrevImage}
+                            className="absolute left-0 text-white text-5xl px-4 hover:text-blue-500"
+                        >
+                            ❮
+                        </button>
+
+                        {/* Immagine principale */}
+                        <img
+                            src={selectedImage}
+                            alt="Galleria"
+                            className="max-h-[70vh] w-auto mx-12 rounded-2xl shadow-lg object-contain"
+                        />
+
+                        {/* Freccia Destra */}
+                        <button
+                            onClick={handleNextImage}
+                            className="absolute right-0 text-white text-5xl px-4 hover:text-blue-500"
+                        >
+                            ❯
+                        </button>
+                    </div>
+
+                    {/* Anteprime immagini */}
+                    <div className="mt-6 flex gap-4 overflow-x-auto max-w-4xl px-4">
+                        {immagini.map((img, index) => (
+                            <img
+                                key={index}
+                                src={img.url}
+                                alt={`Thumb ${index + 1}`}
+                                className={`h-20 rounded-2xl cursor-pointer border-2 ${selectedImage === img.url ? 'border-blue-500' : 'border-transparent'
+                                    }`}
+                                onClick={() => {
+                                    setSelectedImage(img.url);
+                                    setCurrentIndex(index);
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
                     {/* Bottone Chiudi */}
                     <div className="absolute top-4 right-4">
                         <button
@@ -742,12 +842,27 @@ export default function ImmobilePage() {
                                 >
                                     Mostra altro
                                 </button>
+                                <button
+                                    className="text-blue-700 font-bold hover:underline"
+                                    onClick={() => setMenuCaratteristiche(true)}
+                                >
+                                    Mostra altro
+                                </button>
 
                             </div>
                         </div>
 
                         {/* Modal caratteristiche */}
                         {menuCaratteristiche && (
+                            <div className="fixed inset-0 bg-black/30 z-50 flex justify-center items-center">
+                                <div className="flex flex-col w-full max-w-3xl bg-white rounded-2xl shadow-lg p-4">
+
+                                    {/* Titolo */}
+                                    <div className="flex w-full mb-4">
+                                        <div className="font-bold text-3xl text-blue-500 p-4">
+                                            Caratteristiche
+                                        </div>
+                                    </div>
                             <div className="fixed inset-0 bg-black/30 z-50 flex justify-center items-center">
                                 <div className="flex flex-col w-full max-w-3xl bg-white rounded-2xl shadow-lg p-4">
 
@@ -767,7 +882,21 @@ export default function ImmobilePage() {
                                                 <div className="w-1/2">RIF.</div>
                                                 <div className="w-1/2 text-left">{immobile ? immobile.id : 'N/A'}</div>
                                             </div>
+                                    {/* Contenuto */}
+                                    <div className="flex flex-row px-5 gap-8">
+                                        <div className="w-full flex flex-col text-lg">
 
+                                            {/* Riga: RIF */}
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">RIF.</div>
+                                                <div className="w-1/2 text-left">{immobile ? immobile.id : 'N/A'}</div>
+                                            </div>
+
+                                            {/* Riga: Piano */}
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Piano</div>
+                                                <div className="w-1/2 text-left">{immobile ? immobile.piano : 'N/A'}</div>
+                                            </div>
                                             {/* Riga: Piano */}
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Piano</div>
@@ -779,7 +908,19 @@ export default function ImmobilePage() {
                                                 <div className="w-1/2">Stanze</div>
                                                 <div className="w-1/2 text-left">{immobile ? immobile.stanze : 'N/A'}</div>
                                             </div>
+                                            {/* Riga: Stanze */}
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Stanze</div>
+                                                <div className="w-1/2 text-left">{immobile ? immobile.stanze : 'N/A'}</div>
+                                            </div>
 
+                                            {/* Riga: Condizionamento */}
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Condizionamento</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile?.climatizzazione === true ? 'Sì' : 'No'}
+                                                </div>
+                                            </div>
                                             {/* Riga: Condizionamento */}
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Condizionamento</div>
@@ -794,7 +935,19 @@ export default function ImmobilePage() {
                                                     {immobile?.ascensore === true ? 'Sì' : 'No'}
                                                 </div>
                                             </div>
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Ascensore</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile?.ascensore === true ? 'Sì' : 'No'}
+                                                </div>
+                                            </div>
 
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Classe energetica</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile ? immobile.classe_energetica : 'N/A'}
+                                                </div>
+                                            </div>
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Classe energetica</div>
                                                 <div className="w-1/2 text-left">
@@ -808,7 +961,19 @@ export default function ImmobilePage() {
                                                     {immobile?.portineria === true ? 'Sì' : 'No'}
                                                 </div>
                                             </div>
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Portineria</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile?.portineria === true ? 'Sì' : 'No'}
+                                                </div>
+                                            </div>
 
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Vicino a scuole</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile?.vicino_scuole === true ? 'Sì' : 'No'}
+                                                </div>
+                                            </div>
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Vicino a scuole</div>
                                                 <div className="w-1/2 text-left">
@@ -822,7 +987,19 @@ export default function ImmobilePage() {
                                                     {immobile?.vicino_parchi === true ? 'Sì' : 'No'}
                                                 </div>
                                             </div>
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Vicino a parchi</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile?.vicino_parchi === true ? 'Sì' : 'No'}
+                                                </div>
+                                            </div>
 
+                                            <div className="flex mb-4 border-b border-gray-300">
+                                                <div className="w-1/2">Vicino a trasporti</div>
+                                                <div className="w-1/2 text-left">
+                                                    {immobile?.vicino_trasporti === true ? 'Sì' : 'No'}
+                                                </div>
+                                            </div>
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Vicino a trasporti</div>
                                                 <div className="w-1/2 text-left">
@@ -843,9 +1020,25 @@ export default function ImmobilePage() {
                                     </div>
                                 </div>
                             </div>
+                                            {/* Bottone Chiudi */}
+                                            <div className="text-center mt-4">
+                                                <button
+                                                    className="text-blue-700 font-bold hover:underline"
+                                                    onClick={() => setMenuCaratteristiche(false)}
+                                                >
+                                                    Chiudi
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         )}
 
                         <div className="w-[50%] bg-gray-100 rounded-2xl p-4 shadow-sm flex justify-between gap-6">
+                            {/* Costi */}
+                            <div className="w-1/2">
+                                <p className="text-xl font-semibold text-blue-700">Costi</p>
                             {/* Costi */}
                             <div className="w-1/2">
                                 <p className="text-xl font-semibold text-blue-700">Costi</p>
@@ -857,7 +1050,24 @@ export default function ImmobilePage() {
                                         € {Number(immobile?.prezzo).toLocaleString('it-IT')}
                                     </p>
                                 </div>
+                                {/* Prezzo */}
+                                <div className="">
+                                    <p className="font-medium mt-4">Prezzo:</p>
+                                    <p className="text-black text-md font-bold">
+                                        € {Number(immobile?.prezzo).toLocaleString('it-IT')}
+                                    </p>
+                                </div>
 
+                                {/* Prezzo al metro quadro */}
+                                <div className="">
+                                    <p className="font-medium mt-2">Prezzo al m²:</p>
+                                    <p className="text-gray-700">
+                                        {immobile?.prezzo && immobile?.dimensione_mq
+                                            ? (immobile.prezzo / immobile.dimensione_mq).toFixed(2)
+                                            : 'N/A'} €/m²
+                                    </p>
+                                </div>
+                            </div>
                                 {/* Prezzo al metro quadro */}
                                 <div className="">
                                     <p className="font-medium mt-2">Prezzo al m²:</p>
@@ -941,7 +1151,9 @@ export default function ImmobilePage() {
             </div>
             <div className='mt-4'>
                 <Footer />
+                <Footer />
             </div>
+        </div>
         </div>
     );
 }

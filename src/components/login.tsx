@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import '../styles/style.css';
 import { useRouter } from 'next/navigation';
+import '../styles/style.css';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,11 +19,9 @@ export default function LoginPage() {
       const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password })
       });
-
       const data = await response.json();
-
       if (response.ok) {
         sessionStorage.setItem('token', data.token);
         console.log('Login fatto. Token salvato:', sessionStorage.getItem('token'));
@@ -68,33 +66,24 @@ export default function LoginPage() {
     <div className="login-container relative">
       <div className="left justify-center mt-32">
         <img src="/img/logo_prova.png" alt="Logo" />
-        <div className="credits">
-          Designed by<br /><b>STICY Tech.</b>
-        </div>
+        <div className="credits">Designed by<br /><b>STICY Tech.</b></div>
       </div>
-
       <div className="right">
         <h2>Sign in</h2>
-
-        {/* Login Google */}
         <button className="btn" onClick={() => window.location.href = 'http://localhost:3001/auth/google'}>
           <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" />
           Continue with Google
         </button>
-
-        {/* Login Facebook */}
         <button className="btn" onClick={() => window.location.href = 'http://localhost:3001/auth/facebook'}>
           <img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook" />
           Continue with Facebook
         </button>
-
         <div className="divider">OR</div>
-
         <div className="input-group">
           <label htmlFor="username">Username</label>
           <input id="username" type="text" placeholder="Inserisci il tuo username" className="login-input" />
+          <input id="username" type="text" placeholder="Inserisci il tuo username" className="login-input" />
         </div>
-
         <div className="input-group" style={{ position: 'relative' }}>
           <label htmlFor="password">Password</label>
           <input
@@ -131,7 +120,6 @@ export default function LoginPage() {
             Accedi come agenzia
           </a>
         </div>
-
         <button className="signin-btn" onClick={handleSignIn}>Sign in</button>
 
         <div className="signup">

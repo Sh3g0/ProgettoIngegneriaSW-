@@ -4,18 +4,21 @@ const { Pool } = pkg;
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'ING',
-  password: 'sonsycomb',
+  database: 'ingegneriaSW',
+  password: 'claudia',
   port: 5432,
 });
 
 async function queryDB(query, params = []) {
+  console.log("Eseguendo query:", query);
+  console.log("Con parametri:", params);
   try {
-    const { rows } = await pool.query(query, params);
-    return rows;
-  } catch (error) {
-    console.error('Errore eseguendo la query:', error);
-    throw error;
+    const res = await pool.query(query, params);
+    console.log("Risultato query:", res.rows);
+    return res.rows;
+  } catch (err) {
+    console.error("Errore nella query:", err);
+    throw err;
   }
 }
 
