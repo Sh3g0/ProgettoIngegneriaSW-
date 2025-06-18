@@ -440,8 +440,6 @@ async function rispondiPrenotazione(req, res) {
   try {
     await queryDB(
       `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
-    await queryDB(
-      `UPDATE prenotazione_visite SET stato = $1 WHERE id = $2`,
       [nuovoStato, idPrenotazione]
     );
 
@@ -501,16 +499,6 @@ async function getPrenotazioniAccettateCliente(req, res) {
 
   try {
     const result = await queryDB(`
-      SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
-      FROM prenotazione_visite p
-      JOIN immobile i ON p.id_immobile = i.id
-      WHERE p.id_cliente = $1 AND p.stato = 'confermata';
-    `, [idCliente]);
-
-    console.log("Prenotazioni trovate:", result);
-
-    // Protezione contro result o rows undefined
-    const prenotazioni = (Array.isArray(result)) ? result : [];
       SELECT p.id, i.titolo AS titolo_immobile, p.data_visita, i.comune, i.indirizzo
       FROM prenotazione_visite p
       JOIN immobile i ON p.id_immobile = i.id
