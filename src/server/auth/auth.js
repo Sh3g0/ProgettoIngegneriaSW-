@@ -1,28 +1,30 @@
 import express from 'express';
 import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
-// Google login
-router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
-}));
+const generateTokenRedirect = (req, res) => {
+  const user = req.user;
+  const payload = {
+    id: user.id,
+    ruolo: user.ruolo,
+    username: user.username
+  };
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+  const redirectUrl = `http://localhost:3000/successoLogin?token=${token}&id=${user.id}&ruolo=${user.ruolo}&username=${user.username}`;
+  res.redirect(redirectUrl);
+};
 
-router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: 'http://localhost:3000/login' }),
-  (req, res) => {
-    res.redirect('http://localhost:3000/home');  // redirect frontend
-  }
-);
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), generateTokenRedirect);
 
-// Facebook login
 router.get('/facebook', passport.authenticate('facebook'));
+router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), generateTokenRedirect);
 
-router.get('/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: 'http://localhost:3000/login' }),
-  (req, res) => {
-    res.redirect('http://localhost:3000/home');
-  }
-);
+
 
 export default router;

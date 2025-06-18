@@ -9,11 +9,13 @@ dotenv.config();
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
+
 export default function Banner() {
   const router = useRouter();
   const [lastZone, setLastZone] = useState('Roma');
   const [scrolled, setScrolled] = useState(false);
   const user_info: UserInfo | null = useJwtPayload();
+
 
   useEffect(() => {
     const lastZone = localStorage.getItem('ultimaZonaSelezionata');
@@ -96,7 +98,7 @@ export default function Banner() {
           {/* Se loggato mostra link al profilo */}
           {user_info && (
             <a href='/profilo' className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
-              <User size={16} /> {user_info.username || 'Profilo'}
+              <User size={16} /> {user_info.username || user_info.email || 'Profilo'}
             </a>
           )}
 

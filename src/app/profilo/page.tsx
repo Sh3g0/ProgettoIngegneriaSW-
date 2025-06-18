@@ -36,7 +36,9 @@ export default function UserProfile() {
   useEffect(() => {
     if (selectedMenu === 'Logout') {
       setIsLoggingOut(true);
-      sessionStorage.removeItem('token'); // rimuovi il token JWT
+      sessionStorage.removeItem('token');
+      window.dispatchEvent(new Event('token-changed'));
+      // rimuovi il token JWT
       router.push('/'); // reindirizza alla home
     }
   }, [selectedMenu]);

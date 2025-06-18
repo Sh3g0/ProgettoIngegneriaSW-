@@ -6,7 +6,6 @@ export interface UserInfo {
   ruolo: string;
   username?: string;
   email: string;
-  // ...altre proprietà del payload
 }
 
 export function useJwtPayload(): UserInfo | null {
