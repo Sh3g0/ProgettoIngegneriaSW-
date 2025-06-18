@@ -82,7 +82,6 @@ export default function LoginPage() {
         <div className="input-group">
           <label htmlFor="username">Username</label>
           <input id="username" type="text" placeholder="Inserisci il tuo username" className="login-input" />
-          <input id="username" type="text" placeholder="Inserisci il tuo username" className="login-input" />
         </div>
         <div className="input-group" style={{ position: 'relative' }}>
           <label htmlFor="password">Password</label>
