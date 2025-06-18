@@ -9,7 +9,7 @@ import { useJwtPayload } from '@/components/useJwtPayload';
 import { useSearchParams } from 'next/navigation';
 
 export default function Home() {
-  const [showAgenteOptions, setAgenteOption] = useState(true);
+  const [showAgenteOptions, setAgenteOption] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const searchParams = useSearchParams();
@@ -33,6 +33,9 @@ export default function Home() {
   const [backgroundImage, setBackgroundImage] = useState('');
 
   useEffect(() => {
+    if (user?.ruolo === 'agente') {
+      setAgenteOption(true);
+    }
     const randomIndex = Math.floor(Math.random() * backgrounds.length);
     setBackgroundImage(backgrounds[randomIndex]);
 
