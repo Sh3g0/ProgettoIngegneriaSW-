@@ -298,7 +298,7 @@ async function getUserStorico(id) {
     try {
         const query = `
         SELECT *
-        FROM storico_cliente
+        FROM storico
         WHERE id_utente = $1;
         `;
 
