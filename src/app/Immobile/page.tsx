@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import MappaImmobili from '@/components/MappaImmobili';
 import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
-import { useJwtPayload } from '@/components/useJwtPayload';
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
@@ -39,14 +38,11 @@ interface Immagine {
 }
 
 export default function ImmobilePage() {
-
-
     const immID = useSearchParams().get('id');
-    console.log('immID:', immID);
-    if (!immID) {
-        console.error('ID immobile non trovato in URL');
-    }
     const [immobile, setImmobile] = useState<Immobile | null>(null);
+
+
+
 
     const immaginiMock: Immagine[] = [
         { url: '/img/sfondo1.jpg' },
@@ -66,7 +62,6 @@ export default function ImmobilePage() {
     const [showForm, setShowForm] = useState(false); // Stato per il controllo della visibilità del form
     const [selectedDate, setSelectedDate] = useState<string | null>(null); // Stato per la data selezionata
     const [selectedTime, setSelectedTime] = useState<string | null>(null); // Stato per l'orario selezionato
-    const searchParams = useSearchParams();
 
     // Funzione per confrontare due date solo per giorno, mese e anno
     const compareDates = (date1: string, date2: string) => {
@@ -109,7 +104,9 @@ export default function ImmobilePage() {
         setSelectedTime(null);
     };
 
-
+    const handleSendAppointment = () => {
+        //Invia dati all'agente immobiliare
+    }
 
     const formatNumber = (value: string) => {
         const numeric = value.replace(/[^\d]/g, ""); // Rimuove tutto tranne le cifre
@@ -123,13 +120,8 @@ export default function ImmobilePage() {
         setOfferta(formatted);
     };
 
-
-
     useEffect(() => {
-        if (!immID) {
-            console.error("ID immobile non trovato in URL");
-            return;
-        }
+        if (!immID) return;
 
         const fetchImmobile = async () => {
             try {
@@ -140,33 +132,15 @@ export default function ImmobilePage() {
                     },
                     body: JSON.stringify({ id: immID, status: 'accettato' }),
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Errore HTTP! status: ${response.status}`);
-                }
-
                 const data = await response.json();
-
-                if (!data || data.length === 0) {
-                    console.error("Nessun immobile trovato con questo ID");
-                    setImmobile(null);
-                    return;
-                }
-
                 setImmobile(data[0]);
 
                 console.log('Immobile data in immobile:', data[0]);
 
                 const fetchImmagini = async () => {
-                    const response = await fetch('http://localhost:3001/api/getImmagini', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ id: immID }),
+                    const response = await fetch(`http://localhost:3001/api/getImmagini/${immobile?.id}`, {
+                        method: 'GET',
                     });
-
-
 
                     const data = await response.json();
                     if (data && data.length > 0) {
@@ -220,110 +194,44 @@ export default function ImmobilePage() {
     };
 
 
-    const [nome, setNome] = useState("");
-    const [cognome, setCognome] = useState("");
-    const [telefono, setTelefono] = useState("");
-    const [email, setEmail] = useState("");
+const inviaOfferta = async () => {
+  try {
+    const token = sessionStorage.getItem("token");
+    if (!immID) return alert("ID immobile mancante");
+    if (!offerta) return alert("Inserisci un’offerta valida");
 
+    // Pulizia prezzo: "1.000,50" -> 1000.50
+    const prezzoPulito = parseFloat(offerta.replace(/\./g, '').replace(',', '.'));
+    if (isNaN(prezzoPulito)) return alert("Prezzo offerta non valido");
 
-    const userInfo = useJwtPayload();
-
-    useEffect(() => {
-        console.log("UserInfo decodificato:", userInfo);
-    }, [userInfo]);
-
-    const handleSendAppointment = async () => {
-
-        console.log('ID immobile:', immobile?.id);
-        const id_cliente = userInfo?.id;   // prendo id direttamente dal token decodificato
-        const id_immobile = immID;
-        console.log('immID:', immID);
-
-
-        if (!immobile?.id) {
-            alert("Errore: immobile non selezionato!");
-            return;
-        }
-
-
-
-        console.log("handleSendAppointment chiamato");
-
-        const token = localStorage.getItem('token');
-
-        console.log({ token, id_cliente, id_immobile, selectedDate, selectedTime, nome, cognome, telefono, email });
-
-        if (!selectedDate || !selectedTime || !nome || !cognome || !telefono || !email) {
-            alert("Compila tutti i campi obbligatori.");
-            return;
-        }
-
-        console.log("id_cliente da localStorage:", id_cliente);
-
-
-        if (!id_cliente || !id_immobile) {
-            alert("Errore interno: manca id cliente o id immobile.");
-            return;
-        }
-
-        const dateOnly = selectedDate.split('T')[0]; // '2025-05-22'
-        const data_visita = `${dateOnly}T${selectedTime}:00`; // '2025-05-22T11:00:00'
-
-
-
-        const body = {
-            id_immobile: parseInt(immID),
-            data_visita: data_visita
-        };
-
-        console.log("Invio dati appuntamento:", body);
-        console.log('Parametri inserimento visita:', id_immobile, id_cliente, data_visita);
-
-
-        try {
-            const response = await fetch("http://localhost:3001/api/prenotazioneVisita", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(body),
-            });
-
-            console.log("Status response:", response.status);
-            const text = await response.text();
-            console.log("Response text:", text);
-
-            if (response.ok) {
-                const result = JSON.parse(text);
-                alert("Richiesta inviata! Riceverai conferma a breve.");
-                closeForm();
-                setNome("");
-                setCognome("");
-                setTelefono("");
-                setEmail("");
-                setSelectedDate(null);
-                setSelectedTime(null);
-            } else {
-                alert("Errore invio: " + text);
-            }
-        } catch (error) {
-            console.error("Errore di rete o server:", error);
-            alert("Errore di rete o server: " + error.message);
-        }
+    const body = {
+      id_immobile: immID,
+      prezzo_offerto: prezzoPulito,
+      tipo_offerta: "iniziale",
+      provenienza: "manuale"
     };
 
-    const [dateOccupate, setDateOccupate] = useState([]);
+    const response = await fetch("http://localhost:3001/api/inviaOfferta", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token || ""}`,
+      },
+      body: JSON.stringify(body),
+    });
 
-    useEffect(() => {
-        const fetchDateOccupate = async () => {
-            const res = await fetch(`http://localhost:3001/api/dateOccupate/${immID}`);
-            const data = await res.json();
-            setDateOccupate(data.dateList); // ← array di date ISO
-        };
-        fetchDateOccupate();
-    }, [immID]);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Errore invio offerta");
+    }
 
+    alert("Offerta inviata correttamente!");
+    setOfferta(""); // resetta campo input
+  } catch (error) {
+    console.error("Errore:", error);
+    alert("Errore durante l'invio dell'offerta.");
+  }
+};
 
 
 
@@ -508,8 +416,6 @@ export default function ImmobilePage() {
                                                 <input
                                                     type="text"
                                                     id="name"
-                                                    value={nome}
-                                                    onChange={(e) => setNome(e.target.value)}
                                                     name="name"
                                                     className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 />
@@ -522,8 +428,6 @@ export default function ImmobilePage() {
                                                     type="text"
                                                     id="surname"
                                                     name="surname"
-                                                    value={cognome}
-                                                    onChange={(e) => setCognome(e.target.value)}
                                                     className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 />
                                             </div>
@@ -535,8 +439,6 @@ export default function ImmobilePage() {
                                                     type="tel"
                                                     id="phone"
                                                     name="phone"
-                                                    value={telefono}
-                                                    onChange={(e) => setTelefono(e.target.value)}
                                                     className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 />
                                             </div>
@@ -548,8 +450,6 @@ export default function ImmobilePage() {
                                                     type="email"
                                                     id="email"
                                                     name="email"
-                                                    value={email}
-                                                    onChange={(e) => setEmail(e.target.value)}
                                                     className="text-black text-base bg-gray-100 focus:bg-white transition-colors duration-300 mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 />
                                             </div>
@@ -559,7 +459,7 @@ export default function ImmobilePage() {
 
                                         <div className="flex justify-center">
                                             <button
-                                                type="button"
+                                                type="submit"
                                                 className="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 transition duration-300"
                                                 onClick={() => handleSendAppointment()}
                                             >
@@ -580,10 +480,10 @@ export default function ImmobilePage() {
                     {/* Colonna 1: Immagine principale */}
                     <div className='w-[70%] flex justify-center '>
                         <img
-                            src={immobile?.immagine_url || '/img/sfondo5.jpg'}
+                            src={'/img/sfondo5.jpg'}
                             alt="Immobile Anteprima"
                             className='w-full h-auto rounded-2xl shadow-lg object-cover'
-                            onClick={() => { immobile ? immobile.immagine_url : '/sfondo5.jpg' }}
+                            onClick={() => '/sfondo5.jpg'}
                         />
                     </div>
 
@@ -861,8 +761,9 @@ export default function ImmobilePage() {
                                     placeholder="€ Offerta"
                                 />
                                 <button
-                                    className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                                    onClick={() => alert(`Controfferta inviata: € ${offerta}`)}
+                                    onClick={inviaOfferta }
+                                    disabled={!offerta || isNaN(parseFloat(offerta.replace(/\./g, '').replace(',', '.')))}
+                                    className="w-full bg-blue-600 text-white py-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
                                     Invia
                                 </button>

@@ -6,7 +6,6 @@ export interface UserInfo {
   ruolo: string;
   username?: string;
   email: string;
-  // ...altre proprietà del payload
 }
 
 export function useJwtPayload(): UserInfo | null {
@@ -29,6 +28,7 @@ export function useJwtPayload(): UserInfo | null {
           .join('')
       );
       const payload = JSON.parse(jsonPayload) as UserInfo;
+      console.log('🎯 Payload:', payload);
       setUserInfo(payload);
     } catch {
       setUserInfo(null);

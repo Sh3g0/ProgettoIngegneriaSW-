@@ -13,6 +13,8 @@ async function getUser(username, password) {
     const params = [username];
     const result = await queryDB(query, params);
 
+    console.log('Risultato query getUser:', result);
+
     if (!result || result.length === 0) {
         console.log('Utente non trovato');
         return "";
@@ -21,6 +23,8 @@ async function getUser(username, password) {
     const user = result[0];
     const hashedPasswordFromDb = user.password_hash;
 
+    console.log('Username richiesto:', username);
+    console.log('Utente dal DB:', user.username);
     console.log('Password inserita:', password);
     console.log('Hash dal DB:', hashedPasswordFromDb);
 
@@ -34,6 +38,7 @@ async function getUser(username, password) {
         return "";
     }
 }
+
 
 
 async function registrazione(email, username, password, ruolo, idAgenzia) {
@@ -53,7 +58,7 @@ async function registrazione(email, username, password, ruolo, idAgenzia) {
 
     try {
         const result = await queryDB(query, params);
-       console.log('JWT_SECRET:', process.env.JWT_SECRET);
+        console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
         if (!process.env.JWT_SECRET) {
             throw new Error('JWT_SECRET non è definita nelle variabili d’ambiente');
@@ -193,6 +198,19 @@ async function getImmobiliById(id, status) {
     }
 }
 
+
+async function getImmobiliByOnlyId(id) {
+    try {
+        console.log("DEBUG getImmobiliByOnlyId - id ricevuto:", id);
+        const result = await queryDB('SELECT * FROM immobile WHERE id = $1', [id]);
+        console.log("DEBUG risultato query immobile:", result);
+        return result;
+    } catch (error) {
+        console.error('Errore in getImmobiliById:', error);
+        throw error;
+    }
+}
+
 async function getImmobiliByFilter(lat = 0, lng = 0, prezzo_min, prezzo_max, dimensione = null, tipo_annuncio = 'qualsiasi', status) {
     try {
         let query = ` SELECT * FROM immobile 
@@ -276,45 +294,29 @@ async function getImmobiliByCoords(lat, lng, status) {
     }
 }
 
-async function getUserBooks(id) {
-    try{
-        const query = `
-        SELECT *
-        FROM prenotazione_visite
-        WHERE id_cliente = $1;
-        `;
-
-        const result = await queryDB(query,[id]);
-        return result;
-    }catch(error){
-        console.log(error);
-        throw error;
-    }
-}
-
 async function getUserStorico(id) {
-    try{
+    try {
         const query = `
         SELECT *
         FROM storico_cliente
         WHERE id_utente = $1;
         `;
 
-        const result = await queryDB(query,[id]);
+        const result = await queryDB(query, [id]);
         return result;
-    }catch(error){
+    } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
 async function caricaImmobile(data) {
-  try {
-    await queryDB('BEGIN');
+    try {
+        await queryDB('BEGIN');
 
-    console.log('in begin.................');
+        console.log('in begin.................');
 
-    const immobileQuery = `
+        const immobileQuery = `
       INSERT INTO immobile (
         id_agente, titolo, descrizione, prezzo, dimensione_mq, piano, stanze,
         ascensore, classe_energetica, portineria, climatizzazione,
@@ -324,24 +326,24 @@ async function caricaImmobile(data) {
       RETURNING id
     `;
 
-    const immobileValues = [
-      data.id, data.titolo, data.descrizione, data.prezzo, data.dimensione_mq,
-      data.piano, data.stanze, data.ascensore, data.classe_energetica,
-      data.portineria, data.climatizzazione, data.tipo_annuncio,
-      data.vicino_scuole, data.vicino_parchi, data.vicino_trasporti,
-      data.indirizzo.streetAddress, data.indirizzo.city,
-      data.indirizzo.province, data.indirizzo.lat, data.indirizzo.lng
-    ];
+        const immobileValues = [
+            data.id, data.titolo, data.descrizione, data.prezzo, data.dimensione_mq,
+            data.piano, data.stanze, data.ascensore, data.classe_energetica,
+            data.portineria, data.climatizzazione, data.tipo_annuncio,
+            data.vicino_scuole, data.vicino_parchi, data.vicino_trasporti,
+            data.indirizzo.streetAddress, data.indirizzo.city,
+            data.indirizzo.province, data.indirizzo.lat, data.indirizzo.lng
+        ];
 
-    const result = await queryDB(immobileQuery, immobileValues);
-    const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
+        const result = await queryDB(immobileQuery, immobileValues);
+        const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
 
-    for (const path of data.immagini) {
-      await queryDB(
-        `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
-        [immobileId, path]
-      );
-    }
+        for (const path of data.immagini) {
+            await queryDB(
+                `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
+                [immobileId, path]
+            );
+        }
 
     await queryDB('COMMIT');
   } catch (err) {
@@ -367,15 +369,35 @@ async function getUserBooks(id) {
     }
 }
 
-async function getUserStorico(id) {
+async function getAgenzia(email, password) {
     try{
         const query = `
-        SELECT *
-        FROM storico_cliente
-        WHERE id_utente = $1;
+            SELECT * FROM agenzia
+            WHERE email = $1 AND password = $2`
+        ;
+        
+        const result = await queryDB(query, [email, password]);
+        return result;
+    }catch(e){
+        console.log(error);
+        throw e;
+    }
+}
+
+async function updateStorico(id_utente, id_immobile=-1, tipo_attivita){
+    try{
+        const query = `
+        INSERT INTO storico (id_utente, id_immobile, tipo_attivita)
+        VALUES ($1, $2, $3);
         `;
 
-        const result = await queryDB(query,[id]);
+        const values = [
+            id_utente,
+            id_immobile,
+            tipo_attivita
+        ];
+
+        const result = await queryDB(query, values);
         return result;
     }catch(error){
         console.log(error);
@@ -383,52 +405,35 @@ async function getUserStorico(id) {
     }
 }
 
-async function caricaImmobile(data) {
-  try {
-    await queryDB('BEGIN');
+async function cleanStorico(id_utente) {
+    try {
+        const query = `
+        DELETE FROM storico
+        WHERE id_utente = $1;
+        `;
 
-    console.log('in begin.................');
-
-    const immobileQuery = `
-      INSERT INTO immobile (
-        id_agente, titolo, descrizione, prezzo, dimensione_mq, piano, stanze,
-        ascensore, classe_energetica, portineria, climatizzazione,
-        tipo_annuncio, vicino_scuole, vicino_parchi, vicino_trasporti,
-        indirizzo, citta, comune, latitudine, longitudine
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
-      RETURNING id
-    `;
-
-    const immobileValues = [
-      data.id, data.titolo, data.descrizione, data.prezzo, data.dimensione_mq,
-      data.piano, data.stanze, data.ascensore, data.classe_energetica,
-      data.portineria, data.climatizzazione, data.tipo_annuncio,
-      data.vicino_scuole, data.vicino_parchi, data.vicino_trasporti,
-      data.indirizzo.streetAddress, data.indirizzo.city,
-      data.indirizzo.province, data.indirizzo.lat, data.indirizzo.lng
-    ];
-
-    const result = await queryDB(immobileQuery, immobileValues);
-    const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
-
-    for (const path of data.immagini) {
-      await queryDB(
-        `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
-        [immobileId, path]
-      );
+        const result = await queryDB(query, [id_utente]);
+        return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
     }
-
-    await queryDB('COMMIT');
-  } catch (err) {
-    await queryDB('ROLLBACK');
-    console.error("Errore nel salvataggio immobile:", err);
-    throw err;
-  }
 }
 
+async function removeStorico(id) {
+    try {
+        const query = `
+        DELETE FROM storico
+        WHERE id = $1;
+        `;
 
-
-
+        const result = await queryDB(query, [id]);
+        return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 
 export {
     getUser,
@@ -440,5 +445,9 @@ export {
     getImmobiliById,
     getUserBooks,
     getUserStorico,
-    caricaImmobile
+    caricaImmobile,
+    updateStorico,
+    cleanStorico,
+    removeStorico,
+    getAgenzia,
 };

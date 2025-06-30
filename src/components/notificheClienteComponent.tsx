@@ -9,26 +9,46 @@ interface PrenotazioneAccettata {
     indirizzo: string;
 }
 
-export default function NotificheClienteComponent({ idCliente }: { idCliente: number }) {
+export default function NotificheClienteComponent() {
     const [notifiche, setNotifiche] = useState<PrenotazioneAccettata[]>([]);
     const [caricamento, setCaricamento] = useState(true);
 
     useEffect(() => {
         const fetchNotifiche = async () => {
             try {
-                const res = await fetch(`http://localhost:3001/api/prenotazioniConfermateCliente/${idCliente}`);
-                const data = await res.json();
+                const token = sessionStorage.getItem('token');
+
+                const res = await fetch(`http://localhost:3001/api/prenotazioniConfermateCliente`, {
+                    headers: {
+                        'Authorization': `Bearer ${token || ''}`
+                    }
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Errore nel recupero delle notifiche:', res.status, errorText);
+                    setNotifiche([]);
+                    return;
+                }
+
+                const data = await res.json(); // ✅ usa solo questo
                 setNotifiche(data);
+
                 console.log("Notifiche recuperate:", data);
+
             } catch (err) {
                 console.error("Errore nel recupero delle notifiche:", err);
+                setNotifiche([]);
             } finally {
                 setCaricamento(false);
             }
         };
 
         fetchNotifiche();
-    }, [idCliente]);
+    }, []);
+
+
+
 
     if (caricamento) {
         return <div className="text-gray-600">Caricamento notifiche...</div>;
@@ -48,7 +68,6 @@ export default function NotificheClienteComponent({ idCliente }: { idCliente: nu
                             <p className="text-blue-700 text-sm">{p.indirizzo}, {p.comune}</p>
                             <p className="text-sm text-gray-600">Data visita: {new Date(p.data_visita).toLocaleString('it-IT')}</p>
                         </li>
-
                     ))}
                 </ul>
             )}
