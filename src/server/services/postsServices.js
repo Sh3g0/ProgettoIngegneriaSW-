@@ -1,8 +1,7 @@
 import { error } from 'console';
 import { queryDB } from '../db/database.js';
-import bcrypt from 'bcryptjs';   //a me funziona solo con bcryptjs a causa del sistema operativo 
+import bcrypt from 'bcryptjs';   
 
-// Funzione per ottenere il ruolo di un utente
 async function getUser(username, password) {
     const query = `
       SELECT * 
@@ -64,12 +63,11 @@ async function registrazione(email, username, password, ruolo, idAgenzia) {
             throw new Error('JWT_SECRET non è definita nelle variabili d’ambiente');
         }
         if (!result || result.length === 0) {
-            // Gestisci l'errore, magari con un messaggio che indica che l'utente non è stato trovato
             throw new Error('Errore durante la registrazione');
         }
 
-        const user = result[0]; // Restituisci l'utente creato
-        return user;  // Restituisci i dati dell'utente per l'uso nel controller
+        const user = result[0]; 
+        return user;  
 
     } catch (error) {
         console.error('Errore nella registrazione dell\'utente:', error);
@@ -86,7 +84,6 @@ async function getImmobiliByAdvancedFilters(lat = 0, lng = 0, prezzo_min = 0, pr
         const lngNum = parseFloat(lng);
 
 
-        // Verifica validità dei numeri
         if (isNaN(latNum) || isNaN(lngNum)) {
             throw new Error('Coordinate non valide');
         }
@@ -111,40 +108,40 @@ async function getImmobiliByAdvancedFilters(lat = 0, lng = 0, prezzo_min = 0, pr
         if (dimensione != null) {
             query = query + 'AND dimensione_mq BETWEEN $15 AND $16';
             values = [
-                latNum - 0.1, //$1
-                latNum + 0.1, //$2
-                lngNum - 0.1, //$3
-                lngNum + 0.1, //$4
-                prezzo_min, //$5
-                prezzo_max, //$6
-                piano - 1, //$7
-                piano + 1, //8$
-                stanze, //$9
-                ascensore, //$10
-                classe_energetica, //$11
-                portineria, //$12
-                tipo_annuncio, //$13
-                climatizzazione,//$14
+                latNum - 0.1, 
+                latNum + 0.1, 
+                lngNum - 0.1, 
+                lngNum + 0.1, 
+                prezzo_min, 
+                prezzo_max, 
+                piano - 1, 
+                piano + 1, 
+                stanze, 
+                ascensore, 
+                classe_energetica, 
+                portineria, 
+                tipo_annuncio, 
+                climatizzazione,
                 status,
-                dimensione - 10, //$16
-                dimensione + 10, //$17
+                dimensione - 10, 
+                dimensione + 10, 
             ];
         } else {
             values = [
-                latNum - 0.1, //$1
-                latNum + 0.1, //$2
-                lngNum - 0.1, //$3
-                lngNum + 0.1, //$4
-                prezzo_min, //$5
-                prezzo_max, //$6
-                piano - 1, //$7
-                piano + 1, //8$
-                stanze, //$9
-                ascensore, //$10
-                classe_energetica, //$11
-                portineria, //$12
-                tipo_annuncio, //$13
-                climatizzazione,//$14
+                latNum - 0.1,
+                latNum + 0.1, 
+                lngNum - 0.1, 
+                lngNum + 0.1, 
+                prezzo_min, 
+                prezzo_max, 
+                piano - 1, 
+                piano + 1, 
+                stanze, 
+                ascensore, 
+                classe_energetica, 
+                portineria, 
+                tipo_annuncio, 
+                climatizzazione,
                 status
             ];
         }
@@ -175,7 +172,7 @@ async function registrazioneAgenziaDB(nomeAgenzia, sedeAgenzia, emailAgenzia) {
             throw new Error('Errore nella registrazione dell\'agenzia');
         }
 
-        return result[0]; // restituisci la prima riga
+        return result[0]; 
 
     } catch (error) {
         console.error('Errore nella registrazione dell\'agenzia:', error);
@@ -225,26 +222,26 @@ async function getImmobiliByFilter(lat = 0, lng = 0, prezzo_min, prezzo_max, dim
         if (dimensione != null) {
             query = query + 'AND dimensione_mq BETWEEN $8 AND $9';
             values = [
-                lat - 0.1, //$1
-                lat + 0.1, //$2
-                lng - 0.1, //$3
-                lng + 0.1, //$4
-                prezzo_min, //$5
-                prezzo_max, //$6
-                tipo_annuncio, //$7
+                lat - 0.1, 
+                lat + 0.1, 
+                lng - 0.1, 
+                lng + 0.1, 
+                prezzo_min, 
+                prezzo_max, 
+                tipo_annuncio, 
                 status,
                 dimensione - 10,
                 dimensione + 10
             ];
         } else {
             values = [
-                lat - 0.1, //$1
-                lat + 0.1, //$2
-                lng - 0.1, //$3
-                lng + 0.1, //$4
-                prezzo_min, //$5
-                prezzo_max, //$6
-                tipo_annuncio, //$7
+                lat - 0.1, 
+                lat + 0.1, 
+                lng - 0.1, 
+                lng + 0.1, 
+                prezzo_min, 
+                prezzo_max, 
+                tipo_annuncio, 
                 status
             ];
         }
@@ -266,7 +263,7 @@ async function getImmobiliByCoords(lat, lng, status) {
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
 
-        // Verifica validità dei numeri
+       
         if (isNaN(latNum) || isNaN(lngNum)) {
             throw new Error('Coordinate non valide');
         }
@@ -336,7 +333,7 @@ async function caricaImmobile(data) {
         ];
 
         const result = await queryDB(immobileQuery, immobileValues);
-        const immobileId = result[0].id; //Prendo l'id dell'immobile a cui ho inserito i dati
+        const immobileId = result[0].id; 
 
         for (const path of data.immagini) {
             await queryDB(

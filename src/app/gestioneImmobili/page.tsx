@@ -62,7 +62,6 @@ export default function GestioneImmobiliPage() {
   };
 
   const inviaOfferta = async (idImmobile: number) => {
-    // TODO: metti qui la chiamata fetch per inviare l'offerta al backend
     try {
       const res = await fetch(`http://localhost:3001/api/inviaOfferta`, {
         method: 'POST',

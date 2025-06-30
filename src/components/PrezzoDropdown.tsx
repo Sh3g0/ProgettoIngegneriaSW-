@@ -39,19 +39,19 @@ export default function PrezzoDropdown({
 
   const formatPrice = (price: number) => {
     if (!price) return '';
-    return price.toLocaleString(); // Formatta il numero con il punto per le migliaia
+    return price.toLocaleString(); 
   };
 
   const handleManualInput = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'min' | 'max'
   ) => {
-    const value = Number(e.target.value.replace(/\D/g, '')); // remove non-numeric chars
+    const value = Number(e.target.value.replace(/\D/g, '')); 
 
     if (type === 'min') {
-      setPrezzoMin(value || 0); // reset to empty string if empty
+      setPrezzoMin(value || 0); 
     } else {
-      setPrezzoMax(value || 2000000); // reset to empty string if empty
+      setPrezzoMax(value || 2000000); 
     }
   };
 

@@ -88,11 +88,10 @@ const MappaImmobili = ({ immobili, otherImmobili }: Props) => {
           zoom={13}
           onLoad={(map: google.maps.Map) => {
             mapRef.current = map;
-            return; // esplicito
+            return; 
           }}
           onMouseMove={handleMouseMove}
         >
-          {/* Marker blu per immobili principali */}
           {immobili.map((immobile) => (
             <Marker
               key={`immobile-${immobile.id}`}
@@ -110,7 +109,6 @@ const MappaImmobili = ({ immobili, otherImmobili }: Props) => {
             />
           ))}
 
-          {/* Marker rosso per altri immobili */}
           {otherImmobili?.map((immobile) => (
             <Marker
               key={`altro-${immobile.id}`}
@@ -129,7 +127,6 @@ const MappaImmobili = ({ immobili, otherImmobili }: Props) => {
           ))}
         </GoogleMap>
 
-        {/* InfoBox o preview laterale — non fluttuante sul cursore */}
         {activeMarker && (
           <div
             className="absolute right-4 top-4 bg-white p-4 rounded-xl shadow-lg max-w-[300px] pointer-events-none"

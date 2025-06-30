@@ -4,15 +4,15 @@ import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import './auth/passport-config.js'; // config passport strategies
+import './auth/passport-config.js'; 
 
-import postRoutes from './router/postsRoute.js';  // API routes
-import authRoutes from './auth/auth.js';          // Auth routes (Google, Facebook)
+import postRoutes from './router/postsRoute.js'; 
+import authRoutes from './auth/auth.js';          
 
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:3000',  // frontend URL
+  origin: 'http://localhost:3000',  
   credentials: true,
 }));
 
@@ -23,17 +23,17 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,     // metti true in produzione con https
+    secure: false,     
     httpOnly: true,
-    sameSite: 'lax'    // per permettere cookie cross-site con frontend su porta differente
+    sameSite: 'lax'    
   }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api', postRoutes);  // API REST
-app.use('/auth', authRoutes); // Auth routes
+app.use('/api', postRoutes);  
+app.use('/auth', authRoutes); 
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server attivo sulla porta ${PORT}`));

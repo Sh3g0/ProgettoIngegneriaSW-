@@ -9,9 +9,14 @@ interface NotificaPrenotazione {
   titolo_immobile: string;
   data_visita: string;
   stato: 'in_attesa' | 'confermata' | 'rifiutata';
+  
 }
 
-export default function Notifiche() {
+interface NotificheProps {
+  agenteId: number;
+}
+
+export default function Notifiche({ agenteId }: NotificheProps) {
   const [notifiche, setNotifiche] = useState<NotificaPrenotazione[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +34,7 @@ export default function Notifiche() {
           return;
         }
 
-        const res = await fetch('http://localhost:3001/api/notificaAppuntamento', {
+        const res = await fetch('http://localhost:3001/api/notificaAppuntamento?agenteId=${agenteId}', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -51,7 +56,7 @@ export default function Notifiche() {
     };
 
     fetchNotifiche();
-  }, []);
+  }, [agenteId]);
 
   if (loading) return <div className="p-5">Caricamento notifiche...</div>;
   if (error) return <div className="p-5 text-red-600">Errore: {error}</div>;

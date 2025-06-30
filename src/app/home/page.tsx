@@ -73,7 +73,7 @@ const switchPrimoAccesso = async () => {
 
     const url = new URL(window.location.href);
     url.searchParams.set('primo_accesso', 'false');
-    window.location.href = url.toString();  // causa reload
+    window.location.href = url.toString();  
 
   }catch (e) {
     console.error('Errore nella richiesta:', e);
@@ -104,7 +104,6 @@ const handleAgencyPasswordChange = async () => {
 
     switchPrimoAccesso();
 
-    //window.location.reload();
   } catch (e) {
     console.error('Errore nella richiesta:', e);
     alert('Errore di rete o altro problema durante la richiesta');
@@ -115,7 +114,6 @@ const handleAgencyPasswordChange = async () => {
   return (
     <div className="bg-white">
       <div className="w-full min-h-screen relative">
-        {/* Overlay loading */}
         {loading && (
           <div
             style={{
@@ -138,7 +136,6 @@ const handleAgencyPasswordChange = async () => {
           </div>
         )}
 
-        {/* MODALE AGENZIA */}
         {primo_accesso && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-[400px] shadow-lg relative">
@@ -162,7 +159,6 @@ const handleAgencyPasswordChange = async () => {
             </div>
         )}
 
-        {/* Hero Section */}
         <div
           className="relative w-full h-[800px] bg-cover bg-center shadow-xl"
           style={{
@@ -177,17 +173,14 @@ const handleAgencyPasswordChange = async () => {
           </div>
         
          
-          {/* Ricerca */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 w-1/2 sm:w-4/5 md:w-1/2 lg:w-1/2">
 
-            {/* Titolo e Tabs */}
             <div className="flex flex-col items-center space-y-2 mt-8">
               <h1 className="text-3xl font-myfont mb-4">TROVA LA TUA CASA</h1>
             </div>
             <SearchBar onLoadingChange={setLoading} />
           </div>      
         </div>
-        {/* Sezione Chi Siamo + Servizi */}
         <section className="bg-gray-100 py-16 px-6">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">I nostri servizi</h2>

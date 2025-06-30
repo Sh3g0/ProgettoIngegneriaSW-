@@ -152,7 +152,7 @@ const FormImmobile: React.FC = () => {
   const [images, setImages] = useState<File[]>([]);
   const [imageError, setImageError] = useState(false);
 
-  const id = useJwtPayload()?.id ?? ""; //Otteniamo l'id dell'agente che sta caricando l'immobile
+  const id = useJwtPayload()?.id ?? ""; 
 
 
   const validateForm = (): boolean => {
@@ -305,7 +305,7 @@ const FormImmobile: React.FC = () => {
                   ...prevData,
                   tipo_annuncio: e.target.value,
                 }));
-                console.log(e.target.value); // Mostra valore corretto
+                console.log(e.target.value); 
               }}
               style={{ position: "relative", zIndex: 10 }}
               className="w-full h-[70%] border border-gray-300 mt-3 rounded-xl p-2"
@@ -396,7 +396,6 @@ const FormImmobile: React.FC = () => {
             </select>
         </div>
 
-        {/* Form Indirizzo */}
         <div className="col-span-3 border-2 rounded-2xl p-4">
           <FormIndirizzo onAddressChange={handleAddressChange} />
           {data.indirizzo && (
@@ -408,7 +407,6 @@ const FormImmobile: React.FC = () => {
           )}
         </div>
 
-        {/* Upload immagini */}
         <div className="col-span-3">
           <h3 className="text-lg font-semibold mb-2">Carica immagini</h3>
           <p className="text-sm text-gray-600 mb-4">
@@ -434,7 +432,6 @@ const FormImmobile: React.FC = () => {
 
         </div>
 
-        {/* Booleani checkbox */}
         <label className="mx-2">Info agg.</label>
         <div className="-my-4 col-span-3 flex justify-center gap-32 border-2 rounded-2xl mb-1">
           <div className="col-span-3 md:col-span-1">
@@ -513,7 +510,6 @@ const FormImmobile: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottone per mostrare il riepilogo */}
         <div className="col-span-3 flex justify-end">
         <button
             onClick={() => {
@@ -528,11 +524,9 @@ const FormImmobile: React.FC = () => {
         </button>
         </div>
 
-        {/* Riepilogo + conferma invio */}
         {!formError && showSummary && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-2xl max-w-2xl w-full shadow-lg relative">
-            {/* Pulsante chiudi */}
             <button
                 onClick={() => setShowSummary(false)}
                 className="absolute top-3 right-3 text-gray-500 hover:text-black text-lg font-bold"

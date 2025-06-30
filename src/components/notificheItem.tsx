@@ -12,7 +12,6 @@ interface NotificaPrenotazione {
 
 export default function NotificheItem({ notifica }: { notifica: NotificaPrenotazione }) {
   const [loading, setLoading] = useState(false);
-  // Prendi stato iniziale da props o metti in attesa come default
   const [statoPrenotazione, setStatoPrenotazione] = useState<'in_attesa' | 'confermata' | 'rifiutata'>(notifica.stato);
 
 
@@ -40,7 +39,6 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
         throw new Error(`Errore: ${res.status} - ${errorText}`);
       }
 
-      // Aggiorna stato per far sparire i bottoni e mostrare messaggio
       if (azione === 'confermata') setStatoPrenotazione('confermata');
       else setStatoPrenotazione('rifiutata');
 
@@ -54,7 +52,6 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 mb-4 transition-all hover:shadow-md">
       <div className="flex items-start space-x-4">
-        {/* Icona decorativa */}
         <div className="flex-shrink-0 p-2 bg-blue-50 rounded-full">
           <svg
             className="h-5 w-5 text-blue-600"
@@ -71,7 +68,6 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
           </svg>
         </div>
 
-        {/* Contenuto principale */}
         <div className="flex-1">
           <p className="text-gray-800 leading-relaxed">
             <span className="font-semibold text-gray-900">{notifica.nome_cliente}</span> ha richiesto un appuntamento per{' '}
@@ -89,7 +85,6 @@ export default function NotificheItem({ notifica }: { notifica: NotificaPrenotaz
           </p>
 
 
-          {/* Azioni */}
           {statoPrenotazione === 'in_attesa' ? (
             <div className="mt-4 flex flex-wrap gap-3">
               <button

@@ -48,7 +48,6 @@ export default function Banner() {
     <div className={`sticky top-0 z-50 w-full transition-colors duration-500 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
       <div className='w-full flex items-center justify-between px-6' style={{ height: '80px' }}>
 
-        {/* Parte sinistra con il logo */}
         <div className="flex items-center justify-start w-[50%]">
           <a href='/home'>
             <img
@@ -60,7 +59,6 @@ export default function Banner() {
         </div>
 
 
-        {/* Parte destra con il menu */}
 
         <div className="flex gap-4 text-black font-medium text-sm items-center px-3">
 
@@ -99,7 +97,6 @@ export default function Banner() {
             </a>
           )}
 
-          { /* Se agenzia mostra opzione agenti */}
           {user_info?.ruolo === 'agenzia' && (
             <a href="/gestioneAgenti" className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <User size={16} /> Agenti
@@ -112,7 +109,6 @@ export default function Banner() {
             </a>
           )}
 
-          {/* Se loggato mostra link al profilo */}
           {user_info && (
             <a href='/profilo' className='px-3 py-1 rounded-full flex items-center gap-1 transition-all duration-300 hover:bg-blue-700'>
               <User size={16} /> {user_info.username || user_info.email || 'Profilo'}

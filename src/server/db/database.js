@@ -4,8 +4,8 @@ const { Pool } = pkg;
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'ING',
-  password: 'sonsycomb',
+  database: 'ingegneriaSW',
+  password: 'claudia',
   port: 5432,
 });
 
@@ -22,4 +22,4 @@ async function queryDB(query, params = []) {
   }
 }
 
-export { pool, queryDB };  // Aggiungi 'pool' all'esportazione
+export { pool, queryDB };  

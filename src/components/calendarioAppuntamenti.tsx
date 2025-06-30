@@ -5,7 +5,7 @@ interface Prenotazione {
   id: number;
   nome_cliente: string;
   titolo_immobile: string;
-  data_visita: string; // deve contenere anche l'orario (es: 2025-05-21T15:30:00Z)
+  data_visita: string; 
 }
 
 export default function CalendarioAppuntamenti({ idAgente }: { idAgente: number }) {
@@ -82,7 +82,6 @@ export default function CalendarioAppuntamenti({ idAgente }: { idAgente: number 
         </button>
       </div>
 
-      {/* Giorni della settimana */}
       <div className="grid grid-cols-7 gap-1 mb-3 " >
         {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((giorno) => (
           <div key={giorno} className="text-center text-sm font-medium text-gray-900 py-2">
@@ -91,7 +90,6 @@ export default function CalendarioAppuntamenti({ idAgente }: { idAgente: number 
         ))}
       </div>
 
-      {/* Griglia giorni */}
       <div className="grid grid-cols-7 gap-1 ">
         {getGiorniDelMese().map((giorno, index) => {
           if (!giorno) return <div key={`empty-${index}`} className="h-24 bg-blue-50 rounded-lg opacity-50" />;
@@ -133,7 +131,6 @@ export default function CalendarioAppuntamenti({ idAgente }: { idAgente: number 
         })}
       </div>
 
-      {/* Modal Appuntamenti Giornalieri */}
       {giornoSelezionato && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">

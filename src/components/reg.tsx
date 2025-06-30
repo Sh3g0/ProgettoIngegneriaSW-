@@ -13,7 +13,6 @@ export default function Reg() {
   const [showPassword, setShowPassword] = useState(false);
   const [showAgenziaPopup, setShowAgenziaPopup] = useState(false);
 
-  // Dati agenzia
   const [nomeAgenzia, setNomeAgenzia] = useState('');
   const [sedeAgenzia, setSedeAgenzia] = useState('');
   const [emailAgenzia, setEmailAgenzia] = useState('');
@@ -51,14 +50,13 @@ export default function Reg() {
   };
 
   const handleAgenziaSubmit = async () => {
-    // Qui va inserita la logica di invio al backend
     console.log({
       nomeAgenzia,
       sedeAgenzia,
       emailAgenzia,
       descrizioneAgenzia,
     });
-    setShowAgenziaPopup(false); // Chiudi popup dopo invio
+    setShowAgenziaPopup(false); 
 
     const res = await fetch('http://localhost:3001/api/registrazioneAgenzia', {
       method: 'POST',
@@ -149,7 +147,6 @@ export default function Reg() {
           </button>
         </div>
 
-        {/* Link popup agenzia */}
         <div className="agenzia-link" style={{ marginTop: '1rem' }}>
           <a
             onClick={() => setShowAgenziaPopup(true)}
@@ -166,7 +163,6 @@ export default function Reg() {
         </div>
       </div>
 
-      {/* Popup agenzia */}
       {showAgenziaPopup && (
         <div className="popup-overlay">
           <div className="popup">

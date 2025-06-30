@@ -6,7 +6,7 @@ export default function NotificheOfferte() {
   
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token"); // o da dove salvi il token
+    const token = sessionStorage.getItem("token"); 
 
     fetch("http://localhost:3001/api/offerteRicevuteAgente", {
       headers: {
@@ -53,7 +53,7 @@ export default function NotificheOfferte() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // <<< AGGIUNGI QUESTO!
+          "Authorization": `Bearer ${token}` 
         },
         body: JSON.stringify({ id_offerta, nuovo_prezzo: nuovoPrezzo })
       });

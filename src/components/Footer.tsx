@@ -6,7 +6,6 @@ const Footer = () => {
     <footer className="bg-gray-900 text-gray-100 py-10 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         
-        {/* Logo / Descrizione */}
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">DietiEstates25</h2>
           <p className="text-sm text-gray-400">
@@ -14,7 +13,6 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* Link utili */}
         <div>
           <h3 className="text-xl font-semibold mb-3">Link utili</h3>
           <ul className="space-y-2 text-sm text-gray-300">
@@ -25,7 +23,6 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Contatti */}
         <div>
           <h3 className="text-xl font-semibold mb-3">Contatti</h3>
           <ul className="text-sm text-gray-300 space-y-2">
@@ -35,7 +32,6 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Social */}
         <div>
           <h3 className="text-xl font-semibold mb-3">Seguici</h3>
           <div className="flex space-x-4">

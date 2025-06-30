@@ -23,8 +23,8 @@ passport.use(new GoogleStrategy({
   let user = users.find(u => u.id === profile.id);
   if (!user) {
     const email = profile.emails?.[0]?.value || '';
-    const username = email.split('@')[0]; // tipo "claudiacoppola"
-    const ruolo = 'cliente'; // default
+    const username = email.split('@')[0]; 
+    const ruolo = 'cliente'; 
 
     user = {
       id: profile.id,

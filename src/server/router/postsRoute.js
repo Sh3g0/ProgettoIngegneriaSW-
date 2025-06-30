@@ -6,7 +6,6 @@ import * as controller from '../controllers/postsController.js';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Le rotte API vere e proprie
 router.post('/login', controller.login);
 router.post('/loginAgenzia', controller.loginAgenzia);
 router.post('/registrazione', controller.registrazioneUtente);
@@ -41,7 +40,6 @@ router.post('/getUserStorico', verificaToken, controller.getUserStoricoControlle
 
 router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
 router.get('/getImmagini/:id_immobile', controller.getImmaginiController)
-//router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
 
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
