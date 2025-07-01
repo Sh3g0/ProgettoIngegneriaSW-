@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import MappaImmobili from '@/components/MappaImmobili';
 import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
-import { useJwtPayload } from '@/components/useJwtPayload';
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
@@ -60,16 +59,14 @@ export default function ImmobilePage() {
     const [offerta, setOfferta] = useState("");
     const [menuCaratteristiche, setMenuCaratteristiche] = useState(false);
 
-    const [showForm, setShowForm] = useState(false); // Stato per il controllo della visibilità del form
-    const [selectedDate, setSelectedDate] = useState<string | null>(null); // Stato per la data selezionata
-    const [selectedTime, setSelectedTime] = useState<string | null>(null); // Stato per l'orario selezionato
+    const [showForm, setShowForm] = useState(false); 
+    const [selectedDate, setSelectedDate] = useState<string | null>(null); 
+    const [selectedTime, setSelectedTime] = useState<string | null>(null); 
 
-    // Funzione per confrontare due date solo per giorno, mese e anno
     const compareDates = (date1: string, date2: string) => {
         const d1 = new Date(date1);
         const d2 = new Date(date2);
 
-        // Confronta solo anno, mese e giorno (ignora l'ora)
         return d1.getFullYear() === d2.getFullYear() &&
             d1.getMonth() === d2.getMonth() &&
             d1.getDate() === d2.getDate();
@@ -78,7 +75,7 @@ export default function ImmobilePage() {
     const generateAvailableDays = (daysCount: number = 14): string[] => {
         const days: string[] = [];
         const today = new Date();
-        today.setDate(today.getDate() + 1); // aggiunge 14 giorni
+        today.setDate(today.getDate() + 1); 
 
         for (let i = 0; i < daysCount; i++) {
             const futureDate = new Date(today);
@@ -93,12 +90,10 @@ export default function ImmobilePage() {
 
     const availableTimes = ['09:00', '10:00', '11:00', '12:00', '15:00', '16:00', '17:00', '18:00'];
 
-    // Funzione per aprire il form
     const openForm = () => {
         setShowForm(true);
     };
 
-    // Funzione per chiudere il form
     const closeForm = () => {
         setShowForm(false);
         setSelectedDate(null);
@@ -106,15 +101,10 @@ export default function ImmobilePage() {
     };
 
     const handleSendAppointment = () => {
-        //Invia dati all'agente immobiliare
-
-        alert(`Richiesta di appuntamento inviata per il ${selectedDate} alle ${selectedTime}.`);
-
-        window.location.reload(); // Ricarica la pagina dopo l'invio
     }
 
     const formatNumber = (value: string) => {
-        const numeric = value.replace(/[^\d]/g, ""); // Rimuove tutto tranne le cifre
+        const numeric = value.replace(/[^\d]/g, ""); 
         const formatted = Number(numeric).toLocaleString("it-IT");
         return numeric ? formatted : "";
     };
@@ -141,45 +131,26 @@ export default function ImmobilePage() {
                 setImmobile(data[0]);
 
                 console.log('Immobile data in immobile:', data[0]);
+
+                const fetchImmagini = async () => {
+                    const response = await fetch(`http://localhost:3001/api/getImmagini/${immobile?.id}`, {
+                        method: 'GET',
+                    });
+
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        setImmagini(data);
+                    } else {
+                        console.error('No images found for the immobile');
+                    }
+                }
+                fetchImmagini();
             } catch (e) {
                 console.error('Error parsing immobile data:', e);
             }
         }
         fetchImmobile();
     }, [immID]);
-
-useEffect(() => {
-    if (!immobile?.id) return;
-
-    const fetchImmagini = async () => {
-        try {
-            const response = await fetch(`http://localhost:3001/api/getImmagini/${immobile.id}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-            const data = await response.json();
-
-            if (data && data.immagini) {
-                // Trasforma i path in oggetti Immagine
-                const immaginiFormattate: Immagine[] = data.immagini.map((url: string) => ({
-                    url: `http://localhost:3001${url}`
-                }));
-
-                setImmagini(immaginiFormattate);
-            } else {
-                console.error('Nessuna immagine trovata');
-            }
-        } catch (e) {
-            console.error('Errore nel recupero immagini:', e);
-        }
-    };
-
-    fetchImmagini();
-}, [immobile]);
 
     useEffect(() => {
         if (isGalleryOpen) {
@@ -194,39 +165,10 @@ useEffect(() => {
     }, [isGalleryOpen]);
 
 
-    const id = useJwtPayload()?.id;
-
-useEffect(() => {
-    if (!id || !immobile?.id) return; // Aspetta che entrambi siano definiti
-
-    const updateStorico = async () => {
-        console.log('Updating storico for user ID:', id, 'and immobile ID:', immobile.id);
-
-        try {
-            await fetch('http://localhost:3001/api/updateStorico', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id_utente: id,
-                    id_immobile: immobile.id,
-                    tipo_attivita: `Visualizzazione dell'immobile "${immobile.titolo}"`,
-                }),
-            });
-        } catch (err) {
-            console.error("Errore nell'update dello storico:", err);
-        }
-    };
-
-    updateStorico();
-}, [id, immobile]); // La useEffect parte SOLO quando id e immobile cambiano
-
-    
-
     const openGallery = (imageUrl: string, index: number) => {
         setSelectedImage(imageUrl);
         setIsGalleryOpen(true);
+        console.log('lebroooooon')
     };
 
     const closeGallery = () => {
@@ -296,7 +238,6 @@ const inviaOfferta = async () => {
             </div>
 
 
-            {/* Display prezzo, titolo e indirizzo */}
             <div className='flex flex-col sticky bg-white top-0 z-20 lg:flex-row gap-0 border-b-1 border-b-blue-700 shadow-md'>
                 <div className='flex flex-col items-center w-full lg:w-[30%] justify-center text-center p-2 border-r-2'>
                     <div className='w-full pb-1 text-3xl font-bold'>
@@ -358,7 +299,7 @@ const inviaOfferta = async () => {
                         <a
                             href="#"
                             onClick={(e) => {
-                                e.preventDefault(); // Previene il comportamento di navigazione
+                                e.preventDefault(); 
                                 openForm();
                             }}
                             className="h-full w-full text-center flex items-center justify-center gap-2 hover:animate-wiggle"
@@ -404,7 +345,6 @@ const inviaOfferta = async () => {
                                                     const month = date.toLocaleDateString('it-IT', { month: 'long' });
                                                     const year = date.getFullYear();
 
-                                                    // Verifica se la data è selezionata, usando la funzione compareDates
                                                     const isSelected = compareDates(selectedDate ?? '', dayIso);
 
                                                     return (
@@ -415,14 +355,12 @@ const inviaOfferta = async () => {
                                                             border-2 hover:shadow-md transition-all
                                                             ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}
                                                         `}
-                                                            onClick={() => setSelectedDate(dayIso)} // Seleziona la data quando clicchi
+                                                            onClick={() => setSelectedDate(dayIso)} 
                                                         >
-                                                            {/* Parte superiore: mese */}
                                                             <div className="bg-blue-600 text-white text-xs uppercase text-center py-1">
                                                                 {month}
                                                             </div>
 
-                                                            {/* Parte centrale: giorno */}
                                                             <div className="flex flex-col justify-center items-center h-full -my-2">
                                                                 <span className={`text-2xl ${isSelected ? 'text-blue-600' : 'text-black'}`}>
                                                                     {day}
@@ -437,7 +375,6 @@ const inviaOfferta = async () => {
                                             </div>
                                         </div>
 
-                                        {/* Orario - Card scrollabili */}
                                         <div className="mb-4">
                                             <label htmlFor="time" className="block text-sm font-medium text-gray-700">
                                                 Orario
@@ -460,7 +397,6 @@ const inviaOfferta = async () => {
                                             </div>
                                         </div>
 
-                                        {/* Dati personali disposti uno accanto all'altro */}
                                         <div className="grid grid-cols-2 gap-4 mb-4">
                                             <div className="col-span-1">
                                                 <label htmlFor="name" className="block text-sm text-gray-700">
@@ -527,30 +463,25 @@ const inviaOfferta = async () => {
                 </div>
             </div>
 
-            {/*Visualizzazione immagini*/}
             <div className='w-full flex justify-center items-center mt-4'>
                 <div className='flex lg:w-[80%] justify-between gap-4 max-h-[630px]'>
-                    {/* Colonna 1: Immagine principale */}
                     <div className='w-[70%] flex justify-center '>
-                    <img
-                        src={immagini?.[0]?.url || '/img/sfondo5.jpg'}
-                        alt="Immobile Anteprima"
-                        className='w-full h-auto rounded-2xl shadow-lg object-cover'
-                        onClick={() => '/sfondo5.jpg'}
-                    />
+                        <img
+                            src={'/img/sfondo5.jpg'}
+                            alt="Immobile Anteprima"
+                            className='w-full h-auto rounded-2xl shadow-lg object-cover'
+                            onClick={() => '/sfondo5.jpg'}
+                        />
                     </div>
 
-                    {/* Colonna 2: Miniature */}
                     <div className='w-[30%] p-0 flex flex-col gap-4 max-h-[800px]'>
                         {immagini?.slice(0, 3).map((immagine, index) => (
                             <div
                                 key={index}
-                                className={`flex justify-center max-h-[200px] ${index === 3 ? 'relative' : ''}`} // L'ultima immagine avrà la classe relativa
+                                className={`flex justify-center max-h-[200px] ${index === 3 ? 'relative' : ''}`} 
                             >
-                                {/* Condizione per l'ultima immagine */}
                                 {index === 2 ? (
                                     <div className="relative w-full max-h-[200px]">
-                                        {/* Copertura trasparente grigia */}
                                         <div className="absolute inset-0 bg-gray-800 hover:bg-gray-900 opacity-50 flex justify-center items-center max-h-[200px] rounded-2xl"
                                             onClick={() => openGallery(immagine.url, index)}>
                                             <span className="text-white text-3xl font-bold">+</span>
@@ -575,10 +506,8 @@ const inviaOfferta = async () => {
                 </div>
             </div>
 
-            {/* Modal per la galleria */}
             {isGalleryOpen && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex flex-col justify-center items-center">
-                    {/* Bottone Chiudi */}
                     <div className="absolute top-4 right-4">
                         <button
                             onClick={() => setIsGalleryOpen(false)}
@@ -588,9 +517,7 @@ const inviaOfferta = async () => {
                         </button>
                     </div>
 
-                    {/* Immagine con frecce */}
                     <div className="relative flex items-center justify-center w-full max-w-5xl px-4">
-                        {/* Freccia Sinistra */}
                         <button
                             onClick={handlePrevImage}
                             className="absolute left-0 text-white text-5xl px-4 hover:text-blue-500"
@@ -598,14 +525,12 @@ const inviaOfferta = async () => {
                             ❮
                         </button>
 
-                        {/* Immagine principale */}
                         <img
                             src={selectedImage}
                             alt="Galleria"
                             className="max-h-[70vh] w-auto mx-12 rounded-2xl shadow-lg object-contain"
                         />
 
-                        {/* Freccia Destra */}
                         <button
                             onClick={handleNextImage}
                             className="absolute right-0 text-white text-5xl px-4 hover:text-blue-500"
@@ -614,7 +539,6 @@ const inviaOfferta = async () => {
                         </button>
                     </div>
 
-                    {/* Anteprime immagini */}
                     <div className="mt-6 flex gap-4 overflow-x-auto max-w-4xl px-4">
                         {immagini.map((img, index) => (
                             <img
@@ -634,7 +558,6 @@ const inviaOfferta = async () => {
             )}
 
             <div className="flex flex-row w-[80%] mx-auto gap-4 mt-4">
-                {/* Colonna sinistra */}
                 <div className="flex flex-col w-[70%] bg-white rounded-2xl shadow-lg p-4">
                     <div className="flex w-full">
                         <div className="flex font-bold text-3xl w-[50%] text-blue-500 p-4">
@@ -674,41 +597,34 @@ const inviaOfferta = async () => {
                             </div>
                         </div>
 
-                        {/* Modal caratteristiche */}
                         {menuCaratteristiche && (
                             <div className="fixed inset-0 bg-black/30 z-50 flex justify-center items-center">
                                 <div className="flex flex-col w-full max-w-3xl bg-white rounded-2xl shadow-lg p-4">
 
-                                    {/* Titolo */}
                                     <div className="flex w-full mb-4">
                                         <div className="font-bold text-3xl text-blue-500 p-4">
                                             Caratteristiche
                                         </div>
                                     </div>
 
-                                    {/* Contenuto */}
                                     <div className="flex flex-row px-5 gap-8">
                                         <div className="w-full flex flex-col text-lg">
 
-                                            {/* Riga: RIF */}
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">RIF.</div>
                                                 <div className="w-1/2 text-left">{immobile ? immobile.id : 'N/A'}</div>
                                             </div>
 
-                                            {/* Riga: Piano */}
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Piano</div>
                                                 <div className="w-1/2 text-left">{immobile ? immobile.piano : 'N/A'}</div>
                                             </div>
 
-                                            {/* Riga: Stanze */}
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Stanze</div>
                                                 <div className="w-1/2 text-left">{immobile ? immobile.stanze : 'N/A'}</div>
                                             </div>
 
-                                            {/* Riga: Condizionamento */}
                                             <div className="flex mb-4 border-b border-gray-300">
                                                 <div className="w-1/2">Condizionamento</div>
                                                 <div className="w-1/2 text-left">
@@ -758,7 +674,6 @@ const inviaOfferta = async () => {
                                                 </div>
                                             </div>
 
-                                            {/* Bottone Chiudi */}
                                             <div className="text-center mt-4">
                                                 <button
                                                     className="text-blue-700 font-bold hover:underline"
@@ -774,11 +689,9 @@ const inviaOfferta = async () => {
                         )}
 
                         <div className="w-[50%] bg-gray-100 rounded-2xl p-4 shadow-sm flex justify-between gap-6">
-                            {/* Costi */}
                             <div className="w-1/2">
                                 <p className="text-xl font-semibold text-blue-700">Costi</p>
 
-                                {/* Prezzo */}
                                 <div className="">
                                     <p className="font-medium mt-4">Prezzo:</p>
                                     <p className="text-black text-md font-bold">
@@ -786,7 +699,6 @@ const inviaOfferta = async () => {
                                     </p>
                                 </div>
 
-                                {/* Prezzo al metro quadro */}
                                 <div className="">
                                     <p className="font-medium mt-2">Prezzo al m²:</p>
                                     <p className="text-gray-700">
@@ -797,7 +709,6 @@ const inviaOfferta = async () => {
                                 </div>
                             </div>
 
-                            {/* Controfferta */}
                             <div className="w-1/2 flex flex-col justify-center">
                                 <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="controfferta">
                                     Invia una controfferta
@@ -825,7 +736,6 @@ const inviaOfferta = async () => {
                     </div>
                 </div>
 
-                {/* Colonna destra */}
                 <div className="w-[30%] bg-white rounded-2xl shadow-md p-6 text-gray-800">
                     <h2 className="text-2xl font-bold text-blue-700 mb-4">Agenzia XYZ</h2>
                     <p className="mb-2"><span className="font-semibold">Indirizzo:</span> Via Roma 123, Milano</p>
@@ -838,9 +748,7 @@ const inviaOfferta = async () => {
             </div>
 
             <div className="flex flex-row w-[80%] mx-auto gap-4 mt-4">
-                {/* Div sinistro diviso in due righe */}
                 <div className="w-[40%] bg-white rounded-2xl shadow-md p-4 text-gray-800 flex flex-col gap-4">
-                    {/* Riga 1: Titolo + Indirizzo */}
                     <div className="flex flex-col h-full">
                         <div className="font-bold text-3xl text-blue-500 px-4 mb-4">
                             Descrizione
@@ -852,7 +760,6 @@ const inviaOfferta = async () => {
                             {immobile?.descrizione || "Descrizione immobile"}
                         </div>
 
-                        {/* Bottone in basso */}
                         <div className="text-lg text-center mt-auto pt-4">
                             <button
                                 className="text-blue-700 font-bold hover:underline"
@@ -865,7 +772,6 @@ const inviaOfferta = async () => {
                 </div>
 
 
-                {/* Colonna destra con altezza variabile */}
                 <div className="w-[60%] bg-white rounded-2xl shadow-md p-6 mt-0 flex flex-col min-h-[400px]">
                     <MappaImmobili immobili={immobile ? [immobile] : []} otherImmobili={[]} />
                 </div>

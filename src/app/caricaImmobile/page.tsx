@@ -10,7 +10,6 @@ export default function CaricaImmobile() {
   return (
     <div className="bg-gray-100">
       <div className="min-h-screen w-full">
-        {/* Hero Section */}
         <div
           className="relative h-[600px] w-full bg-cover bg-center shadow-xl"
           style={{
@@ -31,9 +30,7 @@ export default function CaricaImmobile() {
           </div>
         </div>
 
-        {/* Sezione principale */}
         <div className="px-6 md:px-12 py-16 flex flex-col gap-12 max-w-4xl mx-auto">
-          {/* Box info */}
           <div className="bg-gray-100 p-6 rounded-2xl flex flex-col items-center text-center justify-center">
             <div className="relative mb-4">
               <Home size={72} className="text-gray-700" />
@@ -52,13 +49,11 @@ export default function CaricaImmobile() {
             </p>
           </div>
 
-          {/* Box form */}
           <div className="bg-white p-6 shadow-lg rounded-2xl">
             <Form />
           </div>
         </div>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

@@ -19,14 +19,12 @@ export default function SearchBar({ onLoadingChange }: SearchBarProps) {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Carica i dati da JSON
   useEffect(() => {
-    fetch('/italian_locations.json') // Assicurati che sia in public/
+    fetch('/italian_locations.json') 
       .then((res) => res.json())
       .then((data) => setSuggestions(data));
   }, []);
 
-  // Aggiorna i suggerimenti
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setZone(value);
@@ -35,7 +33,7 @@ export default function SearchBar({ onLoadingChange }: SearchBarProps) {
       const filtered = suggestions.filter((item) =>
         item.toLowerCase().includes(value.toLowerCase())
       );
-      setFilteredSuggestions(filtered.slice(0, 10)); // Max 10 suggerimenti
+      setFilteredSuggestions(filtered.slice(0, 10)); 
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
@@ -47,7 +45,6 @@ export default function SearchBar({ onLoadingChange }: SearchBarProps) {
     setShowSuggestions(false);
   };
 
-  //Funzione per la ricerca
   const handleSearch = async () => {
     const zoneSearch = zone.trim();
 
@@ -69,7 +66,7 @@ export default function SearchBar({ onLoadingChange }: SearchBarProps) {
 
         if (zoneSearch) {
           const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
-          router.push(`/VisualizzaImmobili?param=${encodedParametri}&searchkey=1`); //searchkey 1 per la ricerca con lat e lng
+          router.push(`/VisualizzaImmobili?param=${encodedParametri}&searchkey=1`); 
         }
       }
     } catch (error) {

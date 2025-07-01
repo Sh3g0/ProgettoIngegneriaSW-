@@ -13,7 +13,7 @@ import NotificheOfferteCliente from '@/components/NotificheOfferteCliente';
 export default function UserProfile() {
   const router = useRouter();
   const payload = useJwtPayload();
-  const [selectedMenu, setSelectedMenu] = useState('Profilo'); // valore iniziale
+  const [selectedMenu, setSelectedMenu] = useState('Profilo');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,6 @@ export default function UserProfile() {
     console.log('Payload:', payload);
 
     if (payload === null) {
-      // ancora loading o non presente, attendi
       return;
     }
 
@@ -38,8 +37,7 @@ export default function UserProfile() {
       setIsLoggingOut(true);
       sessionStorage.removeItem('token');
       window.dispatchEvent(new Event('token-changed'));
-      // rimuovi il token JWT
-      router.push('/'); // reindirizza alla home
+      router.push('/'); 
     }
   }, [selectedMenu]);
 
@@ -51,7 +49,6 @@ export default function UserProfile() {
 
   const id = payload.id;
 
-  // Componenti finti per contenuti menu
   const renderContent = () => {
     switch (selectedMenu) {
       case 'Profilo':
@@ -115,7 +112,6 @@ export default function UserProfile() {
       <Banner />
 
       <div className="grid grid-cols-[200px_1fr] gap-0 p-4">
-        {/* Menu sinistro scrollabile */}
         <div className="bg-white py-4 ml-8 rounded-3xl shadow-md overflow-y-auto w-[100px] max-h-[56%] min-h-[440px] overflow-y-hidden text-center">
           <ul className="space-y-0">
             {menuItems.map(({ label, icon }, index) => {
@@ -141,7 +137,6 @@ export default function UserProfile() {
           </ul>
         </div>
 
-        {/* Contenuto principale con altezza dinamica */}
         <main className="bg-white p-6 rounded-3xl shadow -ml-4">
           <h2 className="text-2xl text-blue-900 font-bold mb-4">{selectedMenu}</h2>
           {renderContent()}

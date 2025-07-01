@@ -6,7 +6,6 @@ import * as controller from '../controllers/postsController.js';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Le rotte API vere e proprie
 router.post('/login', controller.login);
 router.post('/loginAgenzia', controller.loginAgenzia);
 router.post('/registrazione', controller.registrazioneUtente);
@@ -41,7 +40,6 @@ router.post('/getUserStorico', verificaToken, controller.getUserStoricoControlle
 
 router.post('/caricaImmobile', verificaToken, upload.array("immagini"), controller.caricaImmobileController);
 router.get('/getImmagini/:id_immobile', controller.getImmaginiController)
-//router.post('/prenotaVisita', verificaToken, prenotaVisitaController);
 
 router.get('/getAgenziaByAgenteId/:id', controller.getAgenziaByAgenteId);
 
@@ -55,5 +53,11 @@ router.get('/getAgentiByAgenzia/:idAgenzia', controller.getAgentiByAgenziaIdCont
 router.delete('/eliminaAgente/:id', controller.eliminaAgenteController);
 
 router.post('/switchPrimoAccesso', controller.switchPrimoAccessoController);
+
+router.get('/richieste/immobili', controller.getRichiesteImmobili);
+router.get('/richieste/agenzie', controller.getRichiesteAgenzie);
+
+router.delete('/richieste/:type/accetta/:id', controller.accettaRichiesta);
+router.delete('/richieste/:type/rifiuta/:id', controller.rifiutaRichiesta);
 
 export default router;

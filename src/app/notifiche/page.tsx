@@ -15,16 +15,13 @@ export default function NotifichePage() {
 
   return (
   <div className="relative">
-  {/* Banner fissato in alto */}
   <div className="fixed top-0 left-0 right-0 z-50">
     <Banner />
   </div>
 
-  {/* Contenuto principale */}
   <div className="container mx-auto px-4 pt-24 pb-8">
     <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Appuntamenti</h1>
     
-    {/* Box Notifiche con sfumatura blu */}
     <div className="p-[2px] rounded-2xl bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 mb-12 shadow-md">
       <div className="bg-white rounded-[15px] overflow-hidden">
         <div className="p-5 border-b border-gray-200">
@@ -37,7 +34,6 @@ export default function NotifichePage() {
       </div>
     </div>
 
-    {/* Box Calendario con sfumatura blu */}
     <div className="p-[2px] rounded-2xl bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 shadow-md">
       <div className="bg-white rounded-[15px] p-5">
         <div className="mb-5">

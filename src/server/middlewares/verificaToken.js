@@ -16,8 +16,7 @@ function verificaToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    // usa la tua chiave
-    req.user = decoded; // ⚠️ Questo deve contenere l'id!
+    req.utente = decoded; 
     next();
   } catch (err) {
     res.status(403).json({ message: 'Token non valido' });

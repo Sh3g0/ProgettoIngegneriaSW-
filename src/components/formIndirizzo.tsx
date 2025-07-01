@@ -30,7 +30,7 @@ export interface Indirizzo {
 }
 
 interface AddressFormProps {
-  onAddressChange: (address: Indirizzo | null) => void; // accetta anche null per resettare
+  onAddressChange: (address: Indirizzo | null) => void; 
 }
 
 const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
@@ -51,7 +51,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
   };
 
   const notifyParent = () => {
-    // Controlla che tutti i campi richiesti siano valorizzati e validi
     if (
       streetAddress &&
       houseNumber &&
@@ -72,7 +71,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
         lng,
       });
     } else {
-      // Se manca qualcosa, resetta il form genitore
       onAddressChange(null);
     }
   };
@@ -90,7 +88,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
     setLat(location.lat());
     setLng(location.lng());
 
-    // Reset campi per riempirli con dati nuovi
     setCity("");
     setProvince("");
     setPostalCode("");
@@ -124,7 +121,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
     setCountry("");
     setLat(defaultCenter.lat);
     setLng(defaultCenter.lng);
-    onAddressChange(null); // reset genitore
+    onAddressChange(null); 
   };
 
   const handleStreetAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +131,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
     setPostalCode("");
     setCountry("");
     setHouseNumber("");
-    onAddressChange(null); // reset genitore perché indirizzo modificato manualmente
+    onAddressChange(null); 
   };
 
   const handleHouseNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,14 +139,13 @@ const AddressForm: React.FC<AddressFormProps> = ({ onAddressChange }) => {
     if (/^\d*$/.test(value)) {
       setHouseNumber(value);
       setIsHouseNumberValid(true);
-      onAddressChange(null); // reset genitore in attesa conferma completo
+      onAddressChange(null); 
     } else {
       setIsHouseNumberValid(false);
       onAddressChange(null);
     }
   };
 
-  // Usa useEffect per notificare il genitore quando i dati sono completi e corretti
   useEffect(() => {
     notifyParent();
   }, [streetAddress, houseNumber, city, province, postalCode, country, lat, lng, isHouseNumberValid]);

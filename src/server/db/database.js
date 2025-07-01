@@ -22,4 +22,4 @@ async function queryDB(query, params = []) {
   }
 }
 
-export { pool, queryDB };  // Aggiungi 'pool' all'esportazione
+export { pool, queryDB };  

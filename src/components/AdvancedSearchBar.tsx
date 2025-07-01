@@ -21,7 +21,7 @@ export default function AdvancedSearchBar() {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPrezzoLabel, setSelectedPrezzoLabel] = useState('Prezzo');
-  const [activeMenu, setActiveMenu] = useState<string | null>(null); // Stato per tenere traccia del menu attivo
+  const [activeMenu, setActiveMenu] = useState<string | null>(null); 
   const [stanze, setStanze] = useState(0);
   const [piano, setPiano] = useState<number | null>(null);
   const [ascensore, setAscensore] = useState(false);
@@ -85,7 +85,7 @@ const handleAdvancedSearch = async () => {
       try{
         const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
 
-        const timestamp = new Date().getTime(); // Aggiungi un parametro unico per evitare cache
+        const timestamp = new Date().getTime(); 
         window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}&searchkey=${'3'}`;
 
         console.log('Esegui ricerca con:', parametri);
@@ -134,7 +134,7 @@ const handleNormalSearch = async () => {
       try{
         const encodedParametri = encodeURIComponent(JSON.stringify(parametri));
 
-        const timestamp = new Date().getTime(); // Aggiungi un parametro unico per evitare cache
+        const timestamp = new Date().getTime(); 
         window.location.href = `/VisualizzaImmobili?param=${encodedParametri}&timestamp=${timestamp}&searchkey=${'2'}`;
 
         console.log('Esegui ricerca con:', parametri);
@@ -176,8 +176,8 @@ const handleNormalSearch = async () => {
   };
 
   const handleSuggestionClick = (value: string) => {
-    setZone(value);        // valore valido selezionato
-    setZoneInput(value);   // mostra il testo selezionato
+    setZone(value);        
+    setZoneInput(value);   
     setShowSuggestions(false);    
   };
 
@@ -188,7 +188,7 @@ const handleNormalSearch = async () => {
   
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
-    if (filtersVisible) setActiveMenu(null); // Chiudi tutti i menu quando "Altri filtri" è chiuso
+    if (filtersVisible) setActiveMenu(null); 
   };
 
   const resetAll = () => {
@@ -200,11 +200,11 @@ const handleNormalSearch = async () => {
     setSelectedPrezzoLabel('Prezzo');
     setSuperficie(null);
     setFiltersVisible(false);
-    setActiveMenu(null); // Chiudi tutti i menu
+    setActiveMenu(null); 
   };
 
   const toggleMenu = (menu: string) => {
-    setActiveMenu(prevMenu => prevMenu === menu ? null : menu); // Se il menu è già aperto, lo chiude, altrimenti lo apre
+    setActiveMenu(prevMenu => prevMenu === menu ? null : menu); 
   };
 
   return (
@@ -219,7 +219,7 @@ const handleNormalSearch = async () => {
               onChange={(e) => {
                 const value = e.target.value;
                 setZoneInput(value);
-                setZone(value); // manteniamo sincronizzati
+                setZone(value);
 
                 if (value.length > 1) {
                   const filtered = suggestions.filter((item) =>
@@ -263,7 +263,6 @@ const handleNormalSearch = async () => {
           )}
         </div>
 
-        {/* Tipo Annuncio */}
         <div className="relative h-full w-[10%] col-span-1 border-gray-300">
           <button
             onClick={() => toggleMenu('tipoAnnuncio')}
@@ -280,7 +279,7 @@ const handleNormalSearch = async () => {
                     key={val}
                     onClick={() => {
                       setTipoAnnuncio(val);
-                      setActiveMenu(null); // Chiudi il menu
+                      setActiveMenu(null); 
                     }}
                     className="px-4 py-2 hover:bg-blue-100 cursor-pointer capitalize"
                   >
@@ -292,7 +291,6 @@ const handleNormalSearch = async () => {
           )}
         </div>
 
-        {/* Prezzo Dropdown */}
         <div className="relative h-full w-[15%] col-span-1 border-b-0 border-gray-300">
           <button
             onClick={() => toggleMenu('prezzoDropdown')}
@@ -311,14 +309,13 @@ const handleNormalSearch = async () => {
                 onConfirm={() => {
                   const label = `${Number(prezzoMin).toLocaleString()}€ - ${Number(prezzoMax).toLocaleString()}€`;
                   setSelectedPrezzoLabel(label);
-                  setActiveMenu(null); // Chiudi il menu
+                  setActiveMenu(null); 
                 }}
               />
             </div>
           )}
         </div>
 
-        {/* Superficie */}
         <div className="relative h-full w-[10%] col-span-1 border-b-0 border-gray-300">
           <button
             onClick={() => toggleMenu('superficie')}
@@ -339,7 +336,7 @@ const handleNormalSearch = async () => {
                       key={val}
                       onClick={() => {
                         setSuperficie(val);
-                        setActiveMenu(null); // Chiudi il menu
+                        setActiveMenu(null); 
                       }}
                       className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
                     >
@@ -352,12 +349,11 @@ const handleNormalSearch = async () => {
           )}
         </div>
 
-        {/* Altri filtri */}
         <div className="relative h-full w-[10%] border-l border-gray-300">
           <button
             onClick={() => {
               toggleMenu('filters');
-              setFiltersVisible(!filtersVisible); // Inverti visibilità solo se clicchi sul pulsante
+              setFiltersVisible(!filtersVisible); 
             }}
             className="flex justify-between items-center px-3 bg-white border-t-1 border-t-blue-500 w-full h-full focus:outline-none hover:border-b-2 hover:border-blue-600 transition duration-200"
           >
@@ -365,18 +361,16 @@ const handleNormalSearch = async () => {
             <span className="ml-0 mr-1">{filtersVisible ? '▲' : '▼'}</span>
           </button>
         </div>
-        {/* Modal Altri filtri */}
         {filtersVisible && (
           <>
             <div
               className="fixed inset-0 bg-black bg-opacity-40"
               onClick={() => {
                 setFiltersVisible(false);
-                setActiveMenu(null); // Chiudi il menu quando si clicca fuori
+                setActiveMenu(null); 
               }}
             />
 
-            {/* Stanze */}
             <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
               <div>
                 <label htmlFor="stanze" className="block text-sm font-medium">Numero di stanze</label>

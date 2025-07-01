@@ -1,4 +1,3 @@
-// successLogin/page.tsx o componente simile
 'use client';
 
 import { useEffect } from 'react';
@@ -14,11 +13,11 @@ useEffect(() => {
   const ruolo = searchParams.get('ruolo');
   const id = searchParams.get('id');
 
-  console.log('Facebook login params:', { token, username, ruolo, id }); // 🔍
+  console.log('Facebook login params:', { token, username, ruolo, id }); 
 
  if (token && ruolo && id) {
   sessionStorage.setItem('token', token);
-  sessionStorage.setItem('username', username || 'UtenteFacebook'); // fallback se vuoto
+  sessionStorage.setItem('username', username || 'UtenteFacebook'); 
   sessionStorage.setItem('ruolo', ruolo);
   sessionStorage.setItem('id', id);
   window.dispatchEvent(new Event('token-changed'));

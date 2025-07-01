@@ -6,10 +6,10 @@ import { queryDB } from '../db/database.js';
 import path from "path";
 import fs from "fs/promises";
 import * as service from '../services/postsServices.js';
+import { query } from 'express';
 
 const UPLOAD_DIR = path.resolve("uploads");
 
-//Controller per ottenere il ruolo di un utente dato username e password
 async function login(req, res) {
   const { username, password } = req.body;
   console.log('Controller req.utente:', req.utente);
@@ -27,7 +27,6 @@ async function login(req, res) {
       username: user.username
     };
 
-    // Creazione del token (opzionale se vuoi usare autenticazione JWT)
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(200).json({
@@ -62,11 +61,10 @@ async function loginAgenzia(req, res) {
     console.log('id:', agenzia.id);
     const payload = {
       id: agenzia.id,
-      ruolo: 'agenzia', // Ruolo fisso per agenzia
+      ruolo: 'agenzia', 
       username: agenzia.nome,
     };
 
-    // Creazione del token (opzionale se vuoi usare autenticazione JWT)
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(200).json({
@@ -97,15 +95,14 @@ async function checkUserExists(email, username) {
   try {
     const result = await queryDB(query, params);
 
-    // Converte direttamente il valore count in un numero
-    const count = parseInt(result[0].count, 10);  // Assicurati che 'result' sia un array
+    const count = parseInt(result[0].count, 10);  
 
-    console.log('Count:', count);  // Log per verificare il valore numerico
+    console.log('Count:', count);  
 
     if (count > 0) {
-      return true;  // Utente esistente
+      return true;  
     } else {
-      return false;  // Utente non esistente
+      return false;  
     }
   } catch (error) {
     console.error('Errore durante il controllo dell\'utente esistente:', error);
@@ -155,7 +152,6 @@ async function checkAgenziaExists(emailAgenzia) {
     const result = await queryDB(query, params);
     console.log('checkAgenziaExists result:', result);
 
-    // Qui cambiato:
     const count = parseInt(result[0].count, 10);
 
     return count > 0;
@@ -174,10 +170,8 @@ async function getImmobiliByAdvancedFilterController(req, res) {
     tipoAnnuncio = tipoAnnuncio === 'qualsiasi' ? ['affitto', 'vendita'] : [tipoAnnuncio];
     classe_energetica = classe_energetica === 'all' ? ['A', 'B', 'C', 'D', 'E'] : [classe_energetica];
 
-    // Chiamata al servizio per ottenere gli immobili
     const immobili = await service.getImmobiliByAdvancedFilters(lat, lng, prezzoMin, prezzoMax, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipoAnnuncio, climatizzazione, status);
 
-    // Restituisce gli immobili trovati
     return res.json(immobili);
   } catch (error) {
     console.error(error);
@@ -191,10 +185,8 @@ async function getImmobiliByCoordsController(req, res) {
     const params = req.body
     const { lat, lng, status } = params;
 
-    // Chiamata al servizio per ottenere gli immobili
     const immobili = await service.getImmobiliByCoords(lat, lng, status);
 
-    // Restituisce gli immobili trovati
     return res.json(immobili);
   } catch (error) {
     console.error(error);
@@ -208,10 +200,8 @@ async function getImmobiliByIdController(req, res) {
     const params = req.body
     const { id, status } = params;
 
-    // Chiamata al servizio per ottenere gli immobili
     const immobili = await service.getImmobiliById(id, status);
 
-    // Restituisce gli immobili trovati
     return res.json(immobili);
   } catch (error) {
     console.error(error);
@@ -219,7 +209,6 @@ async function getImmobiliByIdController(req, res) {
   }
 }
 
-//Funzione che data lat e lng, prezzo min e max, superficie e tipo di annuncio mi restituisca gli immobili che corrispondo a questi parametri
 async function getImmobiliByFilterController(req, res) {
   try {
 
@@ -268,8 +257,8 @@ async function getUserStoricoController(req, res) {
 }
 
 async function caricaImmobileController(req, res) {
-  const files = req.files; // array di file
-  const jsonData = JSON.parse(req.body.data); // stringa -> oggetto
+  const files = req.files; 
+  const jsonData = JSON.parse(req.body.data); 
 
   console.log("JSON ricevuto:", jsonData);
   console.log("Immagini ricevute:", files);
@@ -279,13 +268,13 @@ async function caricaImmobileController(req, res) {
 
   streetAddress = streetAddress + ` ${houseNumber}`
 
-  const imagePaths = []; //Percorso immagini da salvare sul db
+  const imagePaths = []; 
 
   for (const file of files) {
-    const filename = `${Date.now()}-${file.originalname}`; //Identificatore univoco per l'immagine
-    const filePath = path.join(UPLOAD_DIR, filename); //Crea il percorso unendo path e nome file (uploads/"nomefile")
-    await fs.writeFile(filePath, file.buffer); //Scrive fisicamente il file nel percorso
-    imagePaths.push(filename); //Salvo solo il nome del file perchè a prescindere cercherò in /uploads
+    const filename = `${Date.now()}-${file.originalname}`; 
+    const filePath = path.join(UPLOAD_DIR, filename); 
+    await fs.writeFile(filePath, file.buffer);
+    imagePaths.push(filename); 
   }
 
   await service.caricaImmobile({
@@ -308,7 +297,6 @@ async function caricaImmobileController(req, res) {
     immagini: imagePaths,
   });
 
-  //Cancellare le img da uploads se il caricamento non va a buon fine
 
   return res.status(200).json({ success: true });
 }
@@ -318,7 +306,7 @@ async function prenotaVisitaController(req, res) {
 
   try {
     const { id_immobile, data_visita } = req.body;
-    const id_cliente = req.user.id;
+    const id_cliente = req.utente.id;
 
     if (!id_immobile || !data_visita) {
       return res.status(400).json({ message: 'Dati incompleti per la prenotazione' });
@@ -346,7 +334,6 @@ async function prenotaVisitaController(req, res) {
     `;
     const params = [id_immobile, id_cliente, data_visita];
 
-    // 🔥 Qui definiamo result fuori dal try interno
     const result = await queryDB(query, params);
     console.log('Query result:', result);
 
@@ -404,14 +391,12 @@ async function getDateBloccaVisita(req, res) {
 
 async function getNotifichePrenotazioni(req, res) {
   try {
-    // Check autorizzazione agente
     if (!req.utente || req.utente.ruolo !== 'agente') {
       return res.status(403).json({ message: 'Accesso negato: solo agenti' });
     }
 
     const agenteId = req.utente.id;
 
-    // Query per prendere tutte le prenotazioni di questo agente
     const result = await queryDB(
       `SELECT *
    FROM prenotazione_visite 
@@ -507,7 +492,6 @@ async function getPrenotazioniAccettateCliente(req, res) {
 
     console.log("Prenotazioni trovate:", result);
 
-    // Protezione contro result o rows undefined
     const prenotazioni = (Array.isArray(result)) ? result : [];
 
     res.json(prenotazioni);
@@ -544,7 +528,6 @@ async function getImmaginiController(req, res) {
       [id_immobile]
     );
 
-    // Restituisci i percorsi completi
     const immagini = result.map(r => `/uploads/${r.path}`);
 
     res.json({ immagini });
@@ -580,7 +563,7 @@ async function removeStoricoController(req, res) {
 
 async function inviaOfferta(req, res) {
   try {
-    const id_cliente = req.utente?.id || req.session?.userId; // fallback doppio
+    const id_cliente = req.utente?.id || req.session?.userId; 
 
     const { id_immobile, prezzo_offerto, tipo_offerta, provenienza } = req.body;
     console.log("BODY RICEVUTO:", req.body);
@@ -684,7 +667,7 @@ async function controproponi(req, res) {
 
 
  async function getOfferteCliente(req, res) {
-  const idCliente = req.utente.id; // Assicurati che req.user venga settato dal middleware auth
+  const idCliente = req.utente.id; 
   const sql = `
     SELECT o.id, o.prezzo_offerto, o.tipo_offerta, o.stato, i.titolo AS titolo_immobile
     FROM offerte o
@@ -812,6 +795,72 @@ async function getImmobiliByAgenteController(req, res) {
   }
 } 
 
+async function getRichiesteImmobili(req, res){
+
+  console.log('ciao')
+  try{
+    const result = await queryDB(`
+      SELECT *
+      FROM immobile
+      WHERE stato = 'in attesa'
+      `, []);
+
+      if(result.length === 0){
+        return res.status(404).json({ esito: true});
+      }
+
+      res.json(result);
+  }catch(err){
+    console.error('errore richiesta immobile: ',err);
+    res.status(500).json({ message: 'Errore del server durante il recupero degli immobili' });
+  }
+}
+
+async function getRichiesteAgenzie(req, res){
+  try{
+    const result = await queryDB(`
+      SELECT *
+      FROM agenzia
+      WHERE stato = 'in_attesa'
+      `, []);
+
+      if(result.length === 0){
+        return res.status(404).json({ esito: true});
+      }
+
+      res.json(result);
+  }catch(err){
+    console.error('errore richiesta immobile: ',err);
+    res.status(500).json({ message: 'Errore del server durante il recupero degli immobili' });
+  }
+}
+
+async function accettaRichiesta(req, res) {
+  const type = req.params.type;
+  const id = req.params.id;
+
+  try {
+    await queryDB('UPDATE $1 SET stato = $1 WHERE id = $2', ['rifiutata', id]);
+    res.status(200).json({ esito: true });
+  } catch (err) {
+    console.error('Errore durante l\'aggiornamento di ', type, ': ', err);
+    res.status(500).json({ message: 'Errore durante l\'aggiornamento' });
+  }
+}
+
+async function rifiutaRichiesta(req, res) {
+  const type = req.params.type;
+  const id = req.params.id;
+
+  try {
+    await queryDB(`UPDATE ${type} SET stato = $1 WHERE id = $2`, ['rifiutata',id]);
+    res.status(200).json({ esito: true });
+  } catch (err) {
+    console.error('Errore durante l\'aggiornamento di ', type, ': ', err);
+    res.status(500).json({ message: 'Errore durante l\'aggiornamento' });
+  }
+}
+
 
 export {
   login,
@@ -847,5 +896,9 @@ export {
   eliminaAgenteController,
   switchPrimoAccessoController,
   getImmobiliByAgenteController,
+  getRichiesteAgenzie,
+  getRichiesteImmobili,
+  accettaRichiesta,
+  rifiutaRichiesta
 };
 

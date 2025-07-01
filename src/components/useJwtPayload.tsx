@@ -18,7 +18,6 @@ export function useJwtPayload(): UserInfo | null {
       return;
     }
     try {
-      //decode base64 senza librerie esterne
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(

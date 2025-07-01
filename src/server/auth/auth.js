@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
 
 const generateTokenRedirect = (req, res) => {
-  const user = req.user;
+  const user = req.utente;
   const payload = {
     id: user.id,
     ruolo: user.ruolo,
