@@ -1,6 +1,6 @@
 import { check } from "express-validator";
 
-function checkCoord(lat, lng) {
+export function checkCoord(lat, lng) {
     if (typeof lat !== 'number' || typeof lng !== 'number') {
         throw new Error('Le coordinate devono essere numeri');
     }
@@ -12,7 +12,7 @@ function checkCoord(lat, lng) {
     }
 }
 
-function checkPrice(prezzo_min, prezzo_max) {
+export function checkPrice(prezzo_min, prezzo_max) {
     if (typeof prezzo_min !== 'number' || typeof prezzo_max !== 'number') {
         throw new Error('I prezzi devono essere numeri');
     }
@@ -24,7 +24,7 @@ function checkPrice(prezzo_min, prezzo_max) {
     }
 }
 
-function checkOfferta(prezzo_offerto, tipo_offerta) {
+export function checkOfferta(prezzo_offerto, tipo_offerta) {
     if (prezzo_offerto < 0) {
         throw new Error('Il prezzo offerto non può essere negativo');
     }
@@ -33,7 +33,7 @@ function checkOfferta(prezzo_offerto, tipo_offerta) {
     }
 }
 
-function checkFilters(lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio, climatizzazione) {
+export function checkFilters(lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio, climatizzazione) {
     checkCoord(lat, lng);
     checkPrice(prezzo_min, prezzo_max);
 
@@ -62,10 +62,3 @@ function checkFilters(lat, lng, prezzo_min, prezzo_max, dimensione, piano, stanz
         throw new Error('Climatizzazione deve essere un booleano');
     }
 }
-
-export default {
-    checkCoord,
-    checkPrice,
-    checkOfferta,
-    checkFilters
-};

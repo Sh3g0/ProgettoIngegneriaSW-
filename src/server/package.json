@@ -21,6 +21,8 @@
     "server": "file:"
   },
   "devDependencies": {
+    "chai": "^5.2.1",
+    "mocha": "^11.7.1",
     "nodemon": "^3.1.10"
   }
 }
