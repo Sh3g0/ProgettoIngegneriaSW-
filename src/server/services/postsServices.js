@@ -2,6 +2,8 @@ import { error } from 'console';
 import { queryDB } from '../db/database.js';
 import bcrypt from 'bcryptjs';   
 
+import * as checker from '../checker.js';
+
 async function getUser(username, password) {
     const query = `
       SELECT * 
@@ -82,6 +84,8 @@ async function getImmobiliByAdvancedFilters(lat = 0, lng = 0, prezzo_min = 0, pr
     try {
         const latNum = parseFloat(lat);
         const lngNum = parseFloat(lng);
+
+        checker.checkFilters(latNum, lngNum, prezzo_min, prezzo_max, dimensione, piano, stanze, ascensore, classe_energetica, portineria, tipo_annuncio, climatizzazione);
 
 
         if (isNaN(latNum) || isNaN(lngNum)) {
@@ -196,6 +200,10 @@ async function getImmobiliById(id, status) {
 }
 
 async function getImmobiliByFilter(lat = 0, lng = 0, prezzo_min, prezzo_max, dimensione = null, tipo_annuncio = 'qualsiasi', status) {
+
+    checker.checkCoord(lat, lng);
+    checker.checkPrice(prezzo_min, prezzo_max);
+
     try {
         let query = ` SELECT * FROM immobile 
                 WHERE latitudine BETWEEN $1 AND $2 AND 
