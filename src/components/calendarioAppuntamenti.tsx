@@ -17,7 +17,13 @@ export default function CalendarioAppuntamenti({ idAgente }: { idAgente: number 
   useEffect(() => {
     const fetchPrenotazioni = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/prenotazioni/confermate/${idAgente}`);
+        const res = await fetch(`http://localhost:3001/api/prenotazioni/confermate/${idAgente}`, {
+          headers: { 
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${sessionStorage.getItem('token')}`
+          },
+        }
+        );
         const data = await res.json();
 
         const grouped: Record<string, Prenotazione[]> = {};

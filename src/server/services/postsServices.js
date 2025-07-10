@@ -195,19 +195,6 @@ async function getImmobiliById(id, status) {
     }
 }
 
-
-async function getImmobiliByOnlyId(id) {
-    try {
-        console.log("DEBUG getImmobiliByOnlyId - id ricevuto:", id);
-        const result = await queryDB('SELECT * FROM immobile WHERE id = $1', [id]);
-        console.log("DEBUG risultato query immobile:", result);
-        return result;
-    } catch (error) {
-        console.error('Errore in getImmobiliById:', error);
-        throw error;
-    }
-}
-
 async function getImmobiliByFilter(lat = 0, lng = 0, prezzo_min, prezzo_max, dimensione = null, tipo_annuncio = 'qualsiasi', status) {
     try {
         let query = ` SELECT * FROM immobile 
@@ -295,7 +282,7 @@ async function getUserStorico(id) {
     try {
         const query = `
         SELECT *
-        FROM storico_cliente
+        FROM storico
         WHERE id_utente = $1;
         `;
 
@@ -335,12 +322,21 @@ async function caricaImmobile(data) {
         const result = await queryDB(immobileQuery, immobileValues);
         const immobileId = result[0].id; 
 
-        for (const path of data.immagini) {
+    let i=0;
+    for (const path of data.immagini) {
+        if(i === 0) {
+            // Se è la prima immagine, aggiorno l'immobile con il path dell'immagine principale
             await queryDB(
-                `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
-                [immobileId, path]
+                `UPDATE immobile SET immagine_url = $1 WHERE id = $2`,
+                [path, immobileId]
             );
+            i++;
         }
+      await queryDB(
+        `INSERT INTO immagini_immobile (immobile_id, path) VALUES ($1, $2)`,
+        [immobileId, path]
+      );
+    }
 
     await queryDB('COMMIT');
   } catch (err) {

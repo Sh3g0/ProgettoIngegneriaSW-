@@ -253,6 +253,7 @@ async function getUserStoricoController(req, res) {
   } catch (e) {
     console.log("Errore: ", e);
     return res.status(500).json({ error: 'Errore nel recupero dello storico' });
+    return res.status(500).json({ error: 'Errore nel recupero dello storico' });
   }
 }
 
@@ -399,8 +400,9 @@ async function getNotifichePrenotazioni(req, res) {
 
     const result = await queryDB(
       `SELECT *
+      `SELECT *
    FROM prenotazione_visite 
-   WHERE idagente = $1 AND stato = 'in_attesa' 
+   WHERE id_cliente = $1 AND stato = 'in_attesa' 
    ORDER BY data_creazione DESC`,
       [agenteId]
     );
@@ -571,6 +573,7 @@ async function inviaOfferta(req, res) {
     const idParsed = parseInt(id_immobile);
     if (isNaN(idParsed)) return res.status(400).json({ message: "ID immobile non valido" });
 
+    const immobile = await service.getImmobiliById(idParsed);
     const immobile = await service.getImmobiliById(idParsed);
 
     if (!immobile || immobile.length === 0) {
@@ -880,6 +883,10 @@ export {
   getUserStoricoController,
   caricaImmobileController,
   prenotaVisitaController,
+  updateStoricoController,
+  getImmaginiController,
+  cleanStoricoController,
+  removeStoricoController,
   inviaOfferta,
   offerteRicevuteAgente,
   rispondi,

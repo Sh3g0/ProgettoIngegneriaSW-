@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import MappaImmobili from '@/components/MappaImmobili';
 import Banner from '@/components/Banner';
 import Footer from '@/components/Footer';
+import { useJwtPayload } from '@/components/useJwtPayload';
 
 const API_KEY = process.env.NEXT_PUBLIC_GEO_API_KEY;
 
@@ -101,6 +102,11 @@ export default function ImmobilePage() {
     };
 
     const handleSendAppointment = () => {
+        //Invia dati all'agente immobiliare
+
+        alert(`Richiesta di appuntamento inviata per il ${selectedDate} alle ${selectedTime}.`);
+
+        window.location.reload(); // Ricarica la pagina dopo l'invio
     }
 
     const formatNumber = (value: string) => {
@@ -131,6 +137,15 @@ export default function ImmobilePage() {
                 setImmobile(data[0]);
 
                 console.log('Immobile data in immobile:', data[0]);
+            } catch (e) {
+                console.error('Error parsing immobile data:', e);
+            }
+        }
+        fetchImmobile();
+    }, [immID]);
+
+useEffect(() => {
+    if (!immobile?.id) return;
 
                 const fetchImmagini = async () => {
                     const response = await fetch(`http://localhost:3001/api/getImmagini/${immobile?.id}`, {
@@ -165,10 +180,39 @@ export default function ImmobilePage() {
     }, [isGalleryOpen]);
 
 
+    const id = useJwtPayload()?.id;
+
+useEffect(() => {
+    if (!id || !immobile?.id) return; // Aspetta che entrambi siano definiti
+
+    const updateStorico = async () => {
+        console.log('Updating storico for user ID:', id, 'and immobile ID:', immobile.id);
+
+        try {
+            await fetch('http://localhost:3001/api/updateStorico', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_utente: id,
+                    id_immobile: immobile.id,
+                    tipo_attivita: `Visualizzazione dell'immobile "${immobile.titolo}"`,
+                }),
+            });
+        } catch (err) {
+            console.error("Errore nell'update dello storico:", err);
+        }
+    };
+
+    updateStorico();
+}, [id, immobile]); // La useEffect parte SOLO quando id e immobile cambiano
+
+    
+
     const openGallery = (imageUrl: string, index: number) => {
         setSelectedImage(imageUrl);
         setIsGalleryOpen(true);
-        console.log('lebroooooon')
     };
 
     const closeGallery = () => {
@@ -466,12 +510,12 @@ const inviaOfferta = async () => {
             <div className='w-full flex justify-center items-center mt-4'>
                 <div className='flex lg:w-[80%] justify-between gap-4 max-h-[630px]'>
                     <div className='w-[70%] flex justify-center '>
-                        <img
-                            src={'/img/sfondo5.jpg'}
-                            alt="Immobile Anteprima"
-                            className='w-full h-auto rounded-2xl shadow-lg object-cover'
-                            onClick={() => '/sfondo5.jpg'}
-                        />
+                    <img
+                        src={immagini?.[0]?.url || '/img/sfondo5.jpg'}
+                        alt="Immobile Anteprima"
+                        className='w-full h-auto rounded-2xl shadow-lg object-cover'
+                        onClick={() => '/sfondo5.jpg'}
+                    />
                     </div>
 
                     <div className='w-[30%] p-0 flex flex-col gap-4 max-h-[800px]'>

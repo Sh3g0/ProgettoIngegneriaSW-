@@ -19,9 +19,12 @@ router.post('/getImmobiliByFilter', controller.getImmobiliByFilterController);
 router.get('/getImmobiliByAgente/:id', controller.getImmobiliByAgenteController);
 
 
+router.get('/getImmagini/:id_immobile', controller.getImmaginiController);
+
+//Rotte protette
 router.post('/prenotazioneVisita', verificaToken, controller.prenotaVisitaController);
 router.get('/notificaAppuntamento', verificaToken, controller.getNotifichePrenotazioni);
-router.get('/dateOccupate/:id_immobile', controller.getDateBloccaVisita);
+router.get('/dateOccupate/:id_immobile', verificaToken, controller.getDateBloccaVisita);
 
 router.post('/notifiche/rispondi', verificaToken, controller.rispondiPrenotazione);
 router.get('/prenotazioni/confermate/:idAgente', controller.getPrenotazioniConfermate);
@@ -59,5 +62,9 @@ router.get('/richieste/agenzie', controller.getRichiesteAgenzie);
 
 router.post('/richieste/:type/accetta/:id', controller.accettaRichiesta);
 router.post('/richieste/:type/rifiuta/:id', controller.rifiutaRichiesta);
+
+router.post('/updateStorico', controller.updateStoricoController);
+router.post('/cleanStorico/:id_utente', controller.cleanStoricoController);
+router.post('/removeStorico/:id', controller.removeStoricoController);
 
 export default router;
