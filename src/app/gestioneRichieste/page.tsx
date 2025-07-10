@@ -95,7 +95,7 @@ export default function GestioneRichiestePage() {
   const handleRifiuta = async (type: 'immobile' | 'agenzia', id: number) => {
     try {
       const res = await fetch(`http://localhost:3001/api/richieste/${type}/rifiuta/${id}`, {
-        method: 'DELETE',
+        method: 'POST',
       });
 
       if (res.ok) {

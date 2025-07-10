@@ -57,7 +57,7 @@ router.post('/switchPrimoAccesso', controller.switchPrimoAccessoController);
 router.get('/richieste/immobili', controller.getRichiesteImmobili);
 router.get('/richieste/agenzie', controller.getRichiesteAgenzie);
 
-router.delete('/richieste/:type/accetta/:id', controller.accettaRichiesta);
-router.delete('/richieste/:type/rifiuta/:id', controller.rifiutaRichiesta);
+router.post('/richieste/:type/accetta/:id', controller.accettaRichiesta);
+router.post('/richieste/:type/rifiuta/:id', controller.rifiutaRichiesta);
 
 export default router;
