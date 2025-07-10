@@ -400,7 +400,6 @@ async function getNotifichePrenotazioni(req, res) {
 
     const result = await queryDB(
       `SELECT *
-      `SELECT *
    FROM prenotazione_visite 
    WHERE id_cliente = $1 AND stato = 'in_attesa' 
    ORDER BY data_creazione DESC`,
@@ -573,7 +572,6 @@ async function inviaOfferta(req, res) {
     const idParsed = parseInt(id_immobile);
     if (isNaN(idParsed)) return res.status(400).json({ message: "ID immobile non valido" });
 
-    const immobile = await service.getImmobiliById(idParsed);
     const immobile = await service.getImmobiliById(idParsed);
 
     if (!immobile || immobile.length === 0) {
@@ -893,10 +891,6 @@ export {
   controproponi,
   getOfferteCliente,
   inviaContropropostaCliente,
-  updateStoricoController,
-  getImmaginiController,
-  cleanStoricoController,
-  removeStoricoController,
   getAgentiByAgenziaIdController,
   getAgenziaByAgenteId,
   cambiaPasswordAgenzia,

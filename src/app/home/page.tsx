@@ -10,7 +10,6 @@ import { useSearchParams } from 'next/navigation';
 
 export default function Home() {
   const [showAgenteOptions, setAgenteOption] = useState(false);
-  const [showAgenteOptions, setAgenteOption] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const searchParams = useSearchParams();

@@ -146,25 +146,23 @@ export default function ImmobilePage() {
 
 useEffect(() => {
     if (!immobile?.id) return;
+        try{
+            const fetchImmagini = async () => {
+                const response = await fetch(`http://localhost:3001/api/getImmagini/${immobile?.id}`, {
+                    method: 'GET',
+                });
 
-                const fetchImmagini = async () => {
-                    const response = await fetch(`http://localhost:3001/api/getImmagini/${immobile?.id}`, {
-                        method: 'GET',
-                    });
-
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        setImmagini(data);
-                    } else {
-                        console.error('No images found for the immobile');
-                    }
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    setImmagini(data);
+                } else {
+                    console.error('No images found for the immobile');
                 }
-                fetchImmagini();
-            } catch (e) {
-                console.error('Error parsing immobile data:', e);
             }
+            fetchImmagini();
+        } catch (e) {
+            console.error('Error parsing immobile data:', e);
         }
-        fetchImmobile();
     }, [immID]);
 
     useEffect(() => {
