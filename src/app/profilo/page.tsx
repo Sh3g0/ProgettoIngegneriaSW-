@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useJwtPayload } from '@/components/useJwtPayload';
 import Banner from '@/components/Banner';
 import { Profile } from '@/components/Profile';
-import Books from '@/components/Books';
+import Books from '../notificheCliente/page';
 import Storico from '@/components/Storico';
 import NotificheOfferte from '@/components/NotificheOfferte';
 import NotificheOfferteCliente from '@/components/NotificheOfferteCliente';
@@ -20,6 +20,8 @@ export default function UserProfile() {
     if (payload) {
       console.log('Ruolo utente:', payload.ruolo);
     }
+
+    setSelectedMenu('Storico');
   }, [payload]);
 
 
@@ -62,7 +64,7 @@ export default function UserProfile() {
       case 'Storico':
         return <Storico id={id} />
       case 'Appuntamenti':
-        return <Books id={id} />
+        return <Books/>
       case 'Logout':
         return <div>Logout in corso...</div>;
 

@@ -21,9 +21,9 @@ export default function NotificheCliente() {
             </div>
 
             <div className="pt-24">
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">Le tue prenotazioni confermate</h1>
+                <p className="text-3xl font-bold text-gray-800 mb-6">Le tue prenotazioni confermate</p>
 
-                <NotificheClienteComponent idCliente={Number(userInfo.id)} />
+                <NotificheClienteComponent/>
             </div>
         </div>
     );

@@ -6,7 +6,6 @@ import { queryDB } from '../db/database.js';
 import path from "path";
 import fs from "fs/promises";
 import * as service from '../services/postsServices.js';
-import * as checker from '../checker.js';
 
 const UPLOAD_DIR = path.resolve("uploads");
 
@@ -588,7 +587,6 @@ async function inviaOfferta(req, res) {
     `;
     const values = [idParsed, id_cliente, id_agente, prezzo_offerto, tipo_offerta, provenienza];
 
-    checker.checkOfferta(prezzo_offerto, tipo_offerta);
     const result = await queryDB(query, values);
 
     await queryDB(`
