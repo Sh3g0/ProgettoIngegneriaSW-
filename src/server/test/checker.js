@@ -1,6 +1,7 @@
 import { check } from "express-validator";
 
 export function checkCoord(lat, lng) {
+    console.log(`Controllo coordinate: lat=${lat}, lng=${lng}`);
     if (typeof lat !== 'number' || typeof lng !== 'number') {
         throw new Error('Le coordinate devono essere numeri');
     }

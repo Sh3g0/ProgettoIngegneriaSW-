@@ -71,30 +71,30 @@ describe('checkFilters', function () {
 
     // Parametri numerici negativi
     it('deve lanciare errore se dimensione è negativa', function () {
-    expect(() => checkFilters({ dimensione: -10, piano: 2, stanze: 3, ascensore: true })).to.throw();
+    expect(() => checkFilters( 45.0, 9.0, 100000, 400000, -10, 2, 3, true, "A", true, "affitto", false )).to.throw();
     });
 
     it('deve lanciare errore se piano è negativo', function () {
-    expect(() => checkFilters({ dimensione: 50, piano: -1, stanze: 3, ascensore: true })).to.throw();
+    expect(() => checkFilters( 45.0, 9.0, 100000, 400000, 50, -1, 3, true, "B", false, "affitto", false )).to.throw();
     });
 
     it('deve lanciare errore se stanze è negativa', function () {
-    expect(() => checkFilters({ dimensione: 70, piano: 1, stanze: -2, ascensore: true })).to.throw();
+    expect(() => checkFilters( 45.0, 9.0, 100000, 400000, 70, 1, -2, true, "E", true, "vendita", true )).to.throw();
     });
 
     // Ascensore non booleano
     it('deve lanciare errore se ascensore non è booleano', function () {
-    expect(() => checkFilters({ dimensione: 60, piano: 1, stanze: 2, ascensore: 'sì' })).to.throw();
+    expect(() => checkFilters( 45.0, 9.0, 100000, 400000, 70, 1, 2, true, "si", "F", true, "affitto", false )).to.throw();
     });
 
     // Valori validi - ascensore = true
     it('non deve lanciare errore con valori validi e ascensore = true', function () {
-    expect(() => checkFilters({ dimensione: 100, piano: 3, stanze: 4, ascensore: true })).to.not.throw();
+    expect(() => checkFilters( 45.0, 9.0, 100000, 400000, 60, 1, 2, true, "B", true, "affitto", true )).to.not.throw();
     });
 
     // Valori validi - ascensore = false
     it('non deve lanciare errore con valori validi e ascensore = false', function () {
-    expect(() => checkFilters({ dimensione: 80, piano: 2, stanze: 3, ascensore: false })).to.not.throw();
+    expect(() => checkFilters(45.0, 9.0, 100000, 400000, 70, 1, 2, false, "A", true, "affitto", false )).to.not.throw();
     });
 
 });
