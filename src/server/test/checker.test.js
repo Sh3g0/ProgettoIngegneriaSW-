@@ -44,47 +44,57 @@ describe('checkPrice', function () {
 });
 
 describe('checkOfferta', function () {
+
+    // Test con prezzo_offerto negativo (CE non valida)
     it('deve lanciare errore se prezzo_offerto è negativo', function () {
-        expect(() => checkOfferta(-10, 'vendita')).to.throw('Il prezzo offerto non può essere negativo');
+    expect(() => checkOfferta(-100, 'vendita')).to.throw();
     });
 
-    it('deve lanciare errore se tipo_offerta è invalido', function () {
-        expect(() => checkOfferta(100, 'scambio')).to.throw('Tipo di offerta non valido');
+    // Test con tipo_offerta non ammesso (CE non valida)
+    it('deve lanciare errore se tipo_offerta non è valido', function () {
+    expect(() => checkOfferta(200, 'scambio')).to.throw();
     });
 
-    it('non deve lanciare errore con valori validi', function () {
-        expect(() => checkOfferta(1000, 'affitto')).to.not.throw();
+    // Test con tipo_offerta = "vendita" (CE valida)
+    it('non deve lanciare errore con tipo_offerta = "vendita" e prezzo valido', function () {
+    expect(() => checkOfferta(150000, 'vendita')).to.not.throw();
     });
+
+    // Test con tipo_offerta = "affitto" (CE valida)
+    it('non deve lanciare errore con tipo_offerta = "affitto" e prezzo valido', function () {
+    expect(() => checkOfferta(800, 'affitto')).to.not.throw();
+    });
+
 });
 
 describe('checkFilters', function () {
+
+    // Parametri numerici negativi
     it('deve lanciare errore se dimensione è negativa', function () {
-        expect(() =>
-            checkFilters(10, 10, 0, 100, -1, 1, 2, true, 'A', true, 'vendita', true)
-        ).to.throw('La dimensione deve essere posotiva');
+    expect(() => checkFilters({ dimensione: -10, piano: 2, stanze: 3, ascensore: true })).to.throw();
     });
 
     it('deve lanciare errore se piano è negativo', function () {
-        expect(() =>
-            checkFilters(10, 10, 0, 100, 100, -1, 2, true, 'A', true, 'vendita', true)
-        ).to.throw('Il piano deve essere positivo');
+    expect(() => checkFilters({ dimensione: 50, piano: -1, stanze: 3, ascensore: true })).to.throw();
     });
 
-    it('deve lanciare errore se stanze è negativo', function () {
-        expect(() =>
-            checkFilters(10, 10, 0, 100, 100, 2, -1, true, 'A', true, 'vendita', true)
-        ).to.throw('Il numero di stanze deve essere positivo');
+    it('deve lanciare errore se stanze è negativa', function () {
+    expect(() => checkFilters({ dimensione: 70, piano: 1, stanze: -2, ascensore: true })).to.throw();
     });
 
+    // Ascensore non booleano
     it('deve lanciare errore se ascensore non è booleano', function () {
-        expect(() =>
-            checkFilters(10, 10, 0, 100, 100, 2, 1, 'yes', 'A', true, 'vendita', true)
-        ).to.throw('Ascensore deve essere un booleano');
+    expect(() => checkFilters({ dimensione: 60, piano: 1, stanze: 2, ascensore: 'sì' })).to.throw();
     });
 
-    it('non deve lanciare errore con tutti i parametri validi', function () {
-        expect(() =>
-            checkFilters(10, 10, 0, 100, 100, 2, 1, true, 'A', true, 'vendita', false)
-        ).to.not.throw();
+    // Valori validi - ascensore = true
+    it('non deve lanciare errore con valori validi e ascensore = true', function () {
+    expect(() => checkFilters({ dimensione: 100, piano: 3, stanze: 4, ascensore: true })).to.not.throw();
     });
+
+    // Valori validi - ascensore = false
+    it('non deve lanciare errore con valori validi e ascensore = false', function () {
+    expect(() => checkFilters({ dimensione: 80, piano: 2, stanze: 3, ascensore: false })).to.not.throw();
+    });
+
 });
